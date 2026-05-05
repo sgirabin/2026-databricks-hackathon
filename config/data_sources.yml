@@ -1,49 +1,102 @@
+api_templates:
+  data_gov_datastore_search: https://data.gov.sg/api/action/datastore_search?resource_id={dataset_id}&limit={limit}&offset={offset}
+  data_gov_poll_download: https://api-open.data.gov.sg/v1/public/api/datasets/{dataset_id}/poll-download
+  onemap_search: https://www.onemap.gov.sg/api/common/elastic/search?searchVal={query}&returnGeom=Y&getAddrDetails=Y&pageNum=1
+
 data_gov:
   hdb_resale_2017_onwards:
     name: HDB resale flat prices based on registration date from Jan-2017 onwards
     agency: Housing & Development Board
     dataset_id: d_8b84c4ee58e3cfc0ece0d773c8ca6abc
+    dataset_page: https://data.gov.sg/datasets/d_8b84c4ee58e3cfc0ece0d773c8ca6abc/view
+    api_type: datastore_search
+    api_url: https://data.gov.sg/api/action/datastore_search?resource_id=d_8b84c4ee58e3cfc0ece0d773c8ca6abc&limit=5000&offset=0
     use: resale transaction comparable analysis and price trend by town / flat type / street
+    loader: app.py::load_hdb_resale and notebooks/01_ingest_open_data.py
   hdb_resale_price_index:
     name: HDB Resale Price Index
     agency: Housing & Development Board
     dataset_id: d_14f63e595975691e7c24a27ae4c07c79
+    dataset_page: https://data.gov.sg/datasets/d_14f63e595975691e7c24a27ae4c07c79/view
+    api_type: datastore_search
+    api_url: https://data.gov.sg/api/action/datastore_search?resource_id=d_14f63e595975691e7c24a27ae4c07c79&limit=5000&offset=0
     use: national resale market context
+    loader: planned/useful for market context chart
   hawker_centres_geojson:
     name: Hawker Centres GEOJSON
     agency: National Environment Agency
     dataset_id: d_4a086da0a5553be1d89383cd90d07ecd
+    dataset_page: https://data.gov.sg/datasets/d_4a086da0a5553be1d89383cd90d07ecd/view
+    api_type: poll_download_geojson
+    poll_download_url: https://api-open.data.gov.sg/v1/public/api/datasets/d_4a086da0a5553be1d89383cd90d07ecd/poll-download
     use: nearest hawker centres and markets
+    loader: app.py::load_geojson_points
   schools_general_information:
     name: General information of schools
     agency: Ministry of Education
     dataset_id: d_688b934f82c1059ed0a6993d2a829089
+    dataset_page: https://data.gov.sg/datasets/d_688b934f82c1059ed0a6993d2a829089/view
+    api_type: datastore_search
+    api_url: https://data.gov.sg/api/action/datastore_search?resource_id=d_688b934f82c1059ed0a6993d2a829089&limit=5000&offset=0
     use: nearest MOE schools
+    loader: app.py::load_schools, then OneMap geocode if no coordinates
   preschool_centres:
     name: Listing of Centres
     agency: Early Childhood Development Agency
     dataset_id: d_696c994c50745b079b3684f0e90ffc53
+    dataset_page: https://data.gov.sg/datasets/d_696c994c50745b079b3684f0e90ffc53/view
+    api_type: datastore_search
+    api_url: https://data.gov.sg/api/action/datastore_search?resource_id=d_696c994c50745b079b3684f0e90ffc53&limit=5000&offset=0
     use: nearest childcare and kindergarten centres
+    loader: app.py::load_preschools, then OneMap geocode if no coordinates
   community_clubs_geojson:
     name: Community Clubs GEOJSON
     agency: People's Association
     dataset_id: d_f706de1427279e61fe41e89e24d440fa
+    dataset_page: https://data.gov.sg/datasets/d_f706de1427279e61fe41e89e24d440fa/view
+    api_type: poll_download_geojson
+    poll_download_url: https://api-open.data.gov.sg/v1/public/api/datasets/d_f706de1427279e61fe41e89e24d440fa/poll-download
     use: nearest public community facilities
+    loader: app.py::load_geojson_points
   supermarkets_geojson:
     name: Supermarkets GEOJSON
     agency: Singapore Food Agency
     dataset_id: d_cac2c32f01960a3ad7202a99c27268a0
+    dataset_page: https://data.gov.sg/datasets/d_cac2c32f01960a3ad7202a99c27268a0/view
+    api_type: poll_download_geojson
+    poll_download_url: https://api-open.data.gov.sg/v1/public/api/datasets/d_cac2c32f01960a3ad7202a99c27268a0/poll-download
     use: nearest grocery / supermarket access
+    loader: app.py::load_geojson_points
+
 external_official:
   onemap:
     agency: Singapore Land Authority
-    url: https://www.onemap.gov.sg/apidocs/
+    docs: https://www.onemap.gov.sg/apidocs/
+    search_api: https://www.onemap.gov.sg/api/common/elastic/search?searchVal=308C%20Punggol%20Walk&returnGeom=Y&getAddrDetails=Y&pageNum=1
     use: address search, geocoding, map context and transport checks
+    loader: app.py::geocode
   ura_draft_master_plan:
     agency: Urban Redevelopment Authority
     url: https://www.uradraftmasterplan.gov.sg/
     use: future development and regional planning evidence
+    loader: manual/evidence link for now
   lta_projects:
     agency: Land Transport Authority
     url: https://www.lta.gov.sg/content/ltagov/en/upcoming_projects.html
     use: future transport development evidence
+    loader: manual/evidence link for now
+  hdb_press_releases:
+    agency: Housing & Development Board
+    url: https://www.hdb.gov.sg/about-us/news-and-publications/press-releases
+    use: future HDB estate or project announcement evidence
+    loader: manual/evidence link for now
+
+credible_news_domains:
+  - https://www.channelnewsasia.com/
+  - https://www.straitstimes.com/
+  - https://www.businesstimes.com.sg/
+  - https://www.todayonline.com/
+  - https://mothership.sg/
+  - https://www.scdf.gov.sg/
+  - https://www.police.gov.sg/
+  - https://www.gov.sg/
