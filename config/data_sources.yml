@@ -1,0 +1,49 @@
+data_gov:
+  hdb_resale_2017_onwards:
+    name: HDB resale flat prices based on registration date from Jan-2017 onwards
+    agency: Housing & Development Board
+    dataset_id: d_8b84c4ee58e3cfc0ece0d773c8ca6abc
+    use: resale transaction comparable analysis and price trend by town / flat type / street
+  hdb_resale_price_index:
+    name: HDB Resale Price Index
+    agency: Housing & Development Board
+    dataset_id: d_14f63e595975691e7c24a27ae4c07c79
+    use: national resale market context
+  hawker_centres_geojson:
+    name: Hawker Centres GEOJSON
+    agency: National Environment Agency
+    dataset_id: d_4a086da0a5553be1d89383cd90d07ecd
+    use: nearest hawker centres and markets
+  schools_general_information:
+    name: General information of schools
+    agency: Ministry of Education
+    dataset_id: d_688b934f82c1059ed0a6993d2a829089
+    use: nearest MOE schools
+  preschool_centres:
+    name: Listing of Centres
+    agency: Early Childhood Development Agency
+    dataset_id: d_696c994c50745b079b3684f0e90ffc53
+    use: nearest childcare and kindergarten centres
+  community_clubs_geojson:
+    name: Community Clubs GEOJSON
+    agency: People's Association
+    dataset_id: d_f706de1427279e61fe41e89e24d440fa
+    use: nearest public community facilities
+  supermarkets_geojson:
+    name: Supermarkets GEOJSON
+    agency: Singapore Food Agency
+    dataset_id: d_cac2c32f01960a3ad7202a99c27268a0
+    use: nearest grocery / supermarket access
+external_official:
+  onemap:
+    agency: Singapore Land Authority
+    url: https://www.onemap.gov.sg/apidocs/
+    use: address search, geocoding, map context and transport checks
+  ura_draft_master_plan:
+    agency: Urban Redevelopment Authority
+    url: https://www.uradraftmasterplan.gov.sg/
+    use: future development and regional planning evidence
+  lta_projects:
+    agency: Land Transport Authority
+    url: https://www.lta.gov.sg/content/ltagov/en/upcoming_projects.html
+    use: future transport development evidence
