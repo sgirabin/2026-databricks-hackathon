@@ -1,7 +1,7 @@
 command:
   - streamlit
   - run
-  - app.py
+  - app_goaround.py
   - --server.address
   - 0.0.0.0
   - --server.port
@@ -9,7 +9,7 @@ command:
 env:
   - name: STREAMLIT_GATHER_USAGE_STATS
     value: 'false'
-  - name: HOMEWISE_CACHE_DIR
+  - name: GOAROUND_CACHE_DIR
     value: 'data/cache'
   - name: USE_DATABRICKS_SQL
     value: 'false'
