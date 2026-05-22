@@ -1,15 +1,8 @@
 command:
   - streamlit
   - run
-  - app_picks.py
+  - app_genie.py
   - --server.address
   - 0.0.0.0
   - --server.port
   - $DATABRICKS_APP_PORT
-env:
-  - name: STREAMLIT_GATHER_USAGE_STATS
-    value: 'false'
-  - name: GOAROUND_CACHE_DIR
-    value: 'data/cache'
-  - name: USE_DATABRICKS_SQL
-    value: 'false'
