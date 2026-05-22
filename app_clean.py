@@ -41,10 +41,11 @@ st.markdown(
     """
 <style>
 .main .block-container {padding-top: 0.7rem; max-width: 1500px; padding-bottom: 0.5rem;}
-section[data-testid="stSidebar"] .block-container {padding-top: 1.2rem;}
-.brand-card {border:1px solid #e2e8f0; border-radius:18px; padding:14px; background:linear-gradient(135deg,#f8fafc,#eef6ff); margin-bottom:16px;}
+section[data-testid="stSidebar"] .block-container {padding-top: 0.45rem;}
+.brand-card {border:1px solid #e2e8f0; border-radius:18px; padding:14px; background:linear-gradient(135deg,#f8fafc,#eef6ff); margin-top:0; margin-bottom:18px;}
 .brand-card h1 {font-size:22px; margin:0; color:#0f172a;}
-.brand-card p {font-size:12px; color:#64748b; margin:6px 0 0 0;}
+.brand-card p {font-size:12px; color:#64748b; margin:6px 0 0 0; line-height:1.45; white-space:normal; overflow:visible;}
+.location-help {font-size:13px; line-height:1.45; margin:12px 0 8px 0; padding:10px 12px; border-radius:12px; background:#eff6ff; color:#1e3a8a; border:1px solid #dbeafe; white-space:normal; overflow:visible;}
 .status-card {border:1px solid #e5e7eb; border-radius:18px; padding:12px 16px; background:white; margin-bottom:10px; box-shadow:0 4px 12px rgba(15,23,42,0.04);}
 .status-card h2 {font-size:20px; margin:0 0 8px 0; color:#0f172a;}
 .badge {display:inline-block; border-radius:999px; padding:6px 10px; font-size:12px; font-weight:700; margin:0 6px 6px 0; border:1px solid #dbeafe; background:#eff6ff; color:#1d4ed8;}
@@ -252,7 +253,7 @@ with st.sidebar:
         st.success("Saved for this session. In production this goes to Lakebase.")
 
 if not address and not st.session_state.get("detected_profile"):
-    st.info("Allow current location access or enter a place, block or postal code to generate Today’s Picks.")
+    st.markdown("<div class='location-help'>Allow current location access, or enter a place, block or postal code to generate Today’s Picks.</div>", unsafe_allow_html=True)
     st.stop()
 
 try:
