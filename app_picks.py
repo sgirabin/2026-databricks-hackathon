@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 import re
-import urllib.parse
 from datetime import datetime
 from typing import Any
 
@@ -11,6 +10,11 @@ import plotly.express as px
 import requests
 import streamlit as st
 from dotenv import load_dotenv
+
+try:
+    from streamlit_js_eval import get_geolocation
+except Exception:  # pragma: no cover - optional browser helper
+    get_geolocation = None
 
 from src.goaround.agent import answer_with_databricks
 from src.goaround.business import create_business_promo_card
@@ -24,6 +28,7 @@ st.set_page_config(page_title="GoAround SG", page_icon="📍", layout="wide")
 DATASTORE_URL = "https://data.gov.sg/api/action/datastore_search"
 POLL_DOWNLOAD_URL = "https://api-open.data.gov.sg/v1/public/api/datasets/{dataset_id}/poll-download"
 ONEMAP_SEARCH_URL = "https://www.onemap.gov.sg/api/common/elastic/search"
+ONEMAP_REVERSE_URL = "https://www.onemap.gov.sg/api/public/revgeocode"
 WEATHER_2H_URL = "https://api.data.gov.sg/v1/environment/2-hour-weather-forecast"
 LTA_BUS_STOPS_URL = "https://datamall2.mytransport.sg/ltaodataservice/BusStops"
 LTA_BUS_ARRIVAL_URL = "https://datamall2.mytransport.sg/ltaodataservice/v3/BusArrival"
@@ -42,20 +47,14 @@ INTERESTS = [
 
 
 def api_headers() -> dict[str, str]:
-    h = {"User-Agent": "goaround-sg-picks/0.1"}
+    headers = {"User-Agent": "goaround-sg-picks/0.1"}
     if os.getenv("DATA_GOV_API_KEY"):
-        h["x-api-key"] = os.getenv("DATA_GOV_API_KEY", "")
-    return h
+        headers["x-api-key"] = os.getenv("DATA_GOV_API_KEY", "")
+    return headers
 
 
 def lta_headers() -> dict[str, str]:
     return {"AccountKey": os.getenv("LTA_ACCOUNT_KEY", ""), "accept": "application/json"}
-
-
-def clean_columns(df: pd.DataFrame) -> pd.DataFrame:
-    out = df.copy()
-    out.columns = [re.sub(r"[^a-z0-9]+", "_", str(c).strip().lower()).strip("_") for c in out.columns]
-    return out.drop(columns=["_id"], errors="ignore")
 
 
 def dist_label(v: Any) -> str:
@@ -88,6 +87,40 @@ def geocode(query: str) -> dict[str, Any]:
 
 
 @st.cache_data(ttl=86400, show_spinner=False)
+def reverse_geocode(lat: float, lon: float) -> dict[str, Any]:
+    """Best-effort reverse geocode for browser GPS location.
+
+    If OneMap reverse geocoding is unavailable, the app still works using raw
+    coordinates and labels the area as Current location.
+    """
+
+    fallback = {
+        "address": f"Current location ({lat:.5f}, {lon:.5f})",
+        "building": "Current location",
+        "postal_code": "",
+        "road_name": "",
+        "lat": float(lat),
+        "lon": float(lon),
+    }
+    try:
+        r = requests.get(
+            ONEMAP_REVERSE_URL,
+            params={"location": f"{lat},{lon}", "buffer": 80, "addressType": "All"},
+            timeout=20,
+        )
+        r.raise_for_status()
+        info = (r.json().get("GeocodeInfo") or [{}])[0]
+        block = info.get("BLOCK") or ""
+        road = info.get("ROAD") or info.get("ROAD_NAME") or ""
+        building = info.get("BUILDINGNAME") or info.get("BUILDING") or ""
+        postal = info.get("POSTALCODE") or info.get("POSTAL") or ""
+        address = " ".join([block, road, building, postal]).strip() or fallback["address"]
+        return {**fallback, "address": address, "building": building, "postal_code": postal, "road_name": road}
+    except Exception:
+        return fallback
+
+
+@st.cache_data(ttl=86400, show_spinner=False)
 def poll_download_url(dataset_id: str) -> str:
     r = requests.get(POLL_DOWNLOAD_URL.format(dataset_id=dataset_id), headers=api_headers(), timeout=45)
     r.raise_for_status()
@@ -110,14 +143,7 @@ def load_geojson_points(dataset_id: str, category: str) -> pd.DataFrame:
                 str(props.get("ADDRESSBLOCKHOUSENUMBER") or ""),
                 str(props.get("ADDRESSSTREETNAME") or ""),
             ]).strip() or str(props.get("ADDRESS") or "")
-            rows.append({
-                "category": category,
-                "name": str(name),
-                "address": address,
-                "lat": float(coords[1]),
-                "lon": float(coords[0]),
-                "source": "data.gov.sg",
-            })
+            rows.append({"category": category, "name": str(name), "address": address, "lat": float(coords[1]), "lon": float(coords[0]), "source": "data.gov.sg"})
         return pd.DataFrame(rows)
     except Exception:
         return pd.DataFrame(columns=["category", "name", "address", "lat", "lon", "source"])
@@ -336,7 +362,25 @@ with st.sidebar:
     st.header("My area")
     mode = st.selectbox("I am here as", MODES)
     sample = st.selectbox("Try location", ["Custom", "308C Punggol Walk", "83 Punggol Central", "1 Cantonment Road", "1 Tanjong Pagar Plaza", "Chinatown MRT", "Orchard Road"])
-    default_address = st.session_state.get("saved_area", "") if sample == "Custom" else sample
+
+    if st.button("Use my current location", help="Browser will ask permission. If denied, use manual place search."):
+        st.session_state["request_browser_location"] = True
+
+    if st.session_state.get("request_browser_location"):
+        if get_geolocation is None:
+            st.warning("Browser geolocation helper is not available. Please use manual place search.")
+        else:
+            loc = get_geolocation()
+            coords = (loc or {}).get("coords") if isinstance(loc, dict) else None
+            if coords:
+                detected = reverse_geocode(float(coords["latitude"]), float(coords["longitude"]))
+                st.session_state["detected_profile"] = detected
+                st.session_state["saved_area"] = detected["address"]
+                st.session_state["request_browser_location"] = False
+                st.success(f"Detected: {detected['address']}")
+
+    detected_profile = st.session_state.get("detected_profile")
+    default_address = detected_profile["address"] if detected_profile else (st.session_state.get("saved_area", "") if sample == "Custom" else sample)
     address = st.text_input("Block / place / postal code", default_address)
     radius = st.slider("Discovery radius", 500, 3000, int(st.session_state.get("radius", 1500)), 100)
     interests = st.multiselect("Interests", INTERESTS, default=st.session_state.get("interests", ["cheap food", "grocery", "event", "deal"]))
@@ -346,12 +390,16 @@ with st.sidebar:
         st.session_state["interests"] = interests
         st.success("Saved for this session. Lakebase can persist this in production.")
 
-if not address:
+if not address and not st.session_state.get("detected_profile"):
     st.info("Enter a place, block or postal code to generate Today’s Picks.")
     st.stop()
 
 try:
-    profile = geocode(address)
+    if st.session_state.get("detected_profile") and address == st.session_state["detected_profile"]["address"]:
+        profile = st.session_state["detected_profile"]
+    else:
+        profile = geocode(address)
+        st.session_state.pop("detected_profile", None)
 except Exception as exc:
     st.error(f"Could not find this location with OneMap: {exc}")
     st.stop()
@@ -421,20 +469,34 @@ with tab_things:
 
 with tab_ask:
     st.subheader("Ask GoAround")
-    st.caption("Ask for a source-aware local plan. Databricks Model Serving is used when configured.")
-    examples = [
-        "Plan a cheap lunch near me.",
-        "What can I do with my kid this weekend?",
-        "I am visiting this area for 2 hours. What should I do?",
-        "What is useful around my block today?",
-        "Any rainy-day options nearby?",
-    ]
-    st.write("Try:")
-    for e in examples:
-        st.markdown(f"- {e}")
-    question = st.text_input("Your question")
-    if question:
-        st.markdown(answer_with_databricks(question, context, ranked, default_fallback_answer(ranked)))
+    st.caption("Chat with a source-aware local assistant. Databricks Model Serving is used when configured; otherwise the app uses a safe local intent fallback.")
+
+    if "ask_messages" not in st.session_state:
+        st.session_state["ask_messages"] = [
+            {"role": "assistant", "content": "Hi, I’m Ask GoAround. Ask me about food, deals, events, rainy-day plans, or what to do near this area. I answer only from source-backed local picks."}
+        ]
+
+    c1, c2 = st.columns([1, 5])
+    if c1.button("Clear chat"):
+        st.session_state["ask_messages"] = [
+            {"role": "assistant", "content": "Chat cleared. What would you like to find near this area?"}
+        ]
+
+    st.markdown("**Try:** `what to eat today?` · `what can I do with my kid this weekend?` · `I am visiting this area for 2 hours`")
+
+    for message in st.session_state["ask_messages"]:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+    prompt = st.chat_input("Ask GoAround about this area...")
+    if prompt:
+        st.session_state["ask_messages"].append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+        answer = answer_with_databricks(prompt, context, ranked, default_fallback_answer(ranked))
+        st.session_state["ask_messages"].append({"role": "assistant", "content": answer})
+        with st.chat_message("assistant"):
+            st.markdown(answer)
 
 with tab_myarea:
     st.subheader("My Area")
@@ -442,6 +504,8 @@ with tab_myarea:
     st.json({
         "mode": mode,
         "address": profile["address"],
+        "latitude": profile["lat"],
+        "longitude": profile["lon"],
         "radius_m": radius,
         "interests": interests,
         "saved_cards": st.session_state.get("saved_cards", []),
@@ -516,14 +580,15 @@ with tab_data:
 
 **AI agent role**
 - curate candidate cards
-- rank by distance, freshness, interest, mode, time and weather
+- rank by distance, freshness, interest, mode and weather
 - explain why each card is shown
-- answer questions without inventing unsourced claims
+- answer questions from source-backed context without inventing unsourced claims
 """)
     st.code("""Open data + live APIs + source registries
-  -> Databricks Lakehouse
+  -> Databricks Lakehouse / Delta tables
   -> Today’s Picks ranking engine
-  -> AI agent / Ask GoAround
+  -> AI agent / Ask GoAround chat
   -> Resident, visitor and business experiences""", language="text")
+    st.info("For the demo, the app can call public open-data APIs directly. The repository also includes a Databricks setup script to load open data into Delta tables for a stronger production-style Lakehouse setup.")
 
 st.caption("GoAround SG prototype. Source-backed local discovery only. Verify deals, events, transport and official updates at source before acting.")
