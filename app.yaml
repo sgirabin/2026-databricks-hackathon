@@ -1,7 +1,7 @@
 command:
   - streamlit
   - run
-  - app_final.py
+  - app_submission.py
   - --server.address
   - 0.0.0.0
   - --server.port
