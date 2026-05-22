@@ -1,7 +1,7 @@
 command:
   - streamlit
   - run
-  - app_goaround.py
+  - app_picks.py
   - --server.address
   - 0.0.0.0
   - --server.port
