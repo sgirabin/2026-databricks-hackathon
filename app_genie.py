@@ -39,31 +39,38 @@ INTERESTS = ["cheap food", "grocery", "deal", "event", "family", "fitness", "sho
 
 CSS = """
 <style>
-.main .block-container {padding-top: 1.0rem; max-width: 1400px;}
-.hero {border: 1px solid #e5e7eb; border-radius: 22px; padding: 18px 22px; background: linear-gradient(135deg,#f8fafc,#eef6ff); margin-bottom: 16px;}
-.hero h1 {font-size: 30px; margin: 0; color: #0f172a;}
-.hero p {margin: 6px 0 0 0; color: #475569;}
-.badge {display:inline-block; border-radius:999px; padding:6px 11px; font-size:12px; font-weight:600; margin-right:8px; border:1px solid #dbeafe; background:#eff6ff; color:#1d4ed8;}
+.main .block-container {padding-top: 0.6rem; max-width: 1500px; padding-bottom: 0.5rem;}
+section[data-testid="stSidebar"] .block-container {padding-top: 1.2rem;}
+.sidebar-brand {border:1px solid #e2e8f0; border-radius:20px; padding:14px 14px; background:linear-gradient(135deg,#f8fafc,#eef6ff); margin-bottom:14px;}
+.sidebar-brand h1 {font-size:22px; line-height:1.15; margin:0; color:#0f172a;}
+.sidebar-brand p {font-size:12px; color:#64748b; margin:6px 0 0 0;}
+.top-strip {border:1px solid #e5e7eb; border-radius:20px; padding:12px 16px; background:#ffffff; margin-bottom:12px; box-shadow:0 4px 12px rgba(15,23,42,0.04);}
+.top-strip h2 {font-size:20px; margin:0 0 8px 0; color:#0f172a;}
+.badge {display:inline-block; border-radius:999px; padding:6px 11px; font-size:12px; font-weight:700; margin-right:8px; margin-bottom:6px; border:1px solid #dbeafe; background:#eff6ff; color:#1d4ed8;}
 .badge-green {border-color:#bbf7d0; background:#f0fdf4; color:#15803d;}
 .badge-amber {border-color:#fde68a; background:#fffbeb; color:#a16207;}
-.pick-card {border:1px solid #e5e7eb; border-radius:18px; padding:16px; background:white; margin-bottom:12px; box-shadow:0 4px 12px rgba(15,23,42,0.04);}
-.pick-title {font-weight:700; font-size:16px; color:#0f172a; margin-bottom:4px;}
+.panel-title {font-size:18px; font-weight:800; color:#0f172a; margin:0;}
+.panel-subtitle {font-size:12px; color:#64748b; margin:2px 0 10px 0;}
+.scroll-panel {height: 68vh; overflow-y: auto; padding-right: 8px; border-right: 1px solid #f1f5f9;}
+.pick-card {border:1px solid #e5e7eb; border-radius:18px; padding:14px; background:white; margin-bottom:12px; box-shadow:0 4px 12px rgba(15,23,42,0.04);}
+.pick-title {font-weight:700; font-size:15px; color:#0f172a; margin-bottom:4px;}
 .pick-meta {font-size:12px; color:#64748b; margin-bottom:8px;}
-.why {background:#eff6ff; color:#1e3a8a; border-radius:12px; padding:9px 11px; font-size:13px; margin-top:8px;}
-.chat-shell {border:1px solid #e5e7eb; border-radius:22px; background:#ffffff; min-height:620px; padding:0; overflow:hidden; box-shadow:0 8px 24px rgba(15,23,42,0.05);}
-.chat-header {padding:16px 18px; border-bottom:1px solid #e5e7eb; background:#f8fafc; display:flex; align-items:center; justify-content:space-between;}
+.why {background:#eff6ff; color:#1e3a8a; border-radius:12px; padding:8px 10px; font-size:12.5px; margin-top:8px;}
+.chat-shell {border:1px solid #e5e7eb; border-radius:22px; background:#ffffff; height: 68vh; padding:0; overflow:hidden; box-shadow:0 8px 24px rgba(15,23,42,0.05); display:flex; flex-direction:column;}
+.chat-header {padding:14px 16px; border-bottom:1px solid #e5e7eb; background:#f8fafc; display:flex; align-items:center; justify-content:space-between; flex:0 0 auto;}
 .chat-title {font-size:18px; font-weight:800; color:#0f172a; margin:0;}
 .chat-subtitle {font-size:12px; color:#64748b; margin-top:2px;}
-.chat-body {padding:20px; min-height:430px; max-height:560px; overflow-y:auto; background:linear-gradient(180deg,#ffffff,#fbfdff);}
-.msg-row {display:flex; margin-bottom:16px;}
+.chat-body {padding:18px; overflow-y:auto; background:linear-gradient(180deg,#ffffff,#fbfdff); flex:1 1 auto; min-height:0;}
+.chat-actions {padding:10px 16px; border-top:1px solid #e5e7eb; background:#ffffff; flex:0 0 auto;}
+.msg-row {display:flex; margin-bottom:14px;}
 .msg-row.user {justify-content:flex-end;}
 .msg-row.assistant {justify-content:flex-start;}
-.avatar {width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-right:9px; font-size:16px; background:#eef2ff;}
-.bubble {max-width:78%; border-radius:18px; padding:12px 15px; line-height:1.48; font-size:14px;}
+.avatar {width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-right:8px; font-size:15px; background:#eef2ff; flex:0 0 auto;}
+.bubble {max-width:78%; border-radius:18px; padding:11px 14px; line-height:1.48; font-size:14px;}
 .user .bubble {background:#2563eb; color:white; border-bottom-right-radius:6px;}
 .assistant .bubble {background:#f1f5f9; color:#0f172a; border-bottom-left-radius:6px;}
-.prompt-chip {border:1px solid #dbeafe; background:#eff6ff; color:#1d4ed8; border-radius:999px; padding:7px 10px; font-size:12px; margin-right:6px; margin-bottom:8px; display:inline-block;}
 .small-note {font-size:12px; color:#64748b;}
+div[data-testid="stChatInput"] {position: sticky; bottom: 0; background: white; padding-top: 0.25rem; z-index: 20;}
 </style>
 """
 
@@ -217,14 +224,13 @@ def render_chat(messages: list[dict[str, str]]) -> None:
 
 # ----------------------------- UI -----------------------------
 
-st.markdown("""
-<div class='hero'>
+with st.sidebar:
+    st.markdown("""
+<div class='sidebar-brand'>
   <h1>📍 GoAround SG</h1>
-  <p>AI local discovery assistant for useful lobang near where people live, work, study, or visit.</p>
+  <p>AI local discovery assistant for useful lobang near you.</p>
 </div>
 """, unsafe_allow_html=True)
-
-with st.sidebar:
     st.header("My area")
     mode = st.selectbox("I am here as", MODES)
     sample = st.selectbox("Try location", ["Custom", "308C Punggol Walk", "83 Punggol Central", "Chinatown MRT", "Orchard Road", "1 Tanjong Pagar Plaza"])
@@ -284,21 +290,26 @@ genai_mode = bool(os.getenv("DATABRICKS_HOST") and os.getenv("DATABRICKS_TOKEN")
 badge_data = "Lakehouse" if lakehouse_mode else "Public API fallback"
 badge_ai = "Model Serving GenAI" if genai_mode else "Safe fallback"
 st.markdown(f"""
-<span class='badge {'badge-green' if lakehouse_mode else 'badge-amber'}'>Data mode: {badge_data}</span>
-<span class='badge {'badge-green' if genai_mode else 'badge-amber'}'>AI mode: {badge_ai}</span>
-<span class='badge'>Area: {html_escape(profile['address'][:80])}</span>
-<span class='badge'>Weather: {html_escape(weather.get('forecast') or 'n/a')}</span>
+<div class='top-strip'>
+  <h2>Today around your area</h2>
+  <span class='badge {'badge-green' if lakehouse_mode else 'badge-amber'}'>Data mode: {badge_data}</span>
+  <span class='badge {'badge-green' if genai_mode else 'badge-amber'}'>AI mode: {badge_ai}</span>
+  <span class='badge'>Area: {html_escape(profile['address'][:80])}</span>
+  <span class='badge'>Weather: {html_escape(weather.get('forecast') or 'n/a')}</span>
+</div>
 """, unsafe_allow_html=True)
 
 left, right = st.columns([0.95, 1.35], gap="large")
 
 with left:
-    st.subheader("Today’s Picks")
-    st.caption("Ranked cards from Lakehouse/open data, source registries, weather, location and interests.")
+    st.markdown("<div class='panel-title'>Today’s Picks</div>", unsafe_allow_html=True)
+    st.markdown("<div class='panel-subtitle'>Ranked from Lakehouse/open data, source registries, weather, location and interests.</div>", unsafe_allow_html=True)
+    st.markdown("<div class='scroll-panel'>", unsafe_allow_html=True)
     if not ranked:
         st.warning("No source-backed picks found. Try widening the radius.")
-    for idx, item in enumerate(ranked[:8]):
+    for idx, item in enumerate(ranked[:10]):
         render_pick(item, idx)
+    st.markdown("</div>", unsafe_allow_html=True)
 
 with right:
     st.markdown("<div class='chat-shell'>", unsafe_allow_html=True)
@@ -323,7 +334,7 @@ with right:
         "I am visiting this area for 2 hours",
         "any rainy-day options nearby?",
     ]
-    st.markdown("<div style='padding:0 20px 8px 20px'>", unsafe_allow_html=True)
+    st.markdown("<div class='chat-actions'>", unsafe_allow_html=True)
     chip_cols = st.columns(2)
     for i, chip in enumerate(chips):
         if chip_cols[i % 2].button(chip, key=f"chip-{i}"):
@@ -333,16 +344,15 @@ with right:
         st.session_state["ask_messages"] = [{"role": "assistant", "content": "Chat cleared. What would you like to find nearby?"}]
         st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
-
-    prompt = st.chat_input("Ask GoAround about this area...")
-    prompt = st.session_state.pop("pending_prompt", None) or prompt
-    if prompt:
-        st.session_state["ask_messages"].append({"role": "user", "content": prompt})
-        answer = answer_with_databricks(prompt, context, ranked, default_fallback_answer(ranked))
-        st.session_state["ask_messages"].append({"role": "assistant", "content": answer})
-        st.rerun()
-
     st.markdown("</div>", unsafe_allow_html=True)
+
+prompt = st.chat_input("Ask GoAround about this area...")
+prompt = st.session_state.pop("pending_prompt", None) or prompt
+if prompt:
+    st.session_state["ask_messages"].append({"role": "user", "content": prompt})
+    answer = answer_with_databricks(prompt, context, ranked, default_fallback_answer(ranked))
+    st.session_state["ask_messages"].append({"role": "assistant", "content": answer})
+    st.rerun()
 
 with st.expander("Business promotion demo"):
     st.caption("Creates a source-backed local promotion card. Production version stores this in Lakebase.")
@@ -375,7 +385,7 @@ Run `databricks/setup_open_data_delta.py` to create Bronze, Silver and Gold Delt
 Lakehouse env vars:
 ```text
 USE_DATABRICKS_SQL=true
-GOAROUND_CATALOG=main
+GOAROUND_CATALOG=workspace
 GOAROUND_SCHEMA=goaround_sg
 DATABRICKS_SERVER_HOSTNAME=<serverless SQL hostname>
 DATABRICKS_HTTP_PATH=<serverless SQL warehouse HTTP path>
