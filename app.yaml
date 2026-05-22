@@ -1,7 +1,7 @@
 command:
   - streamlit
   - run
-  - app_databricks.py
+  - app_genie.py
   - --server.address
   - 0.0.0.0
   - --server.port
