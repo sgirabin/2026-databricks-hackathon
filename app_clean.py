@@ -60,6 +60,12 @@ div[data-testid="stVerticalBlock"] {gap: 0.45rem;}
     unsafe_allow_html=True,
 )
 
+# Automatically attempt browser location detection on first load/reload.
+# Browsers still require explicit user permission; manual location remains available.
+if "auto_location_attempted" not in st.session_state:
+    st.session_state["auto_location_attempted"] = True
+    st.session_state["request_browser_location"] = True
+
 
 def esc(value: Any) -> str:
     return str(value).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
@@ -203,12 +209,11 @@ with st.sidebar:
 """, unsafe_allow_html=True)
     st.header("My area")
     mode = st.selectbox("I am here as", MODES)
-    sample = st.selectbox("Try location", ["Custom", "308C Punggol Walk", "83 Punggol Central", "Chinatown MRT", "Orchard Road", "1 Tanjong Pagar Plaza"])
-    if st.button("Use my current location"):
-        st.session_state["request_browser_location"] = True
+
     if st.session_state.get("request_browser_location"):
         if get_geolocation is None:
             st.warning("Browser geolocation helper unavailable. Use manual search.")
+            st.session_state["request_browser_location"] = False
         else:
             loc = get_geolocation()
             coords = (loc or {}).get("coords") if isinstance(loc, dict) else None
@@ -218,8 +223,25 @@ with st.sidebar:
                 st.session_state["saved_area"] = detected["address"]
                 st.session_state["request_browser_location"] = False
                 st.success(f"Detected: {detected['address']}")
+            else:
+                st.info("Allow browser location access, or use a custom location below.")
+
     detected_profile = st.session_state.get("detected_profile")
-    default_address = detected_profile["address"] if detected_profile else (st.session_state.get("saved_area", "") if sample == "Custom" else sample)
+    location_options = ["Auto / Current location", "Custom", "308C Punggol Walk", "83 Punggol Central", "Chinatown MRT", "Orchard Road", "1 Tanjong Pagar Plaza"]
+    sample = st.selectbox("Try location", location_options)
+    if st.button("Detect current location again"):
+        st.session_state["request_browser_location"] = True
+        st.rerun()
+
+    if sample == "Auto / Current location" and detected_profile:
+        default_address = detected_profile["address"]
+    elif sample == "Auto / Current location":
+        default_address = st.session_state.get("saved_area", "Chinatown MRT")
+    elif sample == "Custom":
+        default_address = st.session_state.get("saved_area", "")
+    else:
+        default_address = sample
+
     address = st.text_input("Block / place / postal code", default_address)
     radius = st.slider("Discovery radius", 500, 3000, int(st.session_state.get("radius", 1500)), 100)
     interests = st.multiselect("Interests", INTERESTS, default=st.session_state.get("interests", ["cheap food", "grocery", "event", "deal"]))
@@ -230,7 +252,7 @@ with st.sidebar:
         st.success("Saved for this session. In production this goes to Lakebase.")
 
 if not address and not st.session_state.get("detected_profile"):
-    st.info("Enter a place, block or postal code to generate Today’s Picks.")
+    st.info("Allow current location access or enter a place, block or postal code to generate Today’s Picks.")
     st.stop()
 
 try:
