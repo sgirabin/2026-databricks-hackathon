@@ -1,7 +1,7 @@
 command:
   - streamlit
   - run
-  - app_sidenav_min.py
+  - app_template_ui.py
   - --server.address
   - 0.0.0.0
   - --server.port
