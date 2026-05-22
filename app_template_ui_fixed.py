@@ -31,11 +31,24 @@ PAGES = ["GoAround Today", "Business Promotion", "What is GoAround?"]
 
 st.markdown("""
 <style>
-:root{--blue:#0D6EFD;--navy:#172B4D;--green:#20B2AA;--line:#E6EAF2;--muted:#667085;}
-.main .block-container{padding-top:1rem;max-width:1540px;padding-bottom:.5rem;}
-section[data-testid="stSidebar"]{background:#F6F8FC;}
+:root{--blue:#0D6EFD;--navy:#172B4D;--green:#20B2AA;--line:#E6EAF2;--muted:#667085;--appbg:#F7FAFC;}
+html,body,.stApp,[data-testid="stAppViewContainer"],[data-testid="stApp"]{background:var(--appbg)!important;color:var(--navy)!important;color-scheme:light!important;}
+.main,.block-container,[data-testid="block-container"],section.main{background:var(--appbg)!important;color:var(--navy)!important;}
+[data-testid="stHeader"]{background:rgba(247,250,252,.96)!important;color:var(--navy)!important;}
+.main .block-container{padding-top:1rem;max-width:1580px;padding-bottom:.35rem;}
+section[data-testid="stSidebar"]{background:#F6F8FC!important;color:var(--navy)!important;}
 section[data-testid="stSidebar"] .block-container{padding:1rem .8rem .8rem .8rem;}
 div[data-testid="stVerticalBlock"]{gap:.45rem;}
+/* force readable widgets in browser/system dark mode */
+.stTextInput input,.stTextArea textarea,.stNumberInput input{background:#FFFFFF!important;color:#172B4D!important;border-color:#E6EAF2!important;}
+.stTextInput input::placeholder,.stTextArea textarea::placeholder{color:#98A2B3!important;}
+[data-baseweb="select"]>div,[data-baseweb="input"]>div,[data-baseweb="textarea"]>div{background:#FFFFFF!important;color:#172B4D!important;border-color:#E6EAF2!important;}
+[data-baseweb="select"] span,[data-baseweb="select"] div,[data-baseweb="popover"] div,[data-baseweb="menu"] div{color:#172B4D!important;}
+[data-baseweb="tag"]{background:#EEF4FF!important;color:#175CD3!important;}
+label,p,span,div,li,h1,h2,h3,h4,h5,h6{color:inherit;}
+button[kind="primary"]{background:#0D6EFD!important;border-radius:12px!important;color:#FFFFFF!important;}
+button[kind="secondary"]{background:#FFFFFF!important;color:#172B4D!important;border-color:#E6EAF2!important;}
+.stSlider [data-baseweb="slider"] div{color:#172B4D!important;}
 .brand{display:flex;gap:.65rem;align-items:center;margin-bottom:1rem;}
 .logo-pin{width:42px;height:42px;border-radius:50% 50% 50% 8px;background:linear-gradient(145deg,#0D6EFD,#20B2AA);transform:rotate(-45deg);box-shadow:0 10px 24px rgba(13,110,253,.18);position:relative;flex:0 0 auto;}
 .logo-pin:after{content:"";width:17px;height:17px;background:white;border-radius:50%;position:absolute;left:12px;top:12px;}
@@ -44,12 +57,11 @@ div[data-testid="stVerticalBlock"]{gap:.45rem;}
 .card-title{font-size:23px;font-weight:850;color:var(--navy);letter-spacing:-.015em;margin:0;}.muted{color:var(--muted);font-size:13px}.small{font-size:12px;color:var(--muted)}
 .badge{display:inline-block;border-radius:999px;padding:.28rem .58rem;font-size:12px;font-weight:750;margin:.12rem .25rem .12rem 0;background:#EEF4FF;color:#175CD3}.badge.green{background:#DFF8EE;color:#047857}.badge.purple{background:#F0E8FF;color:#6941C6}.badge.orange{background:#FFF2E0;color:#C05621}
 .chat-row{display:flex;margin:.7rem 0}.chat-row.assistant{justify-content:flex-start}.chat-row.user{justify-content:flex-end}.chat-bubble{max-width:78%;border-radius:18px;padding:.82rem 1rem;font-size:14px;line-height:1.45}.assistant .chat-bubble{background:#F1F5F9;color:#0F172A;border-bottom-left-radius:6px}.user .chat-bubble{background:#0D6EFD;color:white;border-bottom-right-radius:6px}.avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-right:.65rem;background:#EAF2FF;font-size:19px;flex:0 0 auto;}
-.bot-hero{text-align:center;margin:.8rem 0 1rem}.bot-face{font-size:84px;line-height:1;margin:.5rem 0}.bot-hero h2{font-size:22px;margin:.1rem 0;color:var(--navy)}
-.pick{border:1px solid var(--line);border-radius:18px;padding:1rem;margin:.7rem 0;background:white;box-shadow:0 5px 18px rgba(23,43,77,.04)}.pick-head{display:flex;align-items:center;gap:.55rem;margin-bottom:.55rem}.rank{background:#0D6EFD;color:#fff;border-radius:8px;padding:.18rem .48rem;font-weight:850;font-size:12px}.pick-title{font-size:18px;font-weight:850;color:var(--navy);margin:.1rem 0}.pick-desc{font-size:13.5px;color:#344054;margin:.35rem 0 .75rem}.pick-footer{display:flex;justify-content:space-between;align-items:center;color:#667085;font-size:12px}.visit{border:1px solid var(--line);border-radius:12px;padding:.5rem .78rem;color:#0D6EFD;font-weight:800;background:white;text-decoration:none}.big-icon{float:right;font-size:46px;margin-left:.5rem}
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.9rem;margin-bottom:1rem}.kpi{background:white;border:1px solid var(--line);border-radius:18px;padding:1rem;box-shadow:0 5px 18px rgba(23,43,77,.04)}.kpi b{font-size:26px;color:var(--navy)}.phone{border:8px solid #EEF2F7;border-radius:36px;padding:1rem;background:white;max-width:330px;margin:auto}.food-img{height:145px;border-radius:16px;background:linear-gradient(135deg,#FFE6C7,#F8B26A);display:flex;align-items:center;justify-content:center;font-size:74px;margin:.8rem 0}.primary{background:#0D6EFD;color:white;border-radius:12px;padding:.75rem 1rem;text-align:center;font-weight:800;margin-top:.8rem}.footer-note{text-align:center;color:#667085;font-size:12px;margin-top:.5rem}
+.bot-hero{text-align:center;margin:1.1rem 0 1.2rem}.bot-face{font-size:96px;line-height:1;margin:.6rem 0}.bot-hero h2{font-size:23px;margin:.1rem 0;color:var(--navy)}
+.pick{border:1px solid var(--line);border-radius:18px;padding:1rem;margin:.7rem 0;background:#FFFFFF;color:#172B4D;box-shadow:0 5px 18px rgba(23,43,77,.04)}.pick-head{display:flex;align-items:center;gap:.55rem;margin-bottom:.55rem}.rank{background:#0D6EFD;color:#fff;border-radius:8px;padding:.18rem .48rem;font-weight:850;font-size:12px}.pick-title{font-size:18px;font-weight:850;color:var(--navy);margin:.1rem 0}.pick-desc{font-size:13.5px;color:#344054;margin:.35rem 0 .75rem}.pick-footer{display:flex;justify-content:space-between;align-items:center;color:#667085;font-size:12px}.visit{border:1px solid var(--line);border-radius:12px;padding:.5rem .78rem;color:#0D6EFD;font-weight:800;background:white;text-decoration:none}.big-icon{float:right;font-size:46px;margin-left:.5rem}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.9rem;margin-bottom:1rem}.kpi{background:#FFFFFF;color:#172B4D;border:1px solid var(--line);border-radius:18px;padding:1rem;box-shadow:0 5px 18px rgba(23,43,77,.04)}.kpi b{font-size:26px;color:var(--navy)}.phone{border:8px solid #EEF2F7;border-radius:36px;padding:1rem;background:white;max-width:330px;margin:auto}.food-img{height:165px;border-radius:16px;background:linear-gradient(135deg,#FFE6C7,#F8B26A);display:flex;align-items:center;justify-content:center;font-size:76px;margin:.8rem 0}.primary{background:#0D6EFD;color:white;border-radius:12px;padding:.75rem 1rem;text-align:center;font-weight:800;margin-top:.8rem}.footer-note{text-align:center;color:#667085;font-size:12px;margin-top:.5rem}
 /* Streamlit container polish */
-div[data-testid="stVerticalBlockBorderWrapper"]{border-radius:22px!important;box-shadow:0 12px 34px rgba(23,43,77,.06)!important;border-color:#E6EAF2!important;background:#fff!important;}
-button[kind="primary"]{background:#0D6EFD!important;border-radius:12px!important;}
+div[data-testid="stVerticalBlockBorderWrapper"]{border-radius:22px!important;box-shadow:0 12px 34px rgba(23,43,77,.06)!important;border-color:#E6EAF2!important;background:#fff!important;color:#172B4D!important;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -178,15 +190,15 @@ ranked = rank_cards(cards, context, limit=12)
 if page == "GoAround Today":
     chat_col, picks_col = st.columns([1.72, 1.08], gap="large")
     with chat_col:
-        with st.container(height=720, border=True):
+        with st.container(height=840, border=True):
             h1, h2 = st.columns([3, 1])
             h1.markdown("<h2 class='card-title'>💬 Ask GoAround</h2>", unsafe_allow_html=True)
             h2.markdown(f"<div class='small'>🛡️ {'Model Serving' if genai_mode else 'Safe fallback'}</div>", unsafe_allow_html=True)
             st.caption("Conversation-style local assistant grounded by source-backed local picks.")
             if "ask_messages" not in st.session_state:
                 st.session_state.ask_messages = [{"role": "assistant", "content": "Hi! I’m Ask GoAround. Ask me what to eat, what to do with kids, rainy-day options, nearby deals, or a short visit plan."}]
-            with st.container(height=315, border=False):
-                for msg in st.session_state.ask_messages[-6:]:
+            with st.container(height=410, border=False):
+                for msg in st.session_state.ask_messages[-8:]:
                     render_chat(msg)
             if len(st.session_state.ask_messages) <= 1:
                 st.markdown("<div class='bot-hero'><div class='bot-face'>🤖</div><h2>How can I help you today?</h2><p class='muted'>Try one of the ideas below or ask anything.</p></div>", unsafe_allow_html=True)
@@ -210,10 +222,10 @@ if page == "GoAround Today":
                 st.session_state.ask_messages.append({"role": "assistant", "content": answer})
                 st.rerun()
     with picks_col:
-        with st.container(height=720, border=True):
+        with st.container(height=840, border=True):
             st.markdown("<h2 class='card-title'>✨ Today’s Picks</h2>", unsafe_allow_html=True)
             st.caption("Curated picks near you, updated daily.")
-            for idx, item in enumerate(ranked[:3]):
+            for idx, item in enumerate(ranked[:4]):
                 render_pick(item, idx)
             st.button("View more picks  ›", use_container_width=True)
 
@@ -221,7 +233,7 @@ elif page == "Business Promotion":
     st.markdown("<div class='kpi-grid'><div class='kpi'>🏷️<br><span class='muted'>Active Promotions</span><br><b>3</b><br><span class='badge green'>▲ 1 vs last 7 days</span></div><div class='kpi'>🖱️<br><span class='muted'>Clicks (7 days)</span><br><b>128</b><br><span class='badge green'>▲ 18%</span></div><div class='kpi'>🔖<br><span class='muted'>Saves (7 days)</span><br><b>47</b><br><span class='badge green'>▲ 21%</span></div><div class='kpi'>👁️<br><span class='muted'>Views (7 days)</span><br><b>612</b><br><span class='badge green'>▲ 12%</span></div></div>", unsafe_allow_html=True)
     form_col, preview_col = st.columns([1.55, .85], gap="large")
     with form_col:
-        with st.container(border=True):
+        with st.container(height=690, border=True):
             st.subheader("Create Promotion")
             st.caption("Fill in the details to create your promotion. It will be reviewed before it goes live.")
             with st.form("business_promo"):
@@ -236,7 +248,7 @@ elif page == "Business Promotion":
                 c6.date_input("Valid to")
                 c7.text_input("Time", "5:00 PM – 9:00 PM")
                 tags = st.multiselect("Audience / Interests", INTERESTS, default=["cheap food", "deal"])
-                desc = st.text_area("Short description *", "Enjoy our signature Hainanese Chicken Rice at 50% off for dinner! Freshly steamed chicken, fragrant rice, and our homemade chilli.")
+                desc = st.text_area("Short description *", "Enjoy our signature Hainanese Chicken Rice at 50% off for dinner! Freshly steamed chicken, fragrant rice, and our homemade chilli.", height=110)
                 source_url = st.text_input("CTA link", "https://example.com/promo")
                 submitted = st.form_submit_button("✈️ Publish Promotion", type="primary")
             if submitted:
@@ -244,13 +256,13 @@ elif page == "Business Promotion":
                 st.session_state.setdefault("business_cards", []).append(card)
                 st.success("Promotion created. It will appear in Today’s Picks after rerun if relevant.")
     with preview_col:
-        with st.container(border=True):
+        with st.container(height=690, border=True):
             st.subheader("Preview")
             st.caption("This is how your promotion will appear.")
             st.markdown("<div class='phone'><div style='text-align:center;font-weight:850'>GoAround Today</div><span class='badge purple'>FOOD & DINING</span><span class='badge green'>50% OFF</span><div class='food-img'>🍚</div><h3>50% Off Signature Chicken Rice</h3><p class='muted'>Fresh chicken, fragrant rice and homemade chilli.</p><div class='primary'>View details ↗</div></div>", unsafe_allow_html=True)
 
 else:
-    with st.container(border=True):
+    with st.container(height=760, border=True):
         st.subheader("What is GoAround SG?")
         st.markdown("""
 GoAround SG is a source-backed local discovery assistant for Singapore. It helps residents, workers, students, visitors, and businesses understand what is useful around a selected area.
