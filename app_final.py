@@ -38,19 +38,19 @@ INTERESTS = ["cheap food", "grocery", "deal", "event", "family", "fitness", "sho
 
 st.markdown("""
 <style>
-.main .block-container {padding-top:.25rem; max-width:1500px; padding-bottom:.35rem;}
+.main .block-container {padding-top:1.15rem; max-width:1500px; padding-bottom:.35rem;}
 section[data-testid="stSidebar"] .block-container {padding-top:0rem;}
-.brand-card {border:1px solid #e2e8f0;border-radius:18px;padding:12px;background:linear-gradient(135deg,#f8fafc,#eef6ff);margin-top:-12px;margin-bottom:12px;}
+.brand-card {border:1px solid #e2e8f0;border-radius:18px;padding:12px;background:linear-gradient(135deg,#f8fafc,#eef6ff);margin-top:-18px;margin-bottom:12px;}
 .brand-card h1 {font-size:22px;margin:0;color:#0f172a;line-height:1.1;}
 .brand-card p {font-size:12px;color:#64748b;margin:6px 0 0 0;line-height:1.45;white-space:normal;}
-.status-card {border:1px solid #e5e7eb;border-radius:18px;padding:7px 14px;background:white;margin-bottom:2px;box-shadow:0 4px 12px rgba(15,23,42,.04);}
-.status-card h2 {font-size:17px;margin:0 0 4px 0;color:#0f172a;line-height:1.3;white-space:normal;overflow:visible;}
-.badge {display:inline-block;border-radius:999px;padding:4px 8px;font-size:11.5px;font-weight:700;margin:0 5px 3px 0;border:1px solid #dbeafe;background:#eff6ff;color:#1d4ed8;}
+.status-card {border:1px solid #e5e7eb;border-radius:16px;padding:8px 14px 7px 14px;background:white;margin-bottom:0;box-shadow:0 4px 12px rgba(15,23,42,.04);overflow:visible;}
+.status-title {display:inline-block;font-size:15px;font-weight:800;color:#0f172a;margin:0 10px 4px 0;line-height:1.2;vertical-align:middle;}
+.badge {display:inline-block;border-radius:999px;padding:4px 8px;font-size:11.5px;font-weight:700;margin:0 5px 3px 0;border:1px solid #dbeafe;background:#eff6ff;color:#1d4ed8;vertical-align:middle;}
 .badge-good {border-color:#bbf7d0;background:#f0fdf4;color:#15803d;}
 .badge-warn {border-color:#fde68a;background:#fffbeb;color:#a16207;}
 .location-help {font-size:13px;line-height:1.45;margin:12px 0 8px 0;padding:10px 12px;border-radius:12px;background:#eff6ff;color:#1e3a8a;border:1px solid #dbeafe;}
-div[data-testid="stVerticalBlock"] {gap:.32rem;}
-div[data-testid="stTabs"] > div:first-child {margin-top:0;margin-bottom:.05rem;}
+div[data-testid="stVerticalBlock"] {gap:.28rem;}
+div[data-testid="stTabs"] > div:first-child {margin-top:0;margin-bottom:.02rem;}
 .chat-row {display:flex;margin:10px 0;}
 .chat-row.assistant {justify-content:flex-start;}
 .chat-row.user {justify-content:flex-end;}
@@ -58,6 +58,7 @@ div[data-testid="stTabs"] > div:first-child {margin-top:0;margin-bottom:.05rem;}
 .chat-row.assistant .chat-bubble {background:#f1f5f9;color:#0f172a;border-bottom-left-radius:5px;}
 .chat-row.user .chat-bubble {background:#2563eb;color:white;border-bottom-right-radius:5px;}
 .chat-avatar {width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#eef2ff;margin-right:8px;flex:0 0 auto;}
+.chat-input-row div[data-testid="stForm"] {border:0;padding:0;margin:0;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -287,7 +288,7 @@ genai_mode = bool(os.getenv("DATABRICKS_HOST") and os.getenv("DATABRICKS_TOKEN")
 
 st.markdown(f"""
 <div class='status-card'>
-  <h2>Today around your area</h2>
+  <span class='status-title'>Today around your area</span>
   <span class='badge {'badge-good' if lakehouse_mode else 'badge-warn'}'>Data mode: {'Lakehouse' if lakehouse_mode else 'Public API fallback'}</span>
   <span class='badge {'badge-good' if genai_mode else 'badge-warn'}'>AI mode: {'Model Serving GenAI' if genai_mode else 'Safe fallback'}</span>
   <span class='badge'>Area: {esc(profile['address'][:90])}</span>
@@ -314,18 +315,13 @@ with main_tab:
         st.caption("Conversation-style local assistant grounded by source-backed Today’s Picks.")
         if "ask_messages" not in st.session_state:
             st.session_state["ask_messages"] = [{"role": "assistant", "content": "Hi, I’m Ask GoAround. Ask me what to eat, what to do with kids, rainy-day options, nearby deals, or a short visitor plan."}]
-        with st.container(height=570, border=True):
+        with st.container(height=620, border=True):
             for msg in st.session_state["ask_messages"]:
                 render_chat_message(msg)
         with st.form("ask_goaround_form", clear_on_submit=True):
-            user_question = st.text_input("Ask GoAround about this area", placeholder="Ask GoAround about this area...", label_visibility="collapsed")
-            send = st.form_submit_button("Send", use_container_width=True)
-        chip_cols = st.columns(4)
-        examples = ["what to eat today?", "what can I do with my kid this weekend?", "I am visiting this area for 2 hours", "any rainy-day options nearby?"]
-        for i, example in enumerate(examples):
-            if chip_cols[i].button(example, key=f"chip-{i}"):
-                st.session_state["pending_prompt"] = example
-                st.rerun()
+            input_col, send_col = st.columns([8, 1])
+            user_question = input_col.text_input("Ask GoAround about this area", placeholder="Ask GoAround about this area...", label_visibility="collapsed")
+            send = send_col.form_submit_button("➤", use_container_width=True)
         if st.button("Clear chat", key="clear-chat"):
             st.session_state["ask_messages"] = [{"role": "assistant", "content": "Chat cleared. What would you like to find nearby?"}]
             st.rerun()
@@ -383,18 +379,16 @@ DATABRICKS_TOKEN=<token or secret>
 ```
 """)
 
-prompt = st.session_state.pop("pending_prompt", None) if "pending_prompt" in st.session_state else None
 try:
     send_defined = send
     question_defined = user_question
 except NameError:
     send_defined = False
     question_defined = ""
+
 if send_defined and question_defined.strip():
-    prompt = question_defined.strip()
-if prompt:
-    st.session_state["ask_messages"].append({"role": "user", "content": prompt})
-    answer = answer_with_databricks(prompt, context, ranked, default_answer(ranked))
+    st.session_state["ask_messages"].append({"role": "user", "content": question_defined.strip()})
+    answer = answer_with_databricks(question_defined.strip(), context, ranked, default_answer(ranked))
     st.session_state["ask_messages"].append({"role": "assistant", "content": answer})
     st.rerun()
 
