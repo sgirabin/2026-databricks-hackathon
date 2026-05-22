@@ -295,8 +295,9 @@ def default_fallback_answer(ranked: list) -> str:
     return f"Start with **{top.card.title}**. {top.card.description} {top.why_shown} Open the source before acting."
 
 
-def render_pick_card(item) -> None:
+def render_pick_card(item, key_prefix: str) -> None:
     card = item.card
+    safe_key = re.sub(r"[^a-zA-Z0-9_-]+", "-", f"{key_prefix}-{card.id}")
     distance = "" if item.distance_m is None else f" · {dist_label(item.distance_m)}"
     with st.container(border=True):
         st.markdown(f"### {icon_for(card.card_type)} {card.title}")
@@ -304,12 +305,12 @@ def render_pick_card(item) -> None:
         st.write(card.description)
         st.info(item.why_shown)
         cols = st.columns([1, 1, 1, 1.4])
-        if cols[0].button("Save", key=f"save-{card.id}"):
+        if cols[0].button("Save", key=f"save-{safe_key}"):
             st.session_state.setdefault("saved_cards", []).append(card.id)
             st.success("Saved for this session.")
-        if cols[1].button("Share", key=f"share-{card.id}"):
+        if cols[1].button("Share", key=f"share-{safe_key}"):
             st.code(f"{card.title}\n{card.description}\nSource: {card.source_url}")
-        if cols[2].button("Remind", key=f"remind-{card.id}"):
+        if cols[2].button("Remind", key=f"remind-{safe_key}"):
             st.session_state.setdefault("reminders", []).append(card.id)
             st.success("Reminder saved for demo session.")
         cols[3].link_button("Open source", card.source_url)
@@ -399,24 +400,24 @@ with tab_today:
     if not ranked:
         st.warning("No source-backed picks found. Try widening the radius or selecting more interests.")
     else:
-        for item in ranked[:8]:
-            render_pick_card(item)
+        for idx, item in enumerate(ranked[:8]):
+            render_pick_card(item, key_prefix=f"today-{idx}")
 
 with tab_deals:
     st.subheader("Deals and food lobang")
     deal_items = [x for x in ranked if x.card.card_type in {"deal", "food"}]
     if not deal_items:
         st.info("No deal/food cards found. Add a business promo or select cheap food/grocery interests.")
-    for item in deal_items[:10]:
-        render_pick_card(item)
+    for idx, item in enumerate(deal_items[:10]):
+        render_pick_card(item, key_prefix=f"deals-{idx}")
 
 with tab_things:
     st.subheader("Things To Do")
     thing_items = [x for x in ranked if x.card.card_type in {"event", "plan", "local_update"}]
     if not thing_items:
         st.info("No event/planning cards found. Try visitor mode or select family/weekend/tourist interests.")
-    for item in thing_items[:10]:
-        render_pick_card(item)
+    for idx, item in enumerate(thing_items[:10]):
+        render_pick_card(item, key_prefix=f"things-{idx}")
 
 with tab_ask:
     st.subheader("Ask GoAround")
