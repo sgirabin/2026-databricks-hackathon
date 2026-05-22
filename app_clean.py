@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import re
 from typing import Any
 
 import pandas as pd
@@ -39,22 +40,21 @@ INTERESTS = ["cheap food", "grocery", "deal", "event", "family", "fitness", "sho
 st.markdown(
     """
 <style>
-.main .block-container {padding-top: 0.8rem; max-width: 1500px; padding-bottom: 0.5rem;}
+.main .block-container {padding-top: 0.7rem; max-width: 1500px; padding-bottom: 0.5rem;}
 section[data-testid="stSidebar"] .block-container {padding-top: 1.2rem;}
 .brand-card {border:1px solid #e2e8f0; border-radius:18px; padding:14px; background:linear-gradient(135deg,#f8fafc,#eef6ff); margin-bottom:16px;}
 .brand-card h1 {font-size:22px; margin:0; color:#0f172a;}
 .brand-card p {font-size:12px; color:#64748b; margin:6px 0 0 0;}
-.status-card {border:1px solid #e5e7eb; border-radius:18px; padding:12px 16px; background:white; margin-bottom:12px; box-shadow:0 4px 12px rgba(15,23,42,0.04);}
+.status-card {border:1px solid #e5e7eb; border-radius:18px; padding:12px 16px; background:white; margin-bottom:10px; box-shadow:0 4px 12px rgba(15,23,42,0.04);}
 .status-card h2 {font-size:20px; margin:0 0 8px 0; color:#0f172a;}
 .badge {display:inline-block; border-radius:999px; padding:6px 10px; font-size:12px; font-weight:700; margin:0 6px 6px 0; border:1px solid #dbeafe; background:#eff6ff; color:#1d4ed8;}
 .badge-good {border-color:#bbf7d0; background:#f0fdf4; color:#15803d;}
 .badge-warn {border-color:#fde68a; background:#fffbeb; color:#a16207;}
-.pick-card {border:1px solid #e5e7eb; border-radius:16px; padding:14px; background:#fff; margin-bottom:12px; box-shadow:0 3px 10px rgba(15,23,42,0.04);}
+.small-note {font-size:12px; color:#64748b;}
 .pick-title {font-weight:750; font-size:15px; color:#0f172a; margin-bottom:4px;}
 .pick-meta {font-size:12px; color:#64748b; margin-bottom:8px;}
-.why {background:#eff6ff; color:#1e3a8a; border-radius:10px; padding:8px 10px; font-size:12.5px; margin-top:8px;}
-.small-note {font-size:12px; color:#64748b;}
-div[data-testid="stChatInput"] {position: sticky; bottom: 0; background: white; padding-top: .25rem; z-index: 50;}
+/* keep the whole app compact for recording */
+div[data-testid="stVerticalBlock"] {gap: 0.45rem;}
 </style>
 """,
     unsafe_allow_html=True,
@@ -63,6 +63,10 @@ div[data-testid="stChatInput"] {position: sticky; bottom: 0; background: white; 
 
 def esc(value: Any) -> str:
     return str(value).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def safe_key(value: str) -> str:
+    return re.sub(r"[^a-zA-Z0-9_-]+", "-", value)
 
 
 def dist_label(v: Any) -> str:
@@ -170,16 +174,24 @@ def default_answer(ranked: list) -> str:
     return f"Start with **{top.card.title}**. {top.card.description} Open the source before acting."
 
 
-def render_pick(item) -> None:
+def render_pick(item, idx: int) -> None:
     card = item.card
-    st.markdown(f"""
-<div class='pick-card'>
-  <div class='pick-title'>{esc(card.title)}</div>
-  <div class='pick-meta'>{esc(card.category.title())}{dist_label(item.distance_m)} · score {item.score:.2f} · {esc(card.source_name)}</div>
-  <div>{esc(card.description)}</div>
-  <div class='why'>{esc(item.why_shown)}</div>
-</div>
-""", unsafe_allow_html=True)
+    key = safe_key(f"{idx}-{card.id}")
+    with st.container(border=True):
+        st.markdown(f"**{card.title}**")
+        st.caption(f"{card.category.title()}{dist_label(item.distance_m)} · score {item.score:.2f} · {card.source_name}")
+        st.write(card.description)
+        st.info(item.why_shown)
+        c1, c2, c3, c4 = st.columns([1, 1, 1, 1.4])
+        if c1.button("Save", key=f"save-{key}"):
+            st.session_state.setdefault("saved_cards", []).append(card.id)
+            st.success("Saved.")
+        if c2.button("Share", key=f"share-{key}"):
+            st.code(f"{card.title}\n{card.description}\nSource: {card.source_url}")
+        if c3.button("Remind", key=f"remind-{key}"):
+            st.session_state.setdefault("reminders", []).append(card.id)
+            st.success("Reminder saved.")
+        c4.link_button("Open source", card.source_url)
 
 
 with st.sidebar:
@@ -260,11 +272,11 @@ left, right = st.columns([0.95, 1.35], gap="large")
 with left:
     st.subheader("Today’s Picks")
     st.caption("Ranked from Lakehouse/open data, source registries, weather, location and interests.")
-    with st.container(height=610, border=False):
+    with st.container(height=710, border=False):
         if not ranked:
             st.warning("No source-backed picks found. Try widening the radius.")
-        for item in ranked[:10]:
-            render_pick(item)
+        for idx, item in enumerate(ranked[:12]):
+            render_pick(item, idx)
 
 with right:
     header_col, mode_col = st.columns([3, 1])
@@ -275,10 +287,14 @@ with right:
     if "ask_messages" not in st.session_state:
         st.session_state["ask_messages"] = [{"role": "assistant", "content": "Hi, I’m Ask GoAround. Ask me what to eat, what to do with kids, rainy-day options, nearby deals, or a short visitor plan."}]
 
-    with st.container(height=520, border=True):
+    with st.container(height=570, border=True):
         for msg in st.session_state["ask_messages"]:
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
+
+    with st.form("ask_goaround_form", clear_on_submit=True):
+        user_question = st.text_input("Ask GoAround about this area", placeholder="Ask GoAround about this area...", label_visibility="collapsed")
+        send = st.form_submit_button("Send", use_container_width=True)
 
     chip_cols = st.columns(4)
     examples = ["what to eat today?", "what can I do with my kid this weekend?", "I am visiting this area for 2 hours", "any rainy-day options nearby?"]
@@ -290,8 +306,10 @@ with right:
         st.session_state["ask_messages"] = [{"role": "assistant", "content": "Chat cleared. What would you like to find nearby?"}]
         st.rerun()
 
-prompt = st.chat_input("Ask GoAround about this area...")
-prompt = st.session_state.pop("pending_prompt", None) or prompt
+prompt = st.session_state.pop("pending_prompt", None) if "pending_prompt" in st.session_state else None
+if send and user_question.strip():
+    prompt = user_question.strip()
+
 if prompt:
     st.session_state["ask_messages"].append({"role": "user", "content": prompt})
     answer = answer_with_databricks(prompt, context, ranked, default_answer(ranked))
