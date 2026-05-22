@@ -1,7 +1,7 @@
 command:
   - streamlit
   - run
-  - app_template_ui_fixed.py
+  - app_template_light.py
   - --server.address
   - 0.0.0.0
   - --server.port
