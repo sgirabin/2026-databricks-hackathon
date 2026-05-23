@@ -3,14 +3,13 @@ from __future__ import annotations
 import streamlit as st
 
 st.set_page_config(
-    page_title="LAYOUT TEST - GoAround SG",
-    page_icon="🧪",
+    page_title="LAYOUT TARGET - GoAround SG",
+    page_icon="📍",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
-PAGES = ["Layout: GoAround Today", "Layout: Business Promotion", "Layout: What is GoAround?"]
-FOOTER = "LAYOUT TEST ONLY — GoAroundSG / Team R4131N. No real data, no real chat, no production content."
+FOOTER = "GoAround SG. Source-backed local discovery. Verify details at source. Team R4131N."
 
 st.markdown(
     """
@@ -18,135 +17,468 @@ st.markdown(
 :root {
   color-scheme: light !important;
   --bg: #F7FAFC;
-  --sidebar: #F4F7FB;
-  --card: #FFFFFF;
+  --panel: #FFFFFF;
   --text: #172B4D;
   --muted: #667085;
   --line: #E6EAF2;
   --blue: #0D6EFD;
   --green: #10B981;
-  --test: #DC2626;
+  --soft: #F3F7FC;
 }
+
 html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="block-container"] {
   background: var(--bg) !important;
   color: var(--text) !important;
   color-scheme: light !important;
 }
-[data-testid="stHeader"] { background: rgba(247,250,252,.98) !important; }
-.main .block-container { padding: 1.35rem 1rem .65rem 1rem !important; max-width: 1580px !important; }
-section[data-testid="stSidebar"] { background: var(--sidebar) !important; border-right: 1px solid #E5EAF3 !important; }
-section[data-testid="stSidebar"] .block-container { padding: 1rem .85rem .75rem .85rem !important; }
-section[data-testid="stSidebar"] div[data-testid="stVerticalBlock"] { gap: .55rem !important; }
-div[data-testid="stVerticalBlock"] { gap: .52rem !important; }
-.stMarkdown,.stCaption,.stRadio,.stSelectbox,.stTextInput,.stMultiSelect,.stSlider,.stTextArea,label,p,span,div,h1,h2,h3,h4,h5,h6,li { color: var(--text) !important; }
-.stCaption,.stCaption *,.muted { color: var(--muted) !important; }
-input,textarea,[data-baseweb="select"]>div,[data-baseweb="input"]>div,[data-baseweb="textarea"]>div { background: #FFFFFF !important; color: var(--text) !important; border-color: #D8DFEA !important; box-shadow: none !important; }
-[data-baseweb="select"] span,[data-baseweb="select"] div,[data-baseweb="popover"] div,[data-baseweb="menu"] div { background: #FFFFFF !important; color: var(--text) !important; }
-button[kind="primary"] { background: var(--blue) !important; color: #fff !important; border-radius: 12px !important; border: 0 !important; }
-button[kind="secondary"] { background: #FFFFFF !important; color: var(--text) !important; border: 1px solid #D8DFEA !important; border-radius: 12px !important; }
-div[data-testid="stVerticalBlockBorderWrapper"] { background: #FFFFFF !important; border-color: var(--line) !important; border-radius: 22px !important; box-shadow: 0 10px 28px rgba(23,43,77,.055) !important; }
-.test-banner {
-  border: 2px solid #FCA5A5;
-  background: #FEF2F2;
-  color: #991B1B !important;
-  border-radius: 16px;
-  padding: .75rem 1rem;
-  font-weight: 900;
-  text-align: center;
-  margin-bottom: .8rem;
-  letter-spacing: .02em;
+
+[data-testid="stHeader"], section[data-testid="stSidebar"] {
+  display: none !important;
 }
-.brand { display: flex; gap: .65rem; align-items: center; margin-bottom: .5rem; }
-.pin { width: 38px; height: 38px; border-radius: 50% 50% 50% 8px; background: linear-gradient(145deg,#0D6EFD,#20B2AA); transform: rotate(-45deg); position: relative; box-shadow: 0 8px 18px rgba(13,110,253,.18); flex: 0 0 auto; }
-.pin:after { content: ""; width: 15px; height: 15px; background: #fff; border-radius: 50%; position: absolute; left: 11.5px; top: 11.5px; }
-.brand h1 { font-size: 19px; margin: 0; line-height: 1; color: #0D2B5C !important; font-weight: 850; }
-.brand h1 b { color: var(--green) !important; }
-.brand p { font-size: 10.8px; margin: 3px 0 0 0; color: #596579 !important; }
-.statusbar { display: flex; gap: .36rem; flex-wrap: wrap; margin: 0 0 .75rem 0; }
-.chip { border-radius: 999px; padding: .25rem .56rem; font-size: .75rem; font-weight: 750; background: #EEF4FF; color: #175CD3 !important; border: 1px solid #D8E7FF; }
-.chip.test { background: #FEF2F2; color: #B91C1C !important; border-color: #FCA5A5; }
-.card-title { font-size: 1.35rem; font-weight: 850; margin: 0; }
-.section-title { font-size: 1.02rem; font-weight: 850; margin: 0; }
-.placeholder { border: 2px dashed #93C5FD; background: #EFF6FF; border-radius: 16px; padding: 1rem; color: #1D4ED8 !important; text-align: center; font-weight: 800; }
-.hero-placeholder { min-height: 220px; display: flex; align-items: center; justify-content: center; text-align: center; border: 2px dashed #93C5FD; background: #EFF6FF; border-radius: 16px; color: #1D4ED8 !important; font-weight: 800; }
-.pick-placeholder { border: 2px dashed #93C5FD; border-radius: 18px; padding: .85rem; background: #EFF6FF; min-height: 104px; color:#1D4ED8!important; font-weight:800; }
-.kpi { background: #EFF6FF; border: 2px dashed #93C5FD; border-radius: 16px; padding: .8rem; min-height: 72px; color:#1D4ED8!important; }
-.kpi b { font-size: 1.3rem; }
-.business-gap { height: 1rem; }
-.app-footer { margin-top: .8rem; padding: .55rem .75rem; border-top: 1px solid var(--line); color: var(--muted) !important; font-size: .78rem; text-align: center; line-height: 1.3; }
+
+.main .block-container {
+  max-width: none !important;
+  padding: 0 !important;
+}
+
+.app-shell {
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 290px minmax(0, 1fr);
+  gap: 0;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.left-panel {
+  height: 100vh;
+  padding: 18px 18px 16px 18px;
+  box-sizing: border-box;
+  background: #F4F7FB;
+  border-right: 1px solid #E5EAF3;
+  overflow: hidden;
+}
+
+.sidebar-card {
+  height: calc(100vh - 34px);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 12px 30px rgba(23,43,77,.06);
+  padding: 20px 18px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow: hidden;
+}
+
+.right-panel {
+  height: 100vh;
+  padding: 18px 24px 16px 24px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.main-card {
+  height: calc(100vh - 34px);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 12px 30px rgba(23,43,77,.06);
+  padding: 20px 22px;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 22px;
+  overflow: hidden;
+}
+
+.chat-panel, .picks-panel {
+  height: 100%;
+  min-height: 0;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 8px 22px rgba(23,43,77,.04);
+  padding: 22px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.chat-panel {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto auto;
+  gap: 14px;
+}
+
+.picks-panel {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 14px;
+}
+
+.brand {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.pin {
+  width: 40px;
+  height: 40px;
+  border-radius: 50% 50% 50% 9px;
+  background: linear-gradient(145deg,#0D6EFD,#20B2AA);
+  transform: rotate(-45deg);
+  position: relative;
+  box-shadow: 0 8px 18px rgba(13,110,253,.18);
+  flex: 0 0 auto;
+}
+.pin:after {
+  content: "";
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  left: 12px;
+  top: 12px;
+}
+
+h1, h2, h3, p { margin: 0; }
+.brand h1 { font-size: 21px; color: #0D2B5C; font-weight: 850; }
+.brand h1 b { color: var(--green); }
+.brand p, .muted { color: var(--muted); font-size: 13px; line-height: 1.4; }
+
+.nav-list {
+  display: grid;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+.nav-item {
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: transparent;
+  color: var(--text);
+  font-weight: 650;
+  font-size: 14px;
+}
+.nav-item.active { background: #EEF4FF; color: #175CD3; }
+
+.area-block {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+  display: grid;
+  gap: 12px;
+}
+.field {
+  min-height: 42px;
+  border: 1px solid #D8DFEA;
+  border-radius: 12px;
+  background: #FFFFFF;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.tag-row { display: flex; gap: 7px; flex-wrap: wrap; }
+.tag {
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: #EEF4FF;
+  color: #175CD3;
+  font-size: 12px;
+  font-weight: 700;
+}
+.primary-btn {
+  min-height: 42px;
+  border-radius: 12px;
+  background: var(--blue);
+  color: #fff;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: auto;
+}
+
+.status-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.status-pill {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 9px 14px;
+  font-size: 13px;
+  color: var(--text);
+  background: #FFFFFF;
+}
+.chat-body {
+  min-height: 0;
+  border-radius: 16px;
+  background: linear-gradient(180deg,#FFFFFF 0%,#FBFCFE 100%);
+  border: 1px dashed #D8E2F0;
+  padding: 18px;
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  overflow: hidden;
+}
+.message-row { display: flex; gap: 12px; align-items: flex-start; }
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #EEF4FF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.bubble {
+  max-width: 68%;
+  border-radius: 18px;
+  background: #F1F5F9;
+  padding: 13px 16px;
+  color: var(--text);
+  line-height: 1.45;
+  font-size: 14px;
+}
+.message-row.user { justify-content: flex-end; }
+.message-row.user .bubble { background: #EEF4FF; }
+.quick-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 10px;
+}
+.quick {
+  border: 1px solid #D8DFEA;
+  border-radius: 12px;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  background: #FFFFFF;
+}
+.input-row {
+  min-height: 58px;
+  border: 1px solid #D8DFEA;
+  border-radius: 16px;
+  background: #FFFFFF;
+  display: grid;
+  grid-template-columns: 44px 1fr 54px;
+  align-items: center;
+  overflow: hidden;
+}
+.input-icon, .send-icon { text-align: center; color: var(--muted); }
+.send-icon {
+  height: 44px;
+  width: 44px;
+  border-radius: 12px;
+  background: var(--blue);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: center;
+  font-weight: 900;
+}
+.footer-note { text-align: center; color: var(--muted); font-size: 12px; }
+
+.picks-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+.picks-list {
+  min-height: 0;
+  overflow: hidden;
+  display: grid;
+  gap: 12px;
+}
+.pick-card {
+  min-height: 118px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 12px;
+  background: #FFFFFF;
+}
+.pick-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #F1F5F9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pick-title { font-weight: 850; font-size: 15px; margin-bottom: 5px; }
+.pick-meta { color: var(--muted); font-size: 12px; margin-top: 8px; }
+.pick-actions { display: flex; gap: 8px; margin-top: 10px; }
+.small-btn {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 7px 10px;
+  font-size: 12px;
+  background: #FFFFFF;
+}
+.more-btn {
+  border-top: 1px solid var(--line);
+  text-align: center;
+  padding-top: 12px;
+  color: #175CD3;
+  font-weight: 800;
+}
+
+@media (max-width: 1100px) {
+  .app-shell { grid-template-columns: 250px minmax(0, 1fr); }
+  .main-card { grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; padding: 16px; }
+  .chat-panel, .picks-panel { padding: 16px; }
+  .quick-row { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
 </style>
 """,
     unsafe_allow_html=True,
 )
 
-st.markdown("<div class='test-banner'>🧪 LAYOUT TEST VERSION — NOT THE REAL APP — PLACEHOLDERS ONLY</div>", unsafe_allow_html=True)
-
-with st.sidebar:
-    st.markdown(
-        "<div class='brand'><div class='pin'></div><div><h1>Layout <b>Test</b></h1><p>Placeholder structure only</p></div></div>",
-        unsafe_allow_html=True,
-    )
-    page = st.radio("Navigation", PAGES, label_visibility="collapsed")
-    with st.container(border=True):
-        st.markdown("<div class='placeholder'>SIDEBAR WEATHER PLACEHOLDER</div>", unsafe_allow_html=True)
-        st.markdown("<div class='section-title'>📍 Sidebar controls placeholder</div>", unsafe_allow_html=True)
-        st.selectbox("Try location", ["Placeholder A", "Placeholder B"])
-        st.button("Placeholder action", use_container_width=True)
-        st.text_input("Location input placeholder", "Placeholder location")
-        st.slider("Radius placeholder", 500, 3000, 1500, 100)
-        st.multiselect("Interests placeholder", ["A", "B", "C", "D"], default=["A", "B"])
-        st.button("Save placeholder", type="primary", use_container_width=True)
-        st.caption("Sidebar footer placeholder.")
-
 st.markdown(
-    "<div class='statusbar'><span class='chip test'>LAYOUT TEST</span><span class='chip'>Status chip</span><span class='chip'>Area chip</span><span class='chip'>Weather chip</span></div>",
+    f"""
+<div class="app-shell">
+  <aside class="left-panel">
+    <div class="sidebar-card">
+      <div class="brand">
+        <div class="pin"></div>
+        <div>
+          <h1>GoAround <b>SG</b></h1>
+          <p>AI local discovery assistant<br/>for useful lobang near you.</p>
+        </div>
+      </div>
+
+      <div class="nav-list">
+        <div class="nav-item active">● GoAround Today</div>
+        <div class="nav-item">○ Business Promotion</div>
+        <div class="nav-item">○ About Databricks</div>
+      </div>
+
+      <div class="area-block">
+        <h3>My area</h3>
+        <p class="muted">Tell us where you are to get better picks.</p>
+        <div class="field">Auto / Current location</div>
+        <div class="field">◎ Detect current location</div>
+        <div class="field">Seng Kang, Singapore<br/>(1.3871, 103.8915)</div>
+        <p class="muted">Discovery radius: 1.5 km</p>
+        <div class="field">────────●────────</div>
+        <div class="tag-row">
+          <span class="tag">cheap food ×</span>
+          <span class="tag">grocery ×</span>
+          <span class="tag">event ×</span>
+          <span class="tag">deal ×</span>
+        </div>
+      </div>
+
+      <div class="primary-btn">💾 Save my area</div>
+      <p class="muted">🛡️ Source-backed. Verify details at source.</p>
+    </div>
+  </aside>
+
+  <main class="right-panel">
+    <div class="main-card">
+      <section class="chat-panel">
+        <div>
+          <h2>Ask GoAround</h2>
+          <p class="muted">Your conversation-style local assistant.</p>
+        </div>
+        <div class="status-row">
+          <div class="status-pill">☀️ 35.0°C Sunny</div>
+          <div class="status-pill">📍 Seng Kang, Singapore</div>
+          <div class="status-pill">◎ Within 1.5 km</div>
+        </div>
+        <div class="chat-body">
+          <div class="message-row">
+            <div class="avatar">🤖</div>
+            <div class="bubble">Hi, I’m Ask GoAround. Ask me what to eat, what to do with kids, rainy-day options, nearby deals, or a short visitor plan.</div>
+          </div>
+          <div class="message-row user">
+            <div class="bubble">Any cheap food spots near me?</div>
+            <div class="avatar">👤</div>
+          </div>
+          <div class="message-row">
+            <div class="avatar">🤖</div>
+            <div class="bubble">Here are some budget-friendly options near you within 1.5 km.</div>
+          </div>
+        </div>
+        <div class="quick-row">
+          <div class="quick">🍴 Eat cheap</div>
+          <div class="quick">📅 Weekend events</div>
+          <div class="quick">🌧️ Rainy-day ideas</div>
+          <div class="quick">🛒 Grocery deals</div>
+        </div>
+        <div>
+          <div class="input-row">
+            <div class="input-icon">📎</div>
+            <div class="muted">Ask GoAround about this area...</div>
+            <div class="send-icon">➤</div>
+          </div>
+          <div class="footer-note">{FOOTER}</div>
+        </div>
+      </section>
+
+      <aside class="picks-panel">
+        <div class="picks-header">
+          <div>
+            <h2>Today’s Picks</h2>
+            <p class="muted">Curated for you based on your area and interests.</p>
+          </div>
+          <div class="muted">View all</div>
+        </div>
+        <div class="picks-list">
+          <div class="pick-card">
+            <div class="pick-icon">🤖</div>
+            <div>
+              <p class="muted">FOOD</p>
+              <div class="pick-title">$3.50 Chicken Rice Stall</div>
+              <p class="muted">Popular hawker stall with good reviews and queue.</p>
+              <div class="pick-meta">Google Maps · 0.4 km</div>
+              <div class="pick-actions"><span class="small-btn">🔖</span><span class="small-btn">↗</span><span class="small-btn">Visit Website</span></div>
+            </div>
+          </div>
+          <div class="pick-card">
+            <div class="pick-icon">🎉</div>
+            <div>
+              <p class="muted">EVENT</p>
+              <div class="pick-title">Community Flea Market</div>
+              <p class="muted">Local market with pre-loved deals, snacks and more.</p>
+              <div class="pick-meta">Eventbrite · 0.6 km</div>
+              <div class="pick-actions"><span class="small-btn">🔖</span><span class="small-btn">↗</span><span class="small-btn">Visit Website</span></div>
+            </div>
+          </div>
+          <div class="pick-card">
+            <div class="pick-icon">🏷️</div>
+            <div>
+              <p class="muted">DEAL</p>
+              <div class="pick-title">NTUC FairPrice Deals</div>
+              <p class="muted">Weekly offers on groceries near Sengkang.</p>
+              <div class="pick-meta">NTUC FairPrice · 0.5 km</div>
+              <div class="pick-actions"><span class="small-btn">🔖</span><span class="small-btn">↗</span><span class="small-btn">Visit Website</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="more-btn">More picks⌄</div>
+      </aside>
+    </div>
+  </main>
+</div>
+""",
     unsafe_allow_html=True,
 )
-
-if page == "Layout: GoAround Today":
-    chat_col, picks_col = st.columns([1.62, 1.10], gap="small")
-    with chat_col:
-        with st.container(border=True):
-            st.markdown("<h2 class='card-title'>LEFT MAIN PANEL PLACEHOLDER</h2>", unsafe_allow_html=True)
-            st.caption("This will become Ask GoAround after layout approval.")
-            st.markdown("<div class='hero-placeholder'>CHAT AREA PLACEHOLDER<br>Check height, width, spacing and alignment.</div>", unsafe_allow_html=True)
-            q1, q2, q3, q4 = st.columns(4, gap="small")
-            q1.button("Button 1", use_container_width=True)
-            q2.button("Button 2", use_container_width=True)
-            q3.button("Button 3", use_container_width=True)
-            q4.button("Button 4", use_container_width=True)
-            with st.form("layout_ask_form"):
-                input_col, send_col = st.columns([9, 1], gap="small")
-                input_col.text_input("Ask", placeholder="Input placeholder...", label_visibility="collapsed")
-                send_col.form_submit_button("➤", use_container_width=True)
-            st.markdown("<div class='placeholder'>LOWER NOTE PLACEHOLDER</div>", unsafe_allow_html=True)
-    with picks_col:
-        with st.container(border=True):
-            st.markdown("<h2 class='card-title'>RIGHT RAIL PLACEHOLDER</h2>", unsafe_allow_html=True)
-            st.caption("This will become Today’s Picks after layout approval.")
-            for i in range(4):
-                st.markdown(f"<div class='pick-placeholder'>{i+1}. RIGHT RAIL CARD PLACEHOLDER</div>", unsafe_allow_html=True)
-            st.button("More placeholder ›", use_container_width=True)
-
-elif page == "Layout: Business Promotion":
-    k1, k2, k3, k4 = st.columns(4, gap="small")
-    for col, label, value in [(k1, "KPI 1", "00"), (k2, "KPI 2", "00"), (k3, "KPI 3", "00"), (k4, "KPI 4", "00")]:
-        col.markdown(f"<div class='kpi'>{label}<br><b>{value}</b></div>", unsafe_allow_html=True)
-    st.markdown("<div class='business-gap'></div>", unsafe_allow_html=True)
-    form_col, preview_col = st.columns([1.55, .85], gap="small")
-    with form_col:
-        with st.container(border=True):
-            st.markdown("<h2 class='card-title'>BUSINESS FORM PANEL PLACEHOLDER</h2>", unsafe_allow_html=True)
-            st.markdown("<div class='hero-placeholder'>FORM AREA PLACEHOLDER<br>Natural height, no clipping.</div>", unsafe_allow_html=True)
-            st.markdown("<div class='placeholder'>BUSINESS NOTE PLACEHOLDER</div>", unsafe_allow_html=True)
-    with preview_col:
-        with st.container(border=True):
-            st.markdown("<h2 class='card-title'>PREVIEW PANEL PLACEHOLDER</h2>", unsafe_allow_html=True)
-            st.markdown("<div class='hero-placeholder'>PHONE PREVIEW PLACEHOLDER</div>", unsafe_allow_html=True)
-
-else:
-    with st.container(border=True):
-        st.markdown("<h2 class='card-title'>ABOUT PAGE PLACEHOLDER</h2>", unsafe_allow_html=True)
-        st.markdown("<div class='hero-placeholder'>ABOUT CONTENT PLACEHOLDER<br>Footer should stay below this container.</div>", unsafe_allow_html=True)
-
-st.markdown(f"<div class='app-footer'>{FOOTER}</div>", unsafe_allow_html=True)
