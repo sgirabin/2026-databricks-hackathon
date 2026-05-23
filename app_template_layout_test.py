@@ -20,11 +20,11 @@ st.markdown("""
   --blue:#0D6EFD;
   --green:#10B981;
   --app-h:calc(100dvh - 1rem);
-  --chat-h:calc(var(--app-h) - 270px);
-  --picks-h:calc(var(--app-h) - 135px);
+  --chat-body-h:clamp(310px, calc(100dvh - 385px), 560px);
+  --picks-body-h:clamp(430px, calc(100dvh - 140px), 760px);
 }
 @supports not (height:100dvh){
-  :root{--app-h:calc(100vh - 1rem);}
+  :root{--app-h:calc(100vh - 1rem);--chat-body-h:clamp(310px, calc(100vh - 385px), 560px);--picks-body-h:clamp(430px, calc(100vh - 140px), 760px);}
 }
 html,body,.stApp,[data-testid="stAppViewContainer"],[data-testid="block-container"]{
   background:var(--bg)!important;
@@ -47,11 +47,8 @@ div[data-testid="stVerticalBlockBorderWrapper"]{
   border-radius:24px!important;
   box-shadow:0 16px 38px rgba(23,43,77,.08)!important;
   overflow:hidden!important;
-  height:var(--app-h)!important;
-  min-height:560px!important;
 }
 div[data-testid="stVerticalBlockBorderWrapper"] > div{
-  height:100%!important;
   overflow:hidden!important;
 }
 .stMarkdown,.stCaption,label,p,span,div,h1,h2,h3,h4,h5,h6,li{color:var(--text)!important}
@@ -67,14 +64,15 @@ h2{font-size:clamp(1.25rem,1.55vw,1.55rem)!important;margin-bottom:.15rem!import
 .field{min-height:40px;border:1px solid #D8DFEA;border-radius:13px;background:white;display:flex;align-items:center;padding:0 12px;font-size:12.5px;color:#4B5565!important;margin-bottom:9px;box-shadow:0 2px 8px rgba(23,43,77,.025)}
 .tag{border-radius:999px;padding:6px 10px;background:#EEF4FF;color:#175CD3!important;font-size:11.5px;font-weight:800;display:inline-block;margin:3px}
 .status{display:inline-block;border:1px solid var(--line);border-radius:12px;padding:9px 14px;font-size:12.5px;margin:0 8px 12px 0;background:white;box-shadow:0 2px 8px rgba(23,43,77,.025)}
-.chatbox{height:var(--chat-h);min-height:300px;border-radius:18px;background:linear-gradient(180deg,#FFFFFF 0%,#FBFCFE 100%);border:1px dashed #D8E2F0;padding:22px;overflow:hidden;box-sizing:border-box}
+.chat-card,.picks-card{height:var(--app-h);min-height:560px;box-sizing:border-box;overflow:hidden}
+.chatbox{height:var(--chat-body-h);border-radius:18px;background:linear-gradient(180deg,#FFFFFF 0%,#FBFCFE 100%);border:1px dashed #D8E2F0;padding:22px;overflow:hidden;box-sizing:border-box}
 .bubble{border-radius:18px;background:#F1F5F9;padding:13px 16px;display:inline-block;margin:12px;max-width:68%;font-size:14px;line-height:1.45;box-shadow:0 2px 8px rgba(23,43,77,.025)}
 .user{text-align:right}.quick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}.quick{border:1px solid #D8DFEA;border-radius:13px;min-height:44px;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;background:white;box-shadow:0 2px 8px rgba(23,43,77,.025)}
 .inputbar{min-height:58px;border:1px solid #D8DFEA;border-radius:18px;background:white;display:grid;grid-template-columns:46px 1fr 58px;align-items:center;margin-top:14px;box-shadow:0 6px 18px rgba(23,43,77,.045)}
 .send{height:44px;width:44px;border-radius:13px;background:var(--blue);color:white!important;display:flex;align-items:center;justify-content:center;font-weight:900}
-.picklist{height:var(--picks-h);min-height:420px;overflow:hidden}.pick{min-height:clamp(112px,17dvh,135px);border:1px solid var(--line);border-radius:18px;padding:15px;background:white;margin-bottom:13px;box-shadow:0 5px 16px rgba(23,43,77,.045)}.pick b{font-size:15px}
+.picklist{height:var(--picks-body-h);overflow:hidden}.pick{min-height:clamp(112px,17dvh,135px);border:1px solid var(--line);border-radius:18px;padding:15px;background:white;margin-bottom:13px;box-shadow:0 5px 16px rgba(23,43,77,.045)}.pick b{font-size:15px}
 .footer{text-align:center;color:var(--muted)!important;font-size:11.5px;margin-top:9px}.visit{display:inline-block;margin-top:10px;border:1px solid var(--line);border-radius:11px;padding:8px 11px;font-size:11.5px;background:white;color:#0D2B5C!important;font-weight:750}.save{background:linear-gradient(90deg,#0D6EFD,#2563EB)!important;color:white!important;justify-content:center!important;font-weight:900!important;border:0!important;box-shadow:0 8px 18px rgba(13,110,253,.22)!important}.main-shell-title{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.view-all{font-size:13px;color:#175CD3!important;font-weight:800;margin-top:6px}
-@media(max-height:760px){:root{--app-h:calc(100dvh - .8rem);--chat-h:calc(var(--app-h) - 292px);--picks-h:calc(var(--app-h) - 155px)}.pick{min-height:112px}.inputbar{min-height:52px}.quick{min-height:39px}.brand{margin-bottom:12px}.field{min-height:36px;margin-bottom:7px}.nav div{padding:8px 10px}.tag{padding:5px 8px}}
+@media(max-height:760px){:root{--app-h:calc(100dvh - .8rem);--chat-body-h:clamp(285px, calc(100dvh - 400px), 420px);--picks-body-h:clamp(400px, calc(100dvh - 155px), 620px)}.pick{min-height:112px}.inputbar{min-height:52px}.quick{min-height:39px}.brand{margin-bottom:12px}.field{min-height:36px;margin-bottom:7px}.nav div{padding:8px 10px}.tag{padding:5px 8px}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -94,9 +92,10 @@ with left:
 ''', unsafe_allow_html=True)
 
 with right:
-    with st.container(border=True):
-        chat_col, picks_col = st.columns([0.68, 0.32], gap="large")
-        with chat_col:
+    chat_col, picks_col = st.columns([0.68, 0.32], gap="large")
+    with chat_col:
+        with st.container(border=True):
+            st.markdown('<div class="chat-card">', unsafe_allow_html=True)
             st.markdown('# Ask GoAround')
             st.caption('Your conversation-style local assistant.')
             st.markdown('<span class="status">☀️ 35.0°C Sunny</span><span class="status">📍 Seng Kang, Singapore</span><span class="status">◎ Within 1.5 km</span>', unsafe_allow_html=True)
@@ -110,7 +109,10 @@ with right:
 <div class="inputbar"><div style="text-align:center">📎</div><div class="muted">Ask GoAround about this area...</div><div class="send">➤</div></div>
 <div class="footer">GoAround SG. Source-backed local discovery only. Verify deals, events and official updates at source before acting.</div>
 ''', unsafe_allow_html=True)
-        with picks_col:
+            st.markdown('</div>', unsafe_allow_html=True)
+    with picks_col:
+        with st.container(border=True):
+            st.markdown('<div class="picks-card">', unsafe_allow_html=True)
             st.markdown('<div class="main-shell-title"><div><h2>Today’s Picks</h2><div class="muted">Curated for you based on your area and interests.</div></div><div class="view-all">View all</div></div>', unsafe_allow_html=True)
             st.markdown('''
 <div class="picklist">
@@ -120,3 +122,4 @@ with right:
 </div>
 <div class="footer" style="color:#175CD3!important;font-weight:800">More picks⌄</div>
 ''', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
