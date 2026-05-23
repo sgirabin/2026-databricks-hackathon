@@ -36,26 +36,30 @@ st.markdown("""
 :root{color-scheme:light!important;--bg:#F7FAFC;--card:#FFFFFF;--text:#172B4D;--muted:#667085;--line:#E6EAF2;--blue:#0D6EFD;--green:#10B981;}
 html,body,.stApp,[data-testid="stAppViewContainer"],[data-testid="block-container"]{background:var(--bg)!important;color:var(--text)!important;color-scheme:light!important;}
 [data-testid="stHeader"]{background:rgba(247,250,252,.98)!important;}
-.main .block-container{padding:1.45rem .95rem .2rem .95rem!important;max-width:1580px!important;}
-section[data-testid="stSidebar"]{background:#F4F7FB!important;color:var(--text)!important;border-right:1px solid #E5EAF3!important;}
-section[data-testid="stSidebar"] .block-container{padding:.48rem .55rem .2rem .55rem!important;}
-section[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]{gap:.14rem!important;}
-div[data-testid="stVerticalBlock"]{gap:.28rem!important;}
+.main .block-container{padding:1.2rem .95rem .2rem .95rem!important;max-width:1580px!important;min-height:100vh!important;}
+section.main{min-height:100vh!important;}
+section[data-testid="stSidebar"]{background:#F4F7FB!important;color:var(--text)!important;border-right:1px solid #E5EAF3!important;min-height:100vh!important;height:100vh!important;}
+section[data-testid="stSidebar"] .block-container{padding:.7rem .75rem .55rem .75rem!important;min-height:100vh!important;}
+section[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]{gap:.28rem!important;}
+div[data-testid="stVerticalBlock"]{gap:.38rem!important;}
 .stMarkdown,.stCaption,.stRadio,.stSelectbox,.stTextInput,.stMultiSelect,.stSlider,.stTextArea,label,p,span,div,h1,h2,h3,h4,h5,h6,li{color:var(--text)!important;}
 .stCaption,.stCaption *,.muted,.small{color:var(--muted)!important;}
 input,textarea,[data-baseweb="select"]>div,[data-baseweb="input"]>div,[data-baseweb="textarea"]>div{background:#FFFFFF!important;color:#172B4D!important;border-color:#D8DFEA!important;box-shadow:none!important;}
 input::placeholder,textarea::placeholder{color:#98A2B3!important;opacity:1!important;}
 [data-baseweb="select"] span,[data-baseweb="select"] div,[data-baseweb="popover"] div,[data-baseweb="menu"] div{background:#FFFFFF!important;color:#172B4D!important;}
 [data-baseweb="menu"]{background:#FFFFFF!important;border:1px solid #D8DFEA!important;}
-[data-baseweb="tag"]{background:#EEF4FF!important;color:#175CD3!important;min-height:1.28rem!important;font-size:.76rem!important;}
+[data-baseweb="tag"]{background:#EEF4FF!important;color:#175CD3!important;min-height:1.42rem!important;font-size:.8rem!important;}
 button[kind="primary"]{background:#0D6EFD!important;color:#fff!important;border-radius:12px!important;border:0!important;}
 button[kind="secondary"]{background:#FFFFFF!important;color:#172B4D!important;border:1px solid #D8DFEA!important;border-radius:12px!important;}
-section[data-testid="stSidebar"] button{min-height:1.9rem!important;padding:.15rem .55rem!important;}
-section[data-testid="stSidebar"] label{font-size:.78rem!important;margin-bottom:.03rem!important;}
-section[data-testid="stSidebar"] [data-baseweb="select"]>div{min-height:1.95rem!important;}
-section[data-testid="stSidebar"] input{min-height:1.85rem!important;}
+section[data-testid="stSidebar"] button{min-height:2.18rem!important;padding:.22rem .65rem!important;}
+section[data-testid="stSidebar"] label{font-size:.84rem!important;margin-bottom:.08rem!important;}
+section[data-testid="stSidebar"] [data-baseweb="select"]>div{min-height:2.18rem!important;}
+section[data-testid="stSidebar"] input{min-height:2.05rem!important;}
 div[data-testid="stVerticalBlockBorderWrapper"]{background:#FFFFFF!important;border-color:#E6EAF2!important;border-radius:22px!important;box-shadow:0 10px 28px rgba(23,43,77,.055)!important;color:#172B4D!important;}
-.brand{display:flex;gap:.5rem;align-items:center;margin-bottom:.28rem;}.pin{width:32px;height:32px;border-radius:50% 50% 50% 8px;background:linear-gradient(145deg,#0D6EFD,#20B2AA);transform:rotate(-45deg);position:relative;box-shadow:0 8px 18px rgba(13,110,253,.18);flex:0 0 auto}.pin:after{content:"";width:12px;height:12px;background:#fff;border-radius:50%;position:absolute;left:10px;top:10px}.brand h1{font-size:17px;margin:0;line-height:1;color:#0D2B5C!important;font-weight:850}.brand h1 b{color:#10B981!important}.brand p{font-size:10px;margin:3px 0 0 0;color:#596579!important}.weather-card{background:#FFFFFF;border:1px solid #E6EAF2;border-radius:16px;padding:.45rem .56rem;margin:.12rem 0 .25rem;box-shadow:0 5px 16px rgba(23,43,77,.035)}.weather-card .temp{font-size:1.08rem;font-weight:850;color:#172B4D!important}.weather-card .sub{font-size:.72rem;color:#667085!important}.statusbar{display:flex;gap:.32rem;flex-wrap:wrap;margin:0 0 .42rem}.chip{border-radius:999px;padding:.22rem .5rem;font-size:.72rem;font-weight:750;background:#EEF4FF;color:#175CD3!important;border:1px solid #D8E7FF}.chip.green{background:#DFF8EE;color:#047857!important;border-color:#BBF7D0}.chip.warn{background:#FFF7E6;color:#B45309!important;border-color:#FDE68A}.card-title{font-size:1.32rem;font-weight:850;margin:0;color:#172B4D!important}.section-title{font-size:.98rem;font-weight:850;margin:0;color:#172B4D!important}.chat-row{display:flex;margin:.52rem 0}.chat-row.assistant{justify-content:flex-start}.chat-row.user{justify-content:flex-end}.chat-bubble{max-width:82%;border-radius:18px;padding:.64rem .82rem;font-size:.88rem;line-height:1.42}.assistant .chat-bubble{background:#F1F5F9!important;color:#0F172A!important;border-bottom-left-radius:6px}.user .chat-bubble{background:#0D6EFD!important;color:#fff!important;border-bottom-right-radius:6px}.avatar{width:31px;height:31px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-right:.5rem;background:#EAF2FF;font-size:.95rem;flex:0 0 auto}.quick-title{font-weight:850;text-align:center;font-size:1.08rem;margin:.28rem 0 .05rem}.quick-sub{text-align:center;font-size:.78rem;color:#667085!important;margin:0 0 .28rem}.bot-mini{text-align:center;font-size:2.05rem;line-height:1;margin:.12rem 0}.pick-card{border:1px solid #E6EAF2;border-radius:18px;padding:.75rem;margin-bottom:.52rem;background:#FFFFFF!important;box-shadow:0 5px 16px rgba(23,43,77,.035)}.pick-title{font-size:.94rem;font-weight:850;color:#172B4D!important;margin:0 0 .15rem}.pick-desc{font-size:.8rem;color:#344054!important;margin:0 0 .42rem}.rank{background:#0D6EFD;color:#fff!important;border-radius:8px;padding:.1rem .38rem;font-weight:850;font-size:.7rem}.badge{display:inline-block;border-radius:999px;padding:.18rem .42rem;font-size:.68rem;font-weight:750;background:#EEF4FF;color:#175CD3!important}.badge.green{background:#DFF8EE;color:#047857!important}.badge.purple{background:#F0E8FF;color:#6941C6!important}.badge.orange{background:#FFF2E0;color:#C05621!important}.visit{border:1px solid #E6EAF2;border-radius:12px;padding:.32rem .58rem;color:#0D6EFD!important;font-weight:800;background:white;text-decoration:none}.kpi{background:#fff;border:1px solid #E6EAF2;border-radius:16px;padding:.62rem;box-shadow:0 5px 16px rgba(23,43,77,.035)}.kpi b{font-size:1.2rem;color:#172B4D!important}.phone{border:7px solid #EEF2F7;border-radius:32px;padding:.72rem;background:white;max-width:300px;margin:auto}.food-img{height:105px;border-radius:16px;background:linear-gradient(135deg,#FFE6C7,#F8B26A);display:flex;align-items:center;justify-content:center;font-size:3rem;margin:.38rem 0}.primary{background:#0D6EFD;color:white!important;border-radius:12px;padding:.56rem .75rem;text-align:center;font-weight:800;margin-top:.38rem}.footer-note{text-align:center;font-size:.7rem;color:#667085!important;margin-top:.12rem}.compact-footer{font-size:.72rem;color:#667085!important;line-height:1.18;margin-top:.2rem;}.insight-box{background:#F8FBFF;border:1px solid #E6EAF2;border-radius:14px;padding:.65rem;margin-top:.55rem;font-size:.82rem;color:#344054!important}.hide-streamlit-gap{margin-top:-.3rem;}
+section.main div[data-testid="stVerticalBlockBorderWrapper"]{min-height:calc(100vh - 7.4rem)!important;}
+section.main div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stVerticalBlockBorderWrapper"]{min-height:auto!important;}
+.brand{display:flex;gap:.58rem;align-items:center;margin-bottom:.42rem;}.pin{width:36px;height:36px;border-radius:50% 50% 50% 8px;background:linear-gradient(145deg,#0D6EFD,#20B2AA);transform:rotate(-45deg);position:relative;box-shadow:0 8px 18px rgba(13,110,253,.18);flex:0 0 auto}.pin:after{content:"";width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;left:11px;top:11px}.brand h1{font-size:18px;margin:0;line-height:1;color:#0D2B5C!important;font-weight:850}.brand h1 b{color:#10B981!important}.brand p{font-size:10.5px;margin:3px 0 0 0;color:#596579!important}.weather-card{background:#FFFFFF;border:1px solid #E6EAF2;border-radius:16px;padding:.54rem .62rem;margin:.18rem 0 .32rem;box-shadow:0 5px 16px rgba(23,43,77,.035)}.weather-card .temp{font-size:1.18rem;font-weight:850;color:#172B4D!important}.weather-card .sub{font-size:.76rem;color:#667085!important}.statusbar{display:flex;gap:.32rem;flex-wrap:wrap;margin:0 0 .46rem}.chip{border-radius:999px;padding:.24rem .52rem;font-size:.74rem;font-weight:750;background:#EEF4FF;color:#175CD3!important;border:1px solid #D8E7FF}.chip.green{background:#DFF8EE;color:#047857!important;border-color:#BBF7D0}.chip.warn{background:#FFF7E6;color:#B45309!important;border-color:#FDE68A}.card-title{font-size:1.38rem;font-weight:850;margin:0;color:#172B4D!important}.section-title{font-size:1.02rem;font-weight:850;margin:0;color:#172B4D!important}.chat-row{display:flex;margin:.62rem 0}.chat-row.assistant{justify-content:flex-start}.chat-row.user{justify-content:flex-end}.chat-bubble{max-width:82%;border-radius:18px;padding:.72rem .9rem;font-size:.91rem;line-height:1.45}.assistant .chat-bubble{background:#F1F5F9!important;color:#0F172A!important;border-bottom-left-radius:6px}.user .chat-bubble{background:#0D6EFD!important;color:#fff!important;border-bottom-right-radius:6px}.avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-right:.55rem;background:#EAF2FF;font-size:1rem;flex:0 0 auto}.quick-title{font-weight:850;text-align:center;font-size:1.18rem;margin:.42rem 0 .08rem}.quick-sub{text-align:center;font-size:.82rem;color:#667085!important;margin:0 0 .35rem}.bot-mini{text-align:center;font-size:2.55rem;line-height:1;margin:.28rem 0}.pick-card{border:1px solid #E6EAF2;border-radius:18px;padding:.78rem;margin-bottom:.52rem;background:#FFFFFF!important;box-shadow:0 5px 16px rgba(23,43,77,.035)}.pick-title{font-size:.96rem;font-weight:850;color:#172B4D!important;margin:0 0 .15rem}.pick-desc{font-size:.81rem;color:#344054!important;margin:0 0 .42rem}.rank{background:#0D6EFD;color:#fff!important;border-radius:8px;padding:.11rem .4rem;font-weight:850;font-size:.72rem}.badge{display:inline-block;border-radius:999px;padding:.18rem .44rem;font-size:.69rem;font-weight:750;background:#EEF4FF;color:#175CD3!important}.badge.green{background:#DFF8EE;color:#047857!important}.badge.purple{background:#F0E8FF;color:#6941C6!important}.badge.orange{background:#FFF2E0;color:#C05621!important}.visit{border:1px solid #E6EAF2;border-radius:12px;padding:.34rem .6rem;color:#0D6EFD!important;font-weight:800;background:white;text-decoration:none}.kpi{background:#fff;border:1px solid #E6EAF2;border-radius:16px;padding:.62rem;box-shadow:0 5px 16px rgba(23,43,77,.035)}.kpi b{font-size:1.2rem;color:#172B4D!important}.phone{border:7px solid #EEF2F7;border-radius:32px;padding:.72rem;background:white;max-width:300px;margin:auto}.food-img{height:105px;border-radius:16px;background:linear-gradient(135deg,#FFE6C7,#F8B26A);display:flex;align-items:center;justify-content:center;font-size:3rem;margin:.38rem 0}.primary{background:#0D6EFD;color:white!important;border-radius:12px;padding:.56rem .75rem;text-align:center;font-weight:800;margin-top:.38rem}.footer-note{text-align:center;font-size:.72rem;color:#667085!important;margin-top:.16rem}.compact-footer{font-size:.74rem;color:#667085!important;line-height:1.2;margin-top:.25rem;}.insight-box{background:#F8FBFF;border:1px solid #E6EAF2;border-radius:14px;padding:.68rem;margin-top:.58rem;font-size:.84rem;color:#344054!important}
+@media (max-height:760px){section.main div[data-testid="stVerticalBlockBorderWrapper"]{min-height:calc(100vh - 6.4rem)!important}.bot-mini{font-size:2.05rem}.quick-title{font-size:1.05rem}.pick-card{padding:.66rem;margin-bottom:.42rem}.chat-row{margin:.45rem 0}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -179,7 +183,7 @@ except Exception as exc:
 
 weather = weather_near(profile["lat"], profile["lon"])
 weather_slot.markdown(
-    f"<div class='weather-card'><div style='display:flex;justify-content:space-between;align-items:center'><div><div class='temp'>{esc(weather.get('forecast') or 'Weather')}</div><div class='sub'>{esc(weather.get('area') or profile['address'][:28])}</div></div><div style='font-size:1.65rem'>{weather_icon(weather.get('forecast'))}</div></div></div>",
+    f"<div class='weather-card'><div style='display:flex;justify-content:space-between;align-items:center'><div><div class='temp'>{esc(weather.get('forecast') or 'Weather')}</div><div class='sub'>{esc(weather.get('area') or profile['address'][:28])}</div></div><div style='font-size:1.75rem'>{weather_icon(weather.get('forecast'))}</div></div></div>",
     unsafe_allow_html=True,
 )
 
@@ -226,6 +230,11 @@ if page == "GoAround Today":
                 q = ic.text_input("Ask", placeholder="Ask GoAround about this area...", label_visibility="collapsed")
                 send = sc.form_submit_button("➤", use_container_width=True)
             st.markdown("<div class='footer-note'>GoAround can make mistakes. Please check details at the source.</div>", unsafe_allow_html=True)
+            if ranked:
+                st.markdown(
+                    f"<div class='insight-box'><b>Today’s local angle:</b> {esc(ranked[0].card.title)} is the top source-backed pick for this area. Ask GoAround to turn these picks into a lunch plan, family plan, rainy-day plan, or short visitor itinerary.</div>",
+                    unsafe_allow_html=True,
+                )
             prompt = st.session_state.pop("pending_prompt", None) if "pending_prompt" in st.session_state else None
             if send and q.strip():
                 prompt = q.strip()
@@ -234,20 +243,15 @@ if page == "GoAround Today":
                 ans = answer_with_databricks(prompt, context, ranked, fallback_answer(ranked))
                 st.session_state.ask_messages.append({"role": "assistant", "content": ans})
                 st.rerun()
-        if ranked:
-            st.markdown(
-                f"<div class='insight-box'><b>Today’s local angle:</b> {esc(ranked[0].card.title)} is the top source-backed pick for this area. Ask GoAround to turn these picks into a lunch plan, family plan, rainy-day plan, or short visitor itinerary.</div>",
-                unsafe_allow_html=True,
-            )
     with picks_col:
         with st.container(border=True):
             st.markdown("<h2 class='card-title'>✨ Today’s Picks</h2>", unsafe_allow_html=True)
             st.caption("Curated picks near you, updated daily.")
-            for idx, item in enumerate(ranked[:4]):
+            for idx, item in enumerate(ranked[:5]):
                 render_pick(item, idx)
-            if len(ranked) > 4:
+            if len(ranked) > 5:
                 with st.expander("View more picks"):
-                    for idx, item in enumerate(ranked[4:9], start=4):
+                    for idx, item in enumerate(ranked[5:10], start=5):
                         render_pick(item, idx)
 
 elif page == "Business Promotion":
@@ -278,7 +282,7 @@ elif page == "Business Promotion":
                 card = create_business_promo_card(business_name, promo_title, desc, category, source_url, profile["lat"], profile["lon"], area, "", tags)
                 st.session_state.setdefault("business_cards", []).append(card)
                 st.success("Promotion created. It will appear in Today’s Picks after rerun if relevant.")
-        st.markdown("<div class='insight-box'><b>Business value:</b> promotions are ranked by location, interest, freshness, and source trust — so businesses can reach nearby users when they are actively asking what to eat, buy, or do.</div>", unsafe_allow_html=True)
+            st.markdown("<div class='insight-box'><b>Business value:</b> promotions are ranked by location, interest, freshness, and source trust — so businesses can reach nearby users when they are actively asking what to eat, buy, or do.</div>", unsafe_allow_html=True)
     with preview_col:
         with st.container(border=True):
             st.subheader("Preview")
