@@ -601,13 +601,15 @@ st.markdown("""
     --blue: #0D6EFD;
     --green: #10B981;
     --app-h: calc(100dvh - 1.05rem);
-    --chat-body-h: clamp(190px, calc(var(--app-h) - 390px), 680px);
+    --chat-body-h: clamp(250px, calc(var(--app-h) - 340px), 760px);
+    --chat-body-expanded-h: clamp(430px, calc(var(--app-h) - 230px), 980px);
     --picks-body-h: clamp(360px, calc(var(--app-h) - 145px), 1100px);
 }
 @supports not (height:100dvh) {
     :root {
         --app-h: calc(100vh - 1.05rem);
-        --chat-body-h: clamp(190px, calc(var(--app-h) - 390px), 680px);
+        --chat-body-h: clamp(250px, calc(var(--app-h) - 340px), 760px);
+        --chat-body-expanded-h: clamp(430px, calc(var(--app-h) - 230px), 980px);
         --picks-body-h: clamp(360px, calc(var(--app-h) - 145px), 1100px);
     }
 }
@@ -891,6 +893,22 @@ h2 {
     box-sizing: border-box;
     margin-bottom: 12px;
 }
+.chatbox.expanded {
+    height: var(--chat-body-expanded-h);
+}
+.thinking-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.thinking-spinner {
+    width: 15px;
+    height: 15px;
+    border: 2px solid rgba(13,110,253,.16);
+    border-top-color: var(--blue);
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+}
 .picklist {
     height: var(--picks-body-h);
     overflow-y: auto;
@@ -1113,8 +1131,8 @@ div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="st
     font-size: 16px !important;
     font-weight: 900 !important;
     box-shadow: 0 8px 18px rgba(13,110,253,.22) !important;
-    min-height: 48px !important;
-    height: 48px !important;
+    min-height: 58px !important;
+    height: 58px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -1127,12 +1145,12 @@ div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="st
 
 /* Style premium input inside chat form and keep the send button aligned. */
 div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stForm"] div[data-testid="stTextInput"] input {
-    min-height: 48px !important;
-    height: 48px !important;
-    line-height: 48px !important;
-    border-radius: 14px !important;
+    min-height: 58px !important;
+    height: 58px !important;
+    line-height: 58px !important;
+    border-radius: 16px !important;
     font-size: 14px !important;
-    padding: 0 16px !important;
+    padding: 0 18px !important;
 }
 div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stForm"] div[data-testid="stHorizontalBlock"] {
     align-items: center !important;
@@ -1151,9 +1169,11 @@ div[data-testid="stVerticalBlockBorder-business_form_container"] div[data-testid
     justify-content: center !important;
     font-weight: 900 !important;
     border: 0 !important;
-    border-radius: 13px !important;
-    box-shadow: 0 8px 18px rgba(13, 110, 253, 0.22) !important;
-    min-height: 44px !important;
+    border-radius: 16px !important;
+    box-shadow: 0 12px 24px rgba(13, 110, 253, 0.26) !important;
+    min-height: 52px !important;
+    width: 100% !important;
+    letter-spacing: .01em !important;
 }
 div[data-testid="stVerticalBlockBorder-business_form_container"] div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover,
 div[data-testid="stVerticalBlockBorder-business_form_container"] div[data-testid="stForm"] div[data-testid="stButton"] button:hover {
@@ -1233,6 +1253,11 @@ div[data-testid*="stVerticalBlockBorder-"]:has([data-stale="true"]) > div {
     transition: none !important;
 }
 
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 /* Custom animated bouncing typing indicator */
 @keyframes typing-bounce {
     0%, 80%, 100% { transform: translateY(0); }
@@ -1272,49 +1297,9 @@ def render_sidebar():
 
 
 if page == "today":
-    sidebar_col, picks_col, chat_col = st.columns([0.18, 0.56, 0.26], gap="medium")
+    sidebar_col, chat_col, picks_col = st.columns([0.18, 0.56, 0.26], gap="medium")
     with sidebar_col:
         render_sidebar()
-    with picks_col:
-        with st.container(key="picks_card_container"):
-            st.markdown('<div class="picks-card-marker"></div>', unsafe_allow_html=True)
-            filter_options = [
-                ("🌟 All", "all"),
-                ("🍴 Food", "food"),
-                ("🛒 Grocery", "grocery"),
-                ("📅 Events", "event"),
-                ("🏷️ Deals", "deal")
-            ]
-            
-            if "active_filter" not in st.session_state:
-                st.session_state["active_filter"] = "all"
-                
-            cols = st.columns(len(filter_options))
-            for idx, (label, val) in enumerate(filter_options):
-                is_active = (st.session_state["active_filter"] == val)
-                if cols[idx].button(
-                    label,
-                    key=f"filter_btn_{val}",
-                    type="primary" if is_active else "secondary",
-                    use_container_width=True
-                ):
-                    if st.session_state["active_filter"] != val:
-                        st.session_state["active_filter"] = val
-                        st.rerun()
-
-            st.markdown(f'''
-<div class="main-shell-title" style="margin-top: 14px; margin-bottom: 12px;">
-  <div>
-    <h1>Today’s Picks</h1>
-    <div class="muted">Curated source-backed picks {safe_pick_scope}.</div>
-  </div>
-</div>
-''', unsafe_allow_html=True)
-            
-            st.markdown(f'''
-<div class="picklist" style="margin-top: 14px;">{picks_html}</div>
-<div class="footer" style="color:#175CD3!important;font-weight:800; margin-top: 10px;">{safe_picks_footer}</div>
-''', unsafe_allow_html=True)
 
     with chat_col:
         with st.container(key="chat_card_container"):
@@ -1332,7 +1317,11 @@ if page == "today":
             
             def render_chat_history(include_thinking: bool = False) -> None:
                 chat_history_html = ""
-                for msg in st.session_state["ask_messages"][-6:]:
+                conversation_messages = st.session_state["ask_messages"]
+                if len(conversation_messages) > 1 and conversation_messages[0]["role"] == "assistant":
+                    conversation_messages = conversation_messages[1:]
+                chatbox_class = "chatbox expanded" if len(conversation_messages) > 1 else "chatbox"
+                for msg in conversation_messages[-8:]:
                     role = msg["role"]
                     content = escape(msg["content"]).replace("\n", "<br>")
                     if role == "user":
@@ -1342,16 +1331,16 @@ if page == "today":
                 if include_thinking:
                     chat_history_html += f'''
 <div style="margin: 10px 0;">
-  🤖 <span class="bubble" style="display: inline-flex; align-items: center; gap: 4px; padding: 12px 16px;">
-    <span class="typing-dot"></span>
-    <span class="typing-dot"></span>
-    <span class="typing-dot"></span>
+  🤖 <span class="bubble thinking-line" style="padding: 12px 16px;">
+    <span class="thinking-spinner"></span>
+    <span>Thinking through nearby options</span>
+    <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
   </span>
 </div>
 '''
                 chat_history_html += '<div id="chat-bottom"></div>'
                 chat_placeholder.markdown(f'''
-<div class="chatbox">
+<div class="{chatbox_class}">
 {chat_history_html}
 </div>
 ''', unsafe_allow_html=True)
@@ -1409,6 +1398,47 @@ if page == "today":
                 )
         else:
             render_chat_history()
+
+    with picks_col:
+        with st.container(key="picks_card_container"):
+            st.markdown('<div class="picks-card-marker"></div>', unsafe_allow_html=True)
+            filter_options = [
+                ("🌟 All", "all"),
+                ("🍴 Food", "food"),
+                ("🛒 Grocery", "grocery"),
+                ("📅 Events", "event"),
+                ("🏷️ Deals", "deal")
+            ]
+
+            if "active_filter" not in st.session_state:
+                st.session_state["active_filter"] = "all"
+
+            cols = st.columns(len(filter_options))
+            for idx, (label, val) in enumerate(filter_options):
+                is_active = (st.session_state["active_filter"] == val)
+                if cols[idx].button(
+                    label,
+                    key=f"filter_btn_{val}",
+                    type="primary" if is_active else "secondary",
+                    use_container_width=True
+                ):
+                    if st.session_state["active_filter"] != val:
+                        st.session_state["active_filter"] = val
+                        st.rerun()
+
+            st.markdown(f'''
+<div class="main-shell-title" style="margin-top: 14px; margin-bottom: 12px;">
+  <div>
+    <h2>Today’s Picks</h2>
+    <div class="muted">Curated source-backed picks {safe_pick_scope}.</div>
+  </div>
+</div>
+''', unsafe_allow_html=True)
+
+            st.markdown(f'''
+<div class="picklist" style="margin-top: 14px;">{picks_html}</div>
+<div class="footer" style="color:#175CD3!important;font-weight:800; margin-top: 10px;">{safe_picks_footer}</div>
+''', unsafe_allow_html=True)
 
 elif page == "business":
     st.markdown('<div class="business-page-marker"></div>', unsafe_allow_html=True)
