@@ -1017,24 +1017,27 @@ div[data-testid="stVerticalBlockBorder-picks_card_container"] {
 
 div[data-testid="stVerticalBlockBorder-business_form_container"] {
     padding: 26px 28px 16px 28px !important;
+    height: var(--app-h) !important;
+    max-height: var(--app-h) !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    padding-bottom: 34px !important;
+    padding-bottom: 42px !important;
+    overscroll-behavior: contain !important;
 }
 
 div[data-testid="stVerticalBlockBorder-preview_card_container"] {
     padding: 26px 20px 16px 20px !important;
 }
 
-.st-key-business_form_container,
-.st-key-business_form_container > div,
-.st-key-business_form_container div[data-testid="stVerticalBlock"] {
-    height: var(--app-h) !important;
-    max-height: var(--app-h) !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    padding-bottom: 34px !important;
-    box-sizing: border-box !important;
+div[data-testid="stVerticalBlockBorder-business_form_container"]::-webkit-scrollbar {
+    width: 8px !important;
+}
+div[data-testid="stVerticalBlockBorder-business_form_container"]::-webkit-scrollbar-thumb {
+    background: #CBD5E1 !important;
+    border-radius: 999px !important;
+}
+div[data-testid="stVerticalBlockBorder-business_form_container"]::-webkit-scrollbar-track {
+    background: transparent !important;
 }
 
 /* Custom Overrides to Strip Streamlit Native Border and Spacing on Forms */
@@ -1102,12 +1105,13 @@ div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="st
     box-shadow: 0 8px 22px rgba(13,110,253,.32) !important;
 }
 
-/* Style premium input inside chat form specifically to be 48px tall */
+/* Style premium input inside chat form specifically to be taller and easier to tap. */
 div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stForm"] div[data-testid="stTextInput"] input {
-    min-height: 48px !important;
-    height: 48px !important;
-    border-radius: 14px !important;
+    min-height: 58px !important;
+    height: 58px !important;
+    border-radius: 16px !important;
     font-size: 14px !important;
+    padding: 0 18px !important;
 }
 
 /* Style the submit button in the business form container */
