@@ -1100,7 +1100,20 @@ div[data-testid="stTextInput"] input:focus, div[data-testid="stTextArea"] textar
     outline: none !important;
 }
 
-/* Style quick action buttons inside chat container */
+div[data-testid="stMultiSelect"] [data-baseweb="tag"] {
+    background-color: #EAF2FF !important;
+    border: 1px solid #B8D4FF !important;
+    color: #0B3B7A !important;
+    border-radius: 999px !important;
+    font-weight: 800 !important;
+}
+div[data-testid="stMultiSelect"] [data-baseweb="tag"] span,
+div[data-testid="stMultiSelect"] [data-baseweb="tag"] svg {
+    color: #0B3B7A !important;
+    fill: #0B3B7A !important;
+}
+
+/* Style auxiliary buttons inside chat container */
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .chat-card-marker) div[data-testid="stButton"] button {
     border: 1px solid #D8DFEA !important;
     border-radius: 13px !important;
@@ -1160,13 +1173,13 @@ div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .c
 /* Style the submit button in the business form container */
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button,
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) div[data-testid="stForm"] div[data-testid="stButton"] button {
-    background: linear-gradient(135deg, #ED1B24 0%, #F97316 100%) !important;
+    background: linear-gradient(135deg, #0D6EFD 0%, #2563EB 100%) !important;
     color: white !important;
     justify-content: center !important;
     font-weight: 900 !important;
     border: 0 !important;
     border-radius: 999px !important;
-    box-shadow: 0 14px 26px rgba(237, 27, 36, 0.24) !important;
+    box-shadow: 0 14px 26px rgba(13, 110, 253, 0.24) !important;
     min-height: 48px !important;
     width: auto !important;
     min-width: 210px !important;
@@ -1175,9 +1188,9 @@ div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .b
 }
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover,
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) div[data-testid="stForm"] div[data-testid="stButton"] button:hover {
-    background: linear-gradient(135deg, #C4121A 0%, #EA580C 100%) !important;
+    background: linear-gradient(135deg, #0B5ED7 0%, #1D4ED8 100%) !important;
     color: white !important;
-    box-shadow: 0 16px 30px rgba(237, 27, 36, 0.30) !important;
+    box-shadow: 0 16px 30px rgba(13, 110, 253, 0.30) !important;
 }
 
 /* Strip borders and backgrounds from filter button containers */
@@ -1352,21 +1365,6 @@ if page == "today":
             if pending_query:
                 render_chat_history(include_thinking=True)
 
-            # Quick Actions using real Streamlit buttons inside container columns
-            pending_prompt = None
-            if not pending_query and len(st.session_state.get("ask_messages", [])) == 0:
-                prompts = [
-                    ("🍴 Eat cheap", "Any cheap food spots near me?"),
-                    ("📅 Weekend events", f"What weekend events are happening near {safe_location}?"),
-                    ("🌧️ Rainy-day ideas", "What are some good rainy-day indoor ideas?"),
-                    ("🛒 Grocery deals", "Are there any grocery deals or promos?")
-                ]
-                
-                cols = st.columns(2)
-                for idx, (label, query_text) in enumerate(prompts):
-                    if cols[idx % 2].button(label, key=f"quick_{idx}", use_container_width=True):
-                        pending_prompt = query_text
-                    
             # Real input form with native text input that styles beautifully
             with st.form("ask_form", clear_on_submit=True):
                 ic, sc = st.columns([9, 1])
@@ -1402,7 +1400,7 @@ if page == "today":
                 render_chat_history()
 
         # Processing user input after the chat card exists lets the next run hide the starter immediately.
-        user_query = pending_prompt or (q_input.strip() if submitted and q_input.strip() else None)
+        user_query = q_input.strip() if submitted and q_input.strip() else None
         if user_query and not pending_query:
             st.session_state["ask_messages"].append({"role": "user", "content": user_query})
             st.session_state["pending_query"] = user_query
