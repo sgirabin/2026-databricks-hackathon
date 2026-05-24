@@ -1325,17 +1325,31 @@ if page == "today":
             st.markdown(f'''
 <h1>Ask GoAround</h1><div class="muted">Your conversation-style local assistant.</div>
 <div style="margin-top:12px; margin-bottom:12px;"><span class="status">{weather['icon']} {safe_weather_summary}</span><span class="status">📍 {safe_location}</span></div>
-<div class="small-note" style="margin-bottom:14px;">Try asking: “What can I eat nearby?”, “Any rainy-day ideas?”, or “What deals are around Sengkang?”</div>
 ''', unsafe_allow_html=True)
 
             # Conversational state tracking
             if "ask_messages" not in st.session_state:
                 st.session_state["ask_messages"] = []
+            st.session_state.pop("pending_query", None)
             
             def render_chat_history(include_thinking: bool = False) -> None:
                 chat_history_html = ""
                 conversation_messages = st.session_state["ask_messages"]
                 chatbox_class = "chatbox expanded" if conversation_messages else "chatbox"
+                if not conversation_messages:
+                    chat_history_html += f'''
+<div style="margin: 10px 0;">
+  🤖 <span class="bubble">
+    Hello! I'm <b>Ask GoAround</b>, your hyperlocal discovery assistant. 😊<br><br>
+    Since you're near <b>{safe_location}</b>, I can help you find things like:<br>
+    🍲 <b>Local Food & Coffee</b>: Hidden gems or cheap eats nearby.<br>
+    🏷️ <b>Lobang & Deals</b>: Supermarket discounts and retail promotions.<br>
+    🎪 <b>Things To Do</b>: Parks, events, and family activities.<br>
+    ☔ <b>Weather-Aware Ideas</b>: Great indoor plans if it's rainy outside.<br><br>
+    What are you in the mood for today?
+  </span>
+</div>
+'''
                 for msg in conversation_messages[-8:]:
                     role = msg["role"]
                     content = escape(msg["content"]).replace("\n", "<br>")
@@ -1361,9 +1375,6 @@ if page == "today":
 ''', unsafe_allow_html=True)
             
             chat_placeholder = st.empty()
-            pending_query = st.session_state.get("pending_query")
-            if pending_query:
-                render_chat_history(include_thinking=True)
 
             # Real input form with native text input that styles beautifully
             with st.form("ask_form", clear_on_submit=True):
@@ -1375,10 +1386,12 @@ if page == "today":
 <div class="footer" style="margin-top:10px;">Go Around can make mistakes. Please check details at the source</div>
 ''', unsafe_allow_html=True)
 
-            if pending_query:
-                st.session_state.pop("pending_query", None)
+            user_query = q_input.strip() if submitted and q_input.strip() else None
+            if user_query:
+                st.session_state["ask_messages"].append({"role": "user", "content": user_query})
+                render_chat_history(include_thinking=True)
                 ans = answer_with_databricks(
-                    question=pending_query,
+                    question=user_query,
                     context=context,
                     ranked=ranked_physical_picks,
                     fallback="I am looking up details...",
@@ -1398,13 +1411,6 @@ if page == "today":
                     )
             else:
                 render_chat_history()
-
-        # Processing user input after the chat card exists lets the next run hide the starter immediately.
-        user_query = q_input.strip() if submitted and q_input.strip() else None
-        if user_query and not pending_query:
-            st.session_state["ask_messages"].append({"role": "user", "content": user_query})
-            st.session_state["pending_query"] = user_query
-            st.rerun()
 
     with picks_col:
         with st.container():
