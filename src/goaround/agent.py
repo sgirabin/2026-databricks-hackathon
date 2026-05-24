@@ -112,6 +112,9 @@ def answer_with_databricks(question: str, context: UserContext, ranked: list[Ran
     if not (host and token):
         return fallback_answer(question, context, ranked, fallback)
 
+    if not (host.startswith("http://") or host.startswith("https://")):
+        host = f"https://{host}"
+
     prompt = (
         "You are Ask GoAround, a Singapore hyperlocal discovery assistant. "
         "Use only the supplied source-backed cards and context. "

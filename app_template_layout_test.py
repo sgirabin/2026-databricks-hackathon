@@ -521,6 +521,33 @@ div[data-testid="stHorizontalBlock"]{gap:1rem!important;align-items:stretch!impo
 .kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}.kpi{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fff;box-shadow:0 5px 16px rgba(23,43,77,.045)}.kpi b{display:block;font-size:1.35rem;margin-top:4px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.form-field{border:1px solid #D8DFEA;border-radius:13px;padding:12px;background:#fff;color:#4B5565!important;font-size:13px}
 .wide{grid-column:1/-1}.preview-card{border:1px solid var(--line);border-radius:22px;padding:18px;background:#fff;box-shadow:0 8px 22px rgba(23,43,77,.055);margin-top:14px}.about-section{margin-top:22px}.about-section h2{margin-bottom:8px!important}.about-section ul{margin-top:8px;line-height:1.8}
 @media(max-height:760px){:root{--app-h:calc(100dvh - .9rem);--chat-body-h:clamp(260px,calc(100dvh - 445px),420px);--picks-body-h:clamp(370px,calc(100dvh - 165px),620px)}.pick{min-height:108px}.inputbar{min-height:52px}.quick{min-height:39px}.brand{margin-bottom:12px}.field{min-height:38px;margin-bottom:7px}.nav a{padding:8px 10px}.tag{padding:5px 8px}.sidebar-note{display:none}.sidebar-card,.chat-card,.picks-card,.full-card{padding-top:22px}.info-card{padding:10px 12px}.small-note{display:none}}
+div[data-testid="stVerticalBlockBorder-chat_card_container"],
+div[data-testid="stVerticalBlockBorder-picks_card_container"],
+div[data-testid="stVerticalBlockBorder-business_form_container"],
+div[data-testid="stVerticalBlockBorder-preview_card_container"] {
+    background: white !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 16px 38px rgba(23,43,77,.08) !important;
+    height: var(--app-h) !important;
+    box-sizing: border-box !important;
+}
+div[data-testid="stVerticalBlockBorder-chat_card_container"] {
+    padding: 28px 28px 18px 28px !important;
+    overflow: hidden !important;
+}
+div[data-testid="stVerticalBlockBorder-picks_card_container"] {
+    padding: 28px 24px 18px 24px !important;
+    overflow: hidden !important;
+}
+div[data-testid="stVerticalBlockBorder-business_form_container"] {
+    padding: 28px 28px 18px 28px !important;
+    overflow-y: auto !important;
+}
+div[data-testid="stVerticalBlockBorder-preview_card_container"] {
+    padding: 28px 24px 18px 24px !important;
+    overflow: hidden !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -548,55 +575,56 @@ with right:
     if page == "today":
         chat_col, picks_col = st.columns([0.68, 0.32], gap="large")
         with chat_col:
-            st.markdown(f'''
-<div class="app-card chat-card" style="height:var(--app-h);"><h1>Ask GoAround</h1><div class="muted">Your conversation-style local assistant.</div>
+            with st.container(key="chat_card_container", border=True):
+                st.markdown(f'''
+<h1>Ask GoAround</h1><div class="muted">Your conversation-style local assistant.</div>
 <div style="margin-top:12px; margin-bottom:12px;"><span class="status">{weather['icon']} {safe_weather_summary}</span><span class="status">📍 {safe_location}</span><span class="status">◎ {safe_radius_label}</span></div>
 ''', unsafe_allow_html=True)
-            
-            # Conversational state tracking
-            if "ask_messages" not in st.session_state:
-                st.session_state["ask_messages"] = [
-                    {"role": "assistant", "content": "Hi, I’m Ask GoAround. Ask me what to eat, what to do with kids, rainy-day options, nearby deals, or a short visitor plan."}
-                ]
                 
-            # Build clean HTML history
-            chat_history_html = ""
-            for msg in st.session_state["ask_messages"][-6:]:  # Show last 6 messages
-                role = msg["role"]
-                content = escape(msg["content"]).replace("\n", "<br>")
-                if role == "user":
-                    chat_history_html += f'<div style="text-align:right; margin: 10px 0;"><span class="bubble" style="background:#EAF2FF; text-align:left;">{content}</span> 👤</div>'
-                else:
-                    chat_history_html += f'<div style="margin: 10px 0;">🤖 <span class="bubble">{content}</span></div>'
+                # Conversational state tracking
+                if "ask_messages" not in st.session_state:
+                    st.session_state["ask_messages"] = [
+                        {"role": "assistant", "content": "Hi, I’m Ask GoAround. Ask me what to eat, what to do with kids, rainy-day options, nearby deals, or a short visitor plan."}
+                    ]
                     
-            st.markdown(f'''
+                # Build clean HTML history
+                chat_history_html = ""
+                for msg in st.session_state["ask_messages"][-6:]:  # Show last 6 messages
+                    role = msg["role"]
+                    content = escape(msg["content"]).replace("\n", "<br>")
+                    if role == "user":
+                        chat_history_html += f'<div style="text-align:right; margin: 10px 0;"><span class="bubble" style="background:#EAF2FF; text-align:left;">{content}</span> 👤</div>'
+                    else:
+                        chat_history_html += f'<div style="margin: 10px 0;">🤖 <span class="bubble">{content}</span></div>'
+                        
+                st.markdown(f'''
 <div class="chatbox" style="height:var(--chat-body-h); overflow-y:auto; margin-bottom:12px;">
 {chat_history_html}
 </div>
 ''', unsafe_allow_html=True)
-            
-            # Quick Actions using real Streamlit buttons inside container columns
-            prompts = [
-                ("🍴 Eat cheap", "Any cheap food spots near me?"),
-                ("📅 Weekend events", f"What weekend events are happening near {safe_location}?"),
-                ("🌧️ Rainy-day ideas", "What are some good rainy-day indoor ideas?"),
-                ("🛒 Grocery deals", "Are there any grocery deals or promos?")
-            ]
-            
-            cols = st.columns(4)
-            pending_prompt = None
-            for idx, (label, query_text) in enumerate(prompts):
-                if cols[idx].button(label, key=f"quick_{idx}", use_container_width=True):
-                    pending_prompt = query_text
-                    
-            # Real input form with native text input that styles beautifully
-            with st.form("ask_form", clear_on_submit=True):
-                ic, sc = st.columns([9, 1])
-                q_input = ic.text_input("Ask", placeholder="Ask GoAround about this area or another place...", label_visibility="collapsed")
-                submitted = sc.form_submit_button("➤", use_container_width=True)
                 
-            st.markdown(f'''
-<div class="footer" style="margin-top:10px;">GoAround SG. Source-backed local discovery only. Verify deals, events and official updates at source before acting.</div></div>
+                # Quick Actions using real Streamlit buttons inside container columns
+                prompts = [
+                    ("🍴 Eat cheap", "Any cheap food spots near me?"),
+                    ("📅 Weekend events", f"What weekend events are happening near {safe_location}?"),
+                    ("🌧️ Rainy-day ideas", "What are some good rainy-day indoor ideas?"),
+                    ("🛒 Grocery deals", "Are there any grocery deals or promos?")
+                ]
+                
+                cols = st.columns(4)
+                pending_prompt = None
+                for idx, (label, query_text) in enumerate(prompts):
+                    if cols[idx].button(label, key=f"quick_{idx}", use_container_width=True):
+                        pending_prompt = query_text
+                        
+                # Real input form with native text input that styles beautifully
+                with st.form("ask_form", clear_on_submit=True):
+                    ic, sc = st.columns([9, 1])
+                    q_input = ic.text_input("Ask", placeholder="Ask GoAround about this area or another place...", label_visibility="collapsed")
+                    submitted = sc.form_submit_button("➤", use_container_width=True)
+                    
+                st.markdown(f'''
+<div class="footer" style="margin-top:10px;">GoAround SG. Source-backed local discovery only. Verify deals, events and official updates at source before acting.</div>
 ''', unsafe_allow_html=True)
             
             # Processing user input
@@ -615,44 +643,45 @@ with right:
                 st.rerun()
 
         with picks_col:
-            st.markdown(f'''
-<div class="app-card picks-card"><div class="main-shell-title"><div><h2>Today’s Picks</h2><div class="muted">Curated for {safe_location} based on weather, area and interests.</div></div><div class="view-all">View all</div></div>
-<div class="picklist" style="overflow-y:auto; height:var(--picks-body-h);">{picks_html}</div><div class="footer" style="color:#175CD3!important;font-weight:800">{safe_picks_footer}</div></div>
+            with st.container(key="picks_card_container", border=True):
+                st.markdown(f'''
+<div class="main-shell-title"><div><h2>Today’s Picks</h2><div class="muted">Curated for {safe_location} based on weather, area and interests.</div></div><div class="view-all">View all</div></div>
+<div class="picklist" style="overflow-y:auto; height:var(--picks-body-h);">{picks_html}</div><div class="footer" style="color:#175CD3!important;font-weight:800">{safe_picks_footer}</div>
 ''', unsafe_allow_html=True)
             
     elif page == "business":
         form_col, preview_col = st.columns([0.68, 0.32], gap="large")
         with form_col:
-            st.markdown(f'''
-<div class="app-card chat-card" style="height:var(--app-h); overflow-y:auto; padding-bottom:30px;">
+            with st.container(key="business_form_container", border=True):
+                st.markdown(f'''
 <h1>Business Promotion</h1><div class="muted">Create a local promotion that can appear in Today’s Picks for {safe_location}.</div>
 <div class="kpi-grid"><div class="kpi"><span class="muted">Active</span><b>3</b></div><div class="kpi"><span class="muted">Clicks</span><b>128</b></div><div class="kpi"><span class="muted">Saves</span><b>47</b></div><div class="kpi"><span class="muted">Views</span><b>612</b></div></div>
 <h2>Create Promotion</h2>
 ''', unsafe_allow_html=True)
-            
-            # Interactive Streamlit form
-            with st.form("business_form"):
-                col1, col2 = st.columns(2)
-                b_name = col1.text_input("Business name", value="Ah Boyz Chicken Rice")
-                p_title = col2.text_input("Promotion title *", value="50% Off Signature Chicken Rice (Dinner Special)")
                 
-                col3, col4 = st.columns(2)
-                p_category = col3.selectbox("Category *", ["Food & Dining", "Grocery", "Mall", "Family", "Fitness"])
-                p_area = col4.text_input("Location / Area *", value=location)
-                
-                col5, col6 = st.columns(2)
-                p_from = col5.date_input("Valid from")
-                p_to = col6.date_input("Valid to")
-                
-                p_interests = st.multiselect("Audience / Interests", ["cheap food", "grocery", "event", "deal", "fitness", "tourist"], default=["cheap food", "deal"])
-                
-                p_description = st.text_area("Short description *", value="Enjoy our signature Hainanese Chicken Rice at 50% off for dinner! Freshly steamed chicken, fragrant rice, and our homemade chilli.")
-                p_url = st.text_input("CTA link (source url) *", value="https://example.com/AhBoyzDinnerDeal")
-                
-                publish_btn = st.form_submit_button("Publish Promotion", use_container_width=True)
-                
-            st.markdown(f'''
-<div class="footer" style="margin-top:10px;">Submitted promotions appear immediately in Today's Picks on the homepage.</div></div>
+                # Interactive Streamlit form
+                with st.form("business_form"):
+                    col1, col2 = st.columns(2)
+                    b_name = col1.text_input("Business name", value="Ah Boyz Chicken Rice")
+                    p_title = col2.text_input("Promotion title *", value="50% Off Signature Chicken Rice (Dinner Special)")
+                    
+                    col3, col4 = st.columns(2)
+                    p_category = col3.selectbox("Category *", ["Food & Dining", "Grocery", "Mall", "Family", "Fitness"])
+                    p_area = col4.text_input("Location / Area *", value=location)
+                    
+                    col5, col6 = st.columns(2)
+                    p_from = col5.date_input("Valid from")
+                    p_to = col6.date_input("Valid to")
+                    
+                    p_interests = st.multiselect("Audience / Interests", ["cheap food", "grocery", "event", "deal", "fitness", "tourist"], default=["cheap food", "deal"])
+                    
+                    p_description = st.text_area("Short description *", value="Enjoy our signature Hainanese Chicken Rice at 50% off for dinner! Freshly steamed chicken, fragrant rice, and our homemade chilli.")
+                    p_url = st.text_input("CTA link (source url) *", value="https://example.com/AhBoyzDinnerDeal")
+                    
+                    publish_btn = st.form_submit_button("Publish Promotion", use_container_width=True)
+                    
+                st.markdown(f'''
+<div class="footer" style="margin-top:10px;">Submitted promotions appear immediately in Today's Picks on the homepage.</div>
 ''', unsafe_allow_html=True)
             
             if publish_btn:
@@ -676,8 +705,9 @@ with right:
                     st.rerun()
                     
         with preview_col:
-            st.markdown(f'''
-<div class="app-card picks-card" style="height:var(--app-h);"><h2>Preview</h2><div class="muted">How your promotion appears to users in real-time.</div>
+            with st.container(key="preview_card_container", border=True):
+                st.markdown(f'''
+<h2>Preview</h2><div class="muted">How your promotion appears to users in real-time.</div>
 <div class="preview-card" style="margin-top:20px;">
 <div class="tag" style="background:#FFE6E2; color:#D32F2F !important;">{escape(p_category.upper())}</div>
 <h2 style="margin-top:16px!important; font-size: 1.25rem;">{escape(p_title)}</h2>
@@ -687,7 +717,6 @@ with right:
 <div style="font-size:0.85rem; color:var(--muted); margin-top:4px;"><span class="info-icon">🏢</span> {escape(b_name)}</div>
 <br>
 <a class="visit" href="{escape(p_url)}" target="_blank">View details ↗</a>
-</div>
 </div>
 ''', unsafe_allow_html=True)
             
