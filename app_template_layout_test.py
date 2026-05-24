@@ -1014,12 +1014,12 @@ h2 {
     .small-note { display: none; }
 }
 
-/* Precise stVerticalBlockBorder Container Card Styles */
-div[data-testid="stVerticalBlockBorder-sidebar_card_container"],
-div[data-testid="stVerticalBlockBorder-chat_card_container"],
-div[data-testid="stVerticalBlockBorder-picks_card_container"],
-div[data-testid="stVerticalBlockBorder-business_form_container"],
-div[data-testid="stVerticalBlockBorder-preview_card_container"] {
+/* Card styling uses marker classes so it works on older Streamlit builds without st.container(key=...). */
+div[data-testid="stVerticalBlock"]:has(.sidebar-card-marker),
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker),
+div[data-testid="stVerticalBlock"]:has(.picks-card-marker),
+div[data-testid="stVerticalBlock"]:has(.business-form-marker),
+div[data-testid="stVerticalBlock"]:has(.preview-card-marker) {
     background: white !important;
     border: 1px solid var(--line) !important;
     border-radius: 24px !important;
@@ -1030,24 +1030,24 @@ div[data-testid="stVerticalBlockBorder-preview_card_container"] {
     position: relative !important;
 }
 
-div[data-testid="stVerticalBlockBorder-sidebar_card_container"] {
+div[data-testid="stVerticalBlock"]:has(.sidebar-card-marker) {
     padding: 26px 24px 18px 24px !important;
     overflow-y: auto !important;
 }
-div[data-testid="stVerticalBlockBorder-sidebar_card_container"]::-webkit-scrollbar {
+div[data-testid="stVerticalBlock"]:has(.sidebar-card-marker)::-webkit-scrollbar {
     width: 0px !important;
     background: transparent !important;
 }
 
-div[data-testid="stVerticalBlockBorder-chat_card_container"] {
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker) {
     padding: 24px 26px 14px 26px !important;
 }
 
-div[data-testid="stVerticalBlockBorder-picks_card_container"] {
+div[data-testid="stVerticalBlock"]:has(.picks-card-marker) {
     padding: 24px 20px 14px 20px !important;
 }
 
-div[data-testid="stVerticalBlockBorder-business_form_container"] {
+div[data-testid="stVerticalBlock"]:has(.business-form-marker) {
     padding: 26px 28px 16px 28px !important;
     height: auto !important;
     min-height: var(--app-h) !important;
@@ -1057,24 +1057,24 @@ div[data-testid="stVerticalBlockBorder-business_form_container"] {
     padding-bottom: 54px !important;
 }
 
-div[data-testid="stVerticalBlockBorder-preview_card_container"] {
+div[data-testid="stVerticalBlock"]:has(.preview-card-marker) {
     padding: 26px 20px 16px 20px !important;
 }
 
-div[data-testid="stMainBlockContainer"]:has(.business-page-marker) div[data-testid="stVerticalBlockBorder-preview_card_container"] {
+div[data-testid="stMainBlockContainer"]:has(.business-page-marker) div[data-testid="stVerticalBlock"]:has(.preview-card-marker) {
     height: auto !important;
     min-height: var(--app-h) !important;
     max-height: none !important;
 }
 
-div[data-testid="stVerticalBlockBorder-business_form_container"]::-webkit-scrollbar {
+div[data-testid="stVerticalBlock"]:has(.business-form-marker)::-webkit-scrollbar {
     width: 8px !important;
 }
-div[data-testid="stVerticalBlockBorder-business_form_container"]::-webkit-scrollbar-thumb {
+div[data-testid="stVerticalBlock"]:has(.business-form-marker)::-webkit-scrollbar-thumb {
     background: #CBD5E1 !important;
     border-radius: 999px !important;
 }
-div[data-testid="stVerticalBlockBorder-business_form_container"]::-webkit-scrollbar-track {
+div[data-testid="stVerticalBlock"]:has(.business-form-marker)::-webkit-scrollbar-track {
     background: transparent !important;
 }
 
@@ -1105,7 +1105,7 @@ div[data-testid="stTextInput"] input:focus, div[data-testid="stTextArea"] textar
 }
 
 /* Style quick action buttons inside chat container */
-div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stButton"] button {
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stButton"] button {
     border: 1px solid #D8DFEA !important;
     border-radius: 13px !important;
     min-height: 44px !important;
@@ -1116,14 +1116,14 @@ div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="st
     box-shadow: 0 2px 8px rgba(23,43,77,.025) !important;
     transition: all 0.2s ease !important;
 }
-div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stButton"] button:hover {
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stButton"] button:hover {
     border-color: var(--blue) !important;
     color: var(--blue) !important;
     background: #F5F9FF !important;
 }
 
 /* Style the submit button inside chat container */
-div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button {
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button {
     background: var(--blue) !important;
     color: white !important;
     border: none !important;
@@ -1137,14 +1137,14 @@ div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="st
     align-items: center !important;
     justify-content: center !important;
 }
-div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover {
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover {
     background: #1b5ed7 !important;
     color: white !important;
     box-shadow: 0 8px 22px rgba(13,110,253,.32) !important;
 }
 
 /* Style premium input inside chat form and keep the send button aligned. */
-div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stForm"] div[data-testid="stTextInput"] input {
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="stTextInput"] input {
     min-height: 58px !important;
     height: 58px !important;
     line-height: 58px !important;
@@ -1152,18 +1152,18 @@ div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="st
     font-size: 14px !important;
     padding: 0 18px !important;
 }
-div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stForm"] div[data-testid="stHorizontalBlock"] {
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="stHorizontalBlock"] {
     align-items: center !important;
     gap: 8px !important;
 }
-div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stForm"] div[data-testid="element-container"] {
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="element-container"] {
     margin: 0 !important;
     padding: 0 !important;
 }
 
 /* Style the submit button in the business form container */
-div[data-testid="stVerticalBlockBorder-business_form_container"] div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button,
-div[data-testid="stVerticalBlockBorder-business_form_container"] div[data-testid="stForm"] div[data-testid="stButton"] button {
+div[data-testid="stVerticalBlock"]:has(.business-form-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button,
+div[data-testid="stVerticalBlock"]:has(.business-form-marker) div[data-testid="stForm"] div[data-testid="stButton"] button {
     background: linear-gradient(90deg, #0D6EFD, #2563EB) !important;
     color: white !important;
     justify-content: center !important;
@@ -1175,15 +1175,15 @@ div[data-testid="stVerticalBlockBorder-business_form_container"] div[data-testid
     width: 100% !important;
     letter-spacing: .01em !important;
 }
-div[data-testid="stVerticalBlockBorder-business_form_container"] div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover,
-div[data-testid="stVerticalBlockBorder-business_form_container"] div[data-testid="stForm"] div[data-testid="stButton"] button:hover {
+div[data-testid="stVerticalBlock"]:has(.business-form-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover,
+div[data-testid="stVerticalBlock"]:has(.business-form-marker) div[data-testid="stForm"] div[data-testid="stButton"] button:hover {
     background: linear-gradient(90deg, #0B5ED7, #1D4ED8) !important;
     color: white !important;
     box-shadow: 0 8px 22px rgba(13, 110, 253, 0.32) !important;
 }
 
 /* Strip borders and backgrounds from filter button containers */
-div[data-testid*="stVerticalBlockBorder-filter_btn_"] {
+div[class*="st-key-filter_btn_"] {
     border: none !important;
     background: transparent !important;
     box-shadow: none !important;
@@ -1193,7 +1193,7 @@ div[data-testid*="stVerticalBlockBorder-filter_btn_"] {
 }
 
 /* Style filter pill buttons inside picks card container (inactive state) */
-div[data-testid*="stVerticalBlockBorder-filter_btn_"] button {
+div[class*="st-key-filter_btn_"] button {
     border: none !important;
     border-radius: 999px !important;
     min-height: 32px !important;
@@ -1213,23 +1213,23 @@ div[data-testid*="stVerticalBlockBorder-filter_btn_"] button {
     white-space: nowrap !important;
     width: 100% !important;
 }
-div[data-testid*="stVerticalBlockBorder-filter_btn_"] button:hover {
+div[class*="st-key-filter_btn_"] button:hover {
     background-color: #E0ECFF !important;
     color: #114B9E !important;
 }
 
 /* Style filter pill buttons inside picks card container (active state) */
-div[data-testid*="stVerticalBlockBorder-filter_btn_"] button[kind="primary"] {
+div[class*="st-key-filter_btn_"] button[kind="primary"] {
     background: var(--blue) !important;
     color: white !important;
 }
-div[data-testid*="stVerticalBlockBorder-filter_btn_"] button[kind="primary"]:hover {
+div[class*="st-key-filter_btn_"] button[kind="primary"]:hover {
     background: #1b5ed7 !important;
     color: white !important;
 }
 
 /* Force filter button text properties to stay compact */
-div[data-testid*="stVerticalBlockBorder-filter_btn_"] button * {
+div[class*="st-key-filter_btn_"] button * {
     white-space: nowrap !important;
     word-break: keep-all !important;
     font-size: 11.5px !important;
@@ -1238,7 +1238,11 @@ div[data-testid*="stVerticalBlockBorder-filter_btn_"] button * {
 
 [data-stale="true"],
 div[data-testid="stVerticalBlock"][data-stale="true"],
-div[data-testid*="stVerticalBlockBorder-"][data-stale="true"],
+div[data-testid="stVerticalBlock"]:has(.sidebar-card-marker)[data-stale="true"],
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker)[data-stale="true"],
+div[data-testid="stVerticalBlock"]:has(.picks-card-marker)[data-stale="true"],
+div[data-testid="stVerticalBlock"]:has(.business-form-marker)[data-stale="true"],
+div[data-testid="stVerticalBlock"]:has(.preview-card-marker)[data-stale="true"],
 [data-testid="stForm"][data-stale="true"],
 [data-testid="stMarkdownContainer"][data-stale="true"] {
     opacity: 1 !important;
@@ -1247,7 +1251,11 @@ div[data-testid*="stVerticalBlockBorder-"][data-stale="true"],
     transition: none !important;
 }
 
-div[data-testid*="stVerticalBlockBorder-"]:has([data-stale="true"]) > div {
+div[data-testid="stVerticalBlock"]:has(.sidebar-card-marker):has([data-stale="true"]) > div,
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker):has([data-stale="true"]) > div,
+div[data-testid="stVerticalBlock"]:has(.picks-card-marker):has([data-stale="true"]) > div,
+div[data-testid="stVerticalBlock"]:has(.business-form-marker):has([data-stale="true"]) > div,
+div[data-testid="stVerticalBlock"]:has(.preview-card-marker):has([data-stale="true"]) > div {
     opacity: 1 !important;
     filter: none !important;
     transition: none !important;
@@ -1278,7 +1286,7 @@ div[data-testid*="stVerticalBlockBorder-"]:has([data-stale="true"]) > div {
 
 
 def render_sidebar():
-    with st.container(key="sidebar_card_container"):
+    with st.container():
         st.markdown('<div class="sidebar-card-marker"></div>', unsafe_allow_html=True)
         st.markdown(f'''
 <div class="brand">{logo_html}<div><div class="brand-title">GoAround <span class="sg-red">SG</span></div><div class="subtitle">AI local discovery assistant<br>for useful lobang near you.</div></div></div>
@@ -1302,7 +1310,7 @@ if page == "today":
         render_sidebar()
 
     with chat_col:
-        with st.container(key="chat_card_container"):
+        with st.container():
             st.markdown('<div class="chat-card-marker"></div>', unsafe_allow_html=True)
             st.markdown(f'''
 <h1>Ask GoAround</h1><div class="muted">Your conversation-style local assistant.</div>
@@ -1400,7 +1408,7 @@ if page == "today":
             render_chat_history()
 
     with picks_col:
-        with st.container(key="picks_card_container"):
+        with st.container():
             st.markdown('<div class="picks-card-marker"></div>', unsafe_allow_html=True)
             filter_options = [
                 ("🌟 All", "all"),
@@ -1446,7 +1454,7 @@ elif page == "business":
     with sidebar_col:
         render_sidebar()
     with form_col:
-        with st.container(key="business_form_container"):
+        with st.container():
             st.markdown('<div class="business-form-marker"></div>', unsafe_allow_html=True)
             st.markdown(f'''
 <h1>Business Promotion</h1><div class="muted">Create a local promotion that can appear in Today’s Picks for {safe_location}.</div>
@@ -1503,7 +1511,7 @@ elif page == "business":
                 st.rerun()
                 
     with preview_col:
-        with st.container(key="preview_card_container"):
+        with st.container():
             st.markdown('<div class="preview-card-marker"></div>', unsafe_allow_html=True)
             st.markdown(f'''
 <h2>Preview</h2><div class="muted">How your promotion appears to users in real-time.</div>
