@@ -467,6 +467,7 @@ for card in search_cards:
 
 # Combine for homepage feed visualization (physical first, search shortcuts at the bottom)
 ranked_picks = ranked_physical_picks + ranked_search_picks
+all_cards = physical_cards + search_cards
 
 safe_location = escape(location)
 safe_coords = escape(coords)
