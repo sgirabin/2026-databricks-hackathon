@@ -431,12 +431,11 @@ weather_summary = f"{weather['temperature']} · {weather['forecast']}"
 
 # Core dynamic recommendations querying and compilation
 db_cards, databricks_source = load_nearby_databricks_picks(lat, lon)
-all_cards = list(db_cards) if db_cards else list(source_registry_cards())
-all_cards.extend(area_anchor_cards(location, lat, lon))
+physical_cards = list(db_cards) if db_cards else list(source_registry_cards())
 
 # Append merchant-submitted promotions from session state
 business_cards = st.session_state.get("business_cards", [])
-all_cards.extend(business_cards)
+physical_cards.extend(business_cards)
 
 # Construct rich user context
 context = UserContext(
@@ -450,8 +449,24 @@ context = UserContext(
     weather=weather["forecast"],
 )
 
-# Apply formal dynamic ranking engine
-ranked_picks = rank_cards(all_cards, context, limit=12)
+# Apply formal dynamic ranking engine on physical cards
+ranked_physical_picks = rank_cards(physical_cards, context, limit=12)
+
+# Extract and wrap Google Search anchor cards as low-ranked picks at the bottom of the feed
+search_cards = area_anchor_cards(location, lat, lon)
+ranked_search_picks = []
+for card in search_cards:
+    ranked_search_picks.append(
+        RankedPick(
+            card=card,
+            score=0.1,  # Lower score so they logically sit below physical cards
+            distance_m=0.0,
+            why_shown=f"Shown because it is within 0m of your selected area."
+        )
+    )
+
+# Combine for homepage feed visualization (physical first, search shortcuts at the bottom)
+ranked_picks = ranked_physical_picks + ranked_search_picks
 
 safe_location = escape(location)
 safe_coords = escape(coords)
@@ -506,8 +521,8 @@ def render_tags(items: list[str]) -> str:
 
 st.markdown("""
 <style>
-:root{color-scheme:light!important;--bg:#F4F7FB;--text:#172B4D;--muted:#667085;--line:#E3EAF5;--blue:#0D6EFD;--green:#10B981;--app-h:calc(100dvh - 1.05rem);--chat-body-h:clamp(280px,calc(100dvh - 435px),560px);--picks-body-h:clamp(390px,calc(100dvh - 152px),760px)}
-@supports not (height:100dvh){:root{--app-h:calc(100vh - 1.05rem);--chat-body-h:clamp(280px,calc(100vh - 435px),560px);--picks-body-h:clamp(390px,calc(100vh - 152px),760px)}}
+:root{color-scheme:light!important;--bg:#F4F7FB;--text:#172B4D;--muted:#667085;--line:#E3EAF5;--blue:#0D6EFD;--green:#10B981;--app-h:calc(100dvh - 1.05rem);--chat-body-h:clamp(240px,calc(100dvh - 490px),560px);--picks-body-h:clamp(390px,calc(100dvh - 152px),760px)}
+@supports not (height:100dvh){:root{--app-h:calc(100vh - 1.05rem);--chat-body-h:clamp(240px,calc(100vh - 490px),560px);--picks-body-h:clamp(390px,calc(100vh - 152px),760px)}}
 html,body,.stApp,[data-testid="stAppViewContainer"],[data-testid="block-container"]{background:var(--bg)!important;color:var(--text)!important;color-scheme:light!important;overflow:hidden!important}
 [data-testid="stHeader"],section[data-testid="stSidebar"]{display:none!important}.main .block-container{max-width:none!important;padding:.55rem .75rem .35rem .75rem!important;height:100dvh!important;overflow:hidden!important}
 div[data-testid="stHorizontalBlock"]{gap:1rem!important;align-items:stretch!important}div[data-testid="stVerticalBlock"]{gap:0!important}
@@ -520,7 +535,7 @@ div[data-testid="stHorizontalBlock"]{gap:1rem!important;align-items:stretch!impo
 .picklist{height:var(--picks-body-h);overflow-y:auto}.pick{min-height:clamp(112px,17dvh,135px);border:1px solid var(--line);border-radius:18px;padding:15px;background:white;margin-bottom:13px;box-shadow:0 5px 16px rgba(23,43,77,.045)}.pick b{font-size:15px}.footer{text-align:center;color:var(--muted)!important;font-size:11.5px;margin-top:9px}.visit{display:inline-block;margin-top:10px;border:1px solid var(--line);border-radius:11px;padding:8px 11px;font-size:11.5px;background:white;color:#0D2B5C!important;font-weight:750}.main-shell-title{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.view-all{font-size:13px;color:#175CD3!important;font-weight:800;margin-top:6px}.sidebar-note{font-size:11.8px;color:var(--muted)!important;margin-top:10px;line-height:1.35}
 .kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}.kpi{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fff;box-shadow:0 5px 16px rgba(23,43,77,.045)}.kpi b{display:block;font-size:1.35rem;margin-top:4px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.form-field{border:1px solid #D8DFEA;border-radius:13px;padding:12px;background:#fff;color:#4B5565!important;font-size:13px}
 .wide{grid-column:1/-1}.preview-card{border:1px solid var(--line);border-radius:22px;padding:18px;background:#fff;box-shadow:0 8px 22px rgba(23,43,77,.055);margin-top:14px}.about-section{margin-top:22px}.about-section h2{margin-bottom:8px!important}.about-section ul{margin-top:8px;line-height:1.8}
-@media(max-height:760px){:root{--app-h:calc(100dvh - .9rem);--chat-body-h:clamp(260px,calc(100dvh - 445px),420px);--picks-body-h:clamp(370px,calc(100dvh - 165px),620px)}.pick{min-height:108px}.inputbar{min-height:52px}.quick{min-height:39px}.brand{margin-bottom:12px}.field{min-height:38px;margin-bottom:7px}.nav a{padding:8px 10px}.tag{padding:5px 8px}.sidebar-note{display:none}.sidebar-card,.chat-card,.picks-card,.full-card{padding-top:22px}.info-card{padding:10px 12px}.small-note{display:none}}
+@media(max-height:760px){:root{--app-h:calc(100dvh - .9rem);--chat-body-h:clamp(200px,calc(100dvh - 500px),420px);--picks-body-h:clamp(370px,calc(100dvh - 165px),620px)}.pick{min-height:108px}.inputbar{min-height:52px}.quick{min-height:39px}.brand{margin-bottom:12px}.field{min-height:38px;margin-bottom:7px}.nav a{padding:8px 10px}.tag{padding:5px 8px}.sidebar-note{display:none}.sidebar-card,.chat-card,.picks-card,.full-card{padding-top:22px}.info-card{padding:10px 12px}.small-note{display:none}}
 div[data-testid="stVerticalBlockBorder-chat_card_container"],
 div[data-testid="stVerticalBlockBorder-picks_card_container"],
 div[data-testid="stVerticalBlockBorder-business_form_container"],
@@ -547,6 +562,82 @@ div[data-testid="stVerticalBlockBorder-business_form_container"] {
 div[data-testid="stVerticalBlockBorder-preview_card_container"] {
     padding: 28px 24px 18px 24px !important;
     overflow: hidden !important;
+}
+
+/* Custom Overrides to Strip Streamlit Native Border and Spacing on Forms */
+div[data-testid="stForm"] {
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Style premium inputs */
+div[data-testid="stTextInput"] input, div[data-testid="stTextArea"] textarea {
+    border: 1px solid #D8DFEA !important;
+    border-radius: 13px !important;
+    min-height: 44px !important;
+    background-color: white !important;
+    color: var(--text) !important;
+    font-size: 13.5px !important;
+    padding: 0 16px !important;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05) !important;
+}
+div[data-testid="stTextInput"] input:focus, div[data-testid="stTextArea"] textarea:focus {
+    border-color: var(--blue) !important;
+    box-shadow: 0 0 0 3px rgba(13,110,253,0.15) !important;
+    outline: none !important;
+}
+
+/* Style quick action buttons inside chat container */
+div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stButton"] button {
+    border: 1px solid #D8DFEA !important;
+    border-radius: 13px !important;
+    min-height: 44px !important;
+    font-size: 12.5px !important;
+    font-weight: 800 !important;
+    background: white !important;
+    color: var(--text) !important;
+    box-shadow: 0 2px 8px rgba(23,43,77,.025) !important;
+    transition: all 0.2s ease !important;
+}
+div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stButton"] button:hover {
+    border-color: var(--blue) !important;
+    color: var(--blue) !important;
+    background: #F5F9FF !important;
+}
+
+/* Style the submit button in the chat input bar form */
+div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stForm"] div[data-testid="stButton"] button {
+    background: var(--blue) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 13px !important;
+    font-size: 15px !important;
+    font-weight: 900 !important;
+    box-shadow: 0 8px 18px rgba(13,110,253,.22) !important;
+    min-height: 44px !important;
+}
+div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stForm"] div[data-testid="stButton"] button:hover {
+    background: #1b5ed7 !important;
+    color: white !important;
+    box-shadow: 0 8px 22px rgba(13,110,253,.32) !important;
+}
+
+/* Style the submit button in the business form container */
+div[data-testid="stVerticalBlockBorder-business_form_container"] div[data-testid="stForm"] div[data-testid="stButton"] button {
+    background: linear-gradient(90deg,#0D6EFD,#2563EB) !important;
+    color: white !important;
+    justify-content: center !important;
+    font-weight: 900 !important;
+    border: 0 !important;
+    border-radius: 13px !important;
+    box-shadow: 0 8px 18px rgba(13,110,253,.22) !important;
+    min-height: 44px !important;
+}
+div[data-testid="stVerticalBlockBorder-business_form_container"] div[data-testid="stForm"] div[data-testid="stButton"] button:hover {
+    background: linear-gradient(90deg,#0b5ed7,#1d4ed8) !important;
+    color: white !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -636,7 +727,7 @@ with right:
                     ans = answer_with_databricks(
                         question=user_query,
                         context=context,
-                        ranked=ranked_picks,
+                        ranked=ranked_physical_picks,
                         fallback="I am looking up details..."
                     )
                 st.session_state["ask_messages"].append({"role": "assistant", "content": ans})
