@@ -616,7 +616,7 @@ with right:
 
         with picks_col:
             st.markdown(f'''
-<div class="app-card picks-card"><div class="main-shell-title"><div><h2>Today’s Picks</h2><div class="muted">Curated for Curated for {safe_location} based on weather, area and interests.</div></div><div class="view-all">View all</div></div>
+<div class="app-card picks-card"><div class="main-shell-title"><div><h2>Today’s Picks</h2><div class="muted">Curated for {safe_location} based on weather, area and interests.</div></div><div class="view-all">View all</div></div>
 <div class="picklist" style="overflow-y:auto; height:var(--picks-body-h);">{picks_html}</div><div class="footer" style="color:#175CD3!important;font-weight:800">{safe_picks_footer}</div></div>
 ''', unsafe_allow_html=True)
             
