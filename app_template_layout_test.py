@@ -1012,7 +1012,7 @@ h2 {
     background: #fff;
     box-shadow: 0 8px 22px rgba(23,43,77,.055);
     margin-top: 14px;
-    width: calc(100% - 6px);
+    width: 85%;
     box-sizing: border-box;
 }
 .about-section { margin-top: 22px; }
