@@ -581,195 +581,419 @@ else:
 
 st.markdown("""
 <style>
-:root{color-scheme:light!important;--bg:#F4F7FB;--text:#172B4D;--muted:#667085;--line:#E3EAF5;--blue:#0D6EFD;--green:#10B981;--app-h:calc(100dvh - 1.05rem);--chat-body-h:clamp(180px,calc(var(--app-h) - 370px),1200px);--picks-body-h:clamp(200px,calc(var(--app-h) - 180px),1200px)}
-@supports not (height:100dvh){:root{--app-h:calc(100vh - 1.05rem);--chat-body-h:clamp(180px,calc(var(--app-h) - 370px),1200px);--picks-body-h:clamp(200px,calc(var(--app-h) - 180px),1200px)}}
-html,body,.stApp,[data-testid="stAppViewContainer"],[data-testid="block-container"]{background:var(--bg)!important;color:var(--text)!important;color-scheme:light!important;overflow:hidden!important}
-[data-testid="stHeader"],section[data-testid="stSidebar"]{display:none!important}div.block-container,div[data-testid="stMainBlockContainer"],.main .block-container{max-width:none!important;padding:.55rem .75rem .35rem .75rem!important;height:100dvh!important;overflow:hidden!important;box-sizing:border-box!important}
-div[data-testid="stHorizontalBlock"]{gap:1rem!important;align-items:stretch!important}div[data-testid="stVerticalBlock"]{gap:0!important}
-.app-card{height:var(--app-h);background:white;border:1px solid var(--line);border-radius:24px;box-shadow:0 16px 38px rgba(23,43,77,.08);overflow:hidden;box-sizing:border-box}.sidebar-card{padding:26px 24px 18px 24px}.chat-card{padding:28px 28px 18px 28px}.picks-card{padding:28px 24px 18px 24px}.full-card{padding:30px 32px 20px 32px;overflow-y:auto!important}
-.stMarkdown,.stCaption,label,p,span,div,h1,h2,h3,h4,h5,h6,li{color:var(--text)!important}.muted,.stCaption,.stCaption *{color:var(--muted)!important}h1{font-size:clamp(1.65rem,2.2vw,2.05rem)!important;letter-spacing:.01em;margin:0 0 .15rem 0!important}h2{font-size:clamp(1.25rem,1.55vw,1.55rem)!important;margin:0 0 .15rem 0!important}
-.brand{display:flex;gap:13px;align-items:center;margin-bottom:clamp(14px,2dvh,20px)}
-.pin{width:42px;height:42px;border-radius:50%;background:white;border:1px solid var(--line);box-shadow:0 10px 22px rgba(13,110,253,.20);flex:0 0 auto;object-fit:contain;padding:2px;box-sizing:border-box}
-.pin-fallback{width:42px;height:42px;border-radius:50%;background:linear-gradient(145deg,#0D6EFD,#20B2AA);box-shadow:0 10px 22px rgba(13,110,253,.20);flex:0 0 auto}
-.brand-title{font-size:21px;font-weight:900;color:#0D2B5C}
-.sg-red{color:#ED1B24!important}
-.subtitle{font-size:12.5px;line-height:1.45;color:var(--muted)!important;margin-top:4px}
-.nav{border-top:1px solid var(--line);padding-top:14px;margin-top:8px}.nav a{display:block;text-decoration:none!important;border-radius:13px;padding:10px 12px;font-size:13.5px;font-weight:800;margin-bottom:5px;color:var(--text)!important}.nav a.active{background:linear-gradient(90deg,#EAF2FF,#F6FAFF);color:#175CD3!important;box-shadow:inset 3px 0 0 #0D6EFD}
-.side-title{font-size:20px;font-weight:900;margin:clamp(13px,2dvh,18px) 0 5px 0}.info-card{border:1px solid #D8DFEA;border-radius:18px;background:linear-gradient(180deg,#fff,#FBFCFE);padding:13px 14px;margin:10px 0;box-shadow:0 5px 16px rgba(23,43,77,.045)}.info-row{display:flex;gap:10px;align-items:flex-start;margin:8px 0}.info-icon{width:22px;text-align:center;flex:0 0 auto}.info-main{font-size:13px;font-weight:850;color:#172B4D!important;line-height:1.35}.info-sub{font-size:11.5px;color:var(--muted)!important;line-height:1.35}.tag{border-radius:999px;padding:6px 10px;background:#EEF4FF;color:#175CD3!important;font-size:11.5px;font-weight:800;display:inline-block;margin:3px}.tag-wrap{margin:7px 0 12px 0}.area-label{font-size:11.8px;color:var(--muted)!important;font-weight:750;margin:8px 0 5px 2px}.small-note{border:1px solid #E8EEF8;border-radius:13px;background:#F8FBFF;padding:10px 12px;font-size:11.5px;color:#4B5565!important;line-height:1.4}.save{background:linear-gradient(90deg,#ED1B24,#C4121A)!important;color:white!important;justify-content:center!important;font-weight:900!important;border:0!important;box-shadow:0 8px 18px rgba(237,27,36,.22)!important}.field{min-height:44px;border:1px solid #D8DFEA;border-radius:13px;background:white;display:flex;align-items:center;padding:0 13px;font-size:12.5px;color:#4B5565!important;margin-bottom:9px;box-shadow:0 2px 8px rgba(23,43,77,.025);box-sizing:border-box}
-.status{display:inline-block;border:1px solid var(--line);border-radius:12px;padding:9px 14px;font-size:12.5px;margin:0 8px 12px 0;background:white;box-shadow:0 2px 8px rgba(23,43,77,.025)}.chatbox{height:100%;border-radius:18px;background:linear-gradient(180deg,#FFFFFF 0%,#FBFCFE 100%);border:1px dashed #D8E2F0;padding:22px;overflow-y:auto;box-sizing:border-box}.bubble{border-radius:18px;background:#F1F5F9;padding:13px 16px;display:inline-block;margin:12px;max-width:68%;font-size:14px;line-height:1.45;box-shadow:0 2px 8px rgba(23,43,77,.025)}.user{text-align:right}.quick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}.quick{border:1px solid #D8DFEA;border-radius:13px;min-height:44px;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;background:white;box-shadow:0 2px 8px rgba(23,43,77,.025)}.inputbar{min-height:58px;border:1px solid #D8DFEA;border-radius:18px;background:white;display:grid;grid-template-columns:46px 1fr 58px;align-items:center;margin-top:14px;box-shadow:0 6px 18px rgba(23,43,77,.045)}.send{height:44px;width:44px;border-radius:13px;background:var(--blue);color:white!important;display:flex;align-items:center;justify-content:center;font-weight:900}
-.picklist{height:100%;overflow-y:auto}.pick{display:flow-root!important;min-height:clamp(112px,17dvh,135px);border:1px solid var(--line);border-radius:18px;padding:15px;background:white;margin-bottom:13px;box-shadow:0 5px 16px rgba(23,43,77,.045)}.pick b{font-size:15px}.footer{text-align:center;color:var(--muted)!important;font-size:11.5px;margin-top:9px}.visit{float:right!important;margin-top:10px;border:1px solid var(--line);border-radius:11px;padding:8px 11px;font-size:11.5px;background:white;color:#0D2B5C!important;font-weight:750}.main-shell-title{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.view-all{font-size:13px;color:#175CD3!important;font-weight:800;margin-top:6px;}.sidebar-note{font-size:11.8px;color:var(--muted)!important;margin-top:10px;line-height:1.35}
-.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}
-.kpi{border:1px solid var(--line);border-top:3px solid #ED1B24!important;border-radius:16px;padding:14px;background:#fff;box-shadow:0 5px 16px rgba(23,43,77,.045)}
-.kpi b{display:block;font-size:1.35rem;margin-top:4px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.form-field{border:1px solid #D8DFEA;border-radius:13px;padding:12px;background:#fff;color:#4B5565!important;font-size:13px}
-.wide{grid-column:1/-1}.preview-card{border:1px solid var(--line);border-radius:22px;padding:18px;background:#fff;box-shadow:0 8px 22px rgba(23,43,77,.055);margin-top:14px}.about-section{margin-top:22px}.about-section h2{margin-bottom:8px!important}.about-section ul{margin-top:8px;line-height:1.8}
-@media(max-height:760px){:root{--app-h:calc(100dvh - .9rem)}.pick{min-height:108px}.inputbar{min-height:52px}.quick{min-height:39px}.brand{margin-bottom:12px}.field{min-height:38px;margin-bottom:7px}.nav a{padding:8px 10px}.tag{padding:5px 8px}.sidebar-note{display:none}.sidebar-card,.chat-card,.picks-card,.full-card{padding-top:22px}.info-card{padding:10px 12px}.small-note{display:none}}
+:root {
+    color-scheme: light !important;
+    --bg: #F4F7FB;
+    --text: #172B4D;
+    --muted: #667085;
+    --line: #E3EAF5;
+    --blue: #0D6EFD;
+    --green: #10B981;
+    --app-h: calc(100dvh - 1.05rem);
+    --chat-body-h: calc(var(--app-h) - 250px);
+    --picks-body-h: calc(var(--app-h) - 195px);
+}
+@supports not (height:100dvh) {
+    :root {
+        --app-h: calc(100vh - 1.05rem);
+        --chat-body-h: calc(var(--app-h) - 250px);
+        --picks-body-h: calc(var(--app-h) - 195px);
+    }
+}
+html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="block-container"] {
+    background: var(--bg) !important;
+    color: var(--text) !important;
+    color-scheme: light !important;
+    overflow: hidden !important;
+}
+[data-testid="stHeader"], section[data-testid="stSidebar"] {
+    display: none !important;
+}
+div.block-container, div[data-testid="stMainBlockContainer"], .main .block-container {
+    max-width: none !important;
+    padding: .55rem .75rem .35rem .75rem !important;
+    height: 100dvh !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+}
+div[data-testid="stHorizontalBlock"] {
+    gap: 1rem !important;
+    align-items: stretch !important;
+}
+div[data-testid="stVerticalBlock"] {
+    gap: 0 !important;
+}
+.app-card {
+    height: var(--app-h);
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    box-shadow: 0 16px 38px rgba(23,43,77,.08);
+    overflow: hidden;
+    box-sizing: border-box;
+}
+.sidebar-card { padding: 26px 24px 18px 24px; }
+.chat-card { padding: 28px 28px 18px 28px; }
+.picks-card { padding: 28px 24px 18px 24px; }
+.full-card { padding: 30px 32px 20px 32px; overflow-y: auto !important; }
 
-/* Card Container Layout Structure using key-based classes, column-index, and relational fallbacks */
-/* Force the main vertical block of the page to stretch to 100% */
-div[data-testid="stMainBlockContainer"] > div[data-testid="stVerticalBlock"] {
-    height: 100% !important;
-    display: flex !important;
-    flex-direction: column !important;
-    flex-grow: 1 !important;
+.stMarkdown, .stCaption, label, p, span, div, h1, h2, h3, h4, h5, h6, li {
+    color: var(--text) !important;
+}
+.muted, .stCaption, .stCaption * {
+    color: var(--muted) !important;
+}
+h1 {
+    font-size: clamp(1.65rem, 2.2vw, 2.05rem) !important;
+    letter-spacing: .01em;
+    margin: 0 0 .15rem 0 !important;
+}
+h2 {
+    font-size: clamp(1.25rem, 1.55vw, 1.55rem) !important;
+    margin: 0 0 .15rem 0 !important;
+}
+.brand {
+    display: flex;
+    gap: 13px;
+    align-items: center;
+    margin-bottom: clamp(14px, 2dvh, 20px);
+}
+.pin {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid var(--line);
+    box-shadow: 0 10px 22px rgba(13,110,253,.20);
+    flex: 0 0 auto;
+    object-fit: contain;
+    padding: 2px;
+    box-sizing: border-box;
+}
+.pin-fallback {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #0D6EFD, #20B2AA);
+    box-shadow: 0 10px 22px rgba(13,110,253,.20);
+    flex: 0 0 auto;
+}
+.brand-title {
+    font-size: 21px;
+    font-weight: 900;
+    color: #0D2B5C;
+}
+.sg-red {
+    color: #ED1B24 !important;
+}
+.subtitle {
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: var(--muted) !important;
+    margin-top: 4px;
+}
+.nav {
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+    margin-top: 8px;
+}
+.nav a {
+    display: block;
+    text-decoration: none !important;
+    border-radius: 13px;
+    padding: 10px 12px;
+    font-size: 13.5px;
+    font-weight: 800;
+    margin-bottom: 5px;
+    color: var(--text) !important;
+}
+.nav a.active {
+    background: linear-gradient(90deg, #EAF2FF, #F6FAFF);
+    color: #175CD3 !important;
+    box-shadow: inset 3px 0 0 #0D6EFD;
+}
+.side-title {
+    font-size: 20px;
+    font-weight: 900;
+    margin: clamp(13px, 2dvh, 18px) 0 5px 0;
+}
+.info-card {
+    border: 1px solid #D8DFEA;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #fff, #FBFCFE);
+    padding: 13px 14px;
+    margin: 10px 0;
+    box-shadow: 0 5px 16px rgba(23,43,77,.045);
+}
+.info-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin: 8px 0;
+}
+.info-icon {
+    width: 22px;
+    text-align: center;
+    flex: 0 0 auto;
+}
+.info-main {
+    font-size: 13px;
+    font-weight: 850;
+    color: #172B4D !important;
+    line-height: 1.35;
+}
+.info-sub {
+    font-size: 11.5px;
+    color: var(--muted) !important;
+    line-height: 1.35;
+}
+.tag {
+    border-radius: 999px;
+    padding: 6px 10px;
+    background: #EEF4FF;
+    color: #175CD3 !important;
+    font-size: 11.5px;
+    font-weight: 800;
+    display: inline-block;
+    margin: 3px;
+}
+.tag-wrap {
+    margin: 7px 0 12px 0;
+}
+.area-label {
+    font-size: 11.8px;
+    color: var(--muted) !important;
+    font-weight: 750;
+    margin: 8px 0 5px 2px;
+}
+.small-note {
+    border: 1px solid #E8EEF8;
+    border-radius: 13px;
+    background: #F8FBFF;
+    padding: 10px 12px;
+    font-size: 11.5px;
+    color: #4B5565 !important;
+    line-height: 1.4;
+}
+.field {
+    min-height: 44px;
+    border: 1px solid #D8DFEA;
+    border-radius: 13px;
+    background: white;
+    display: flex;
+    align-items: center;
+    padding: 0 13px;
+    font-size: 12.5px;
+    color: #4B5565 !important;
+    margin-bottom: 9px;
+    box-shadow: 0 2px 8px rgba(23,43,77,.025);
+    box-sizing: border-box;
+}
+.status {
+    display: inline-block;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 9px 14px;
+    font-size: 12.5px;
+    margin: 0 8px 12px 0;
+    background: white;
+    box-shadow: 0 2px 8px rgba(23,43,77,.025);
+}
+.bubble {
+    border-radius: 18px;
+    background: #F1F5F9;
+    padding: 13px 16px;
+    display: inline-block;
+    margin: 12px;
+    max-width: 68%;
+    font-size: 14px;
+    line-height: 1.45;
+    box-shadow: 0 2px 8px rgba(23,43,77,.025);
+}
+.user {
+    text-align: right;
+}
+.quick-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+}
+.quick {
+    border: 1px solid #D8DFEA;
+    border-radius: 13px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12.5px;
+    font-weight: 800;
+    background: white;
+    box-shadow: 0 2px 8px rgba(23,43,77,.025);
+}
+.inputbar {
+    min-height: 58px;
+    border: 1px solid #D8DFEA;
+    border-radius: 18px;
+    background: white;
+    display: grid;
+    grid-template-columns: 46px 1fr 58px;
+    align-items: center;
+    margin-top: 14px;
+    box-shadow: 0 6px 18px rgba(23,43,77,.045);
+}
+.send {
+    height: 44px;
+    width: 44px;
+    border-radius: 13px;
+    background: var(--blue);
+    color: white !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+}
+.pick {
+    display: flow-root !important;
+    min-height: clamp(112px, 17dvh, 135px);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 15px;
+    background: white;
+    margin-bottom: 13px;
+    box-shadow: 0 5px 16px rgba(23,43,77,.045);
+}
+.pick b { font-size: 15px; }
+.footer {
+    text-align: center;
+    color: var(--muted) !important;
+    font-size: 11.5px;
+    margin-top: 9px;
+}
+.visit {
+    float: right !important;
+    margin-top: 10px;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    padding: 8px 11px;
+    font-size: 11.5px;
+    background: white;
+    color: #0D2B5C !important;
+    font-weight: 750;
+}
+.main-shell-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+.view-all {
+    font-size: 13px;
+    color: #175CD3 !important;
+    font-weight: 800;
+    margin-top: 6px;
+}
+.sidebar-note {
+    font-size: 11.8px;
+    color: var(--muted) !important;
+    margin-top: 10px;
+    line-height: 1.35;
+}
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin: 18px 0;
+}
+.kpi {
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 14px;
+    background: #fff;
+    box-shadow: 0 5px 16px rgba(23,43,77,.045);
+}
+.kpi b { display: block; font-size: 1.35rem; margin-top: 4px; }
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 14px;
+}
+.form-field {
+    border: 1px solid #D8DFEA;
+    border-radius: 13px;
+    padding: 12px;
+    background: #fff;
+    color: #4B5565 !important;
+    font-size: 13px;
+}
+.wide { grid-column: 1/-1; }
+.preview-card {
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: 18px;
+    background: #fff;
+    box-shadow: 0 8px 22px rgba(23,43,77,.055);
+    margin-top: 14px;
+}
+.about-section { margin-top: 22px; }
+.about-section h2 { margin-bottom: 8px !important; }
+.about-section ul { margin-top: 8px; line-height: 1.8; }
+
+@media(max-height: 760px) {
+    :root { --app-h: calc(100dvh - .9rem); }
+    .pick { min-height: 108px; }
+    .inputbar { min-height: 52px; }
+    .quick { min-height: 39px; }
+    .brand { margin-bottom: 12px; }
+    .field { min-height: 38px; margin-bottom: 7px; }
+    .nav a { padding: 8px 10px; }
+    .tag { padding: 5px 8px; }
+    .sidebar-note { display: none; }
+    .info-card { padding: 10px 12px; }
+    .small-note { display: none; }
 }
 
-/* Force the element containers that contain horizontal layout blocks to stretch to 100% */
-div[data-testid="stMainBlockContainer"] > div[data-testid="stVerticalBlock"] > div[data-testid="element-container"]:has(div[data-testid="stHorizontalBlock"]),
-div[data-testid="column"] > div[data-testid="stVerticalBlock"] > div[data-testid="element-container"]:has(div[data-testid="stHorizontalBlock"]) {
-    height: 100% !important;
-    display: flex !important;
-    flex-direction: column !important;
-    flex-grow: 1 !important;
-    min-height: 0 !important;
-}
-
-/* Force main horizontal layout rows to stretch to full height */
-div[data-testid="stHorizontalBlock"]:has(.sidebar-card-marker),
-div[data-testid="stHorizontalBlock"]:has(.chat-card-marker),
-div[data-testid="stHorizontalBlock"]:has(.picks-card-marker),
-div[data-testid="stHorizontalBlock"]:has(.business-form-marker) {
-    height: 100% !important;
-    display: flex !important;
-    flex-grow: 1 !important;
-    min-height: 0 !important;
-}
-
-/* Force Streamlit columns to stretch to 100% height and layout as flex columns */
-div[data-testid="column"] > div[data-testid="stVerticalBlock"] {
-    height: 100% !important;
-    display: flex !important;
-    flex-direction: column !important;
-    flex-grow: 1 !important;
-}
-
-/* Force inner vertical blocks inside custom key cards to stretch to 100% height and layout as flex columns */
-.st-key-sidebar_card_container div[data-testid="stVerticalBlock"],
-.st-key-chat_card_container div[data-testid="stVerticalBlock"],
-.st-key-picks_card_container div[data-testid="stVerticalBlock"],
-.st-key-business_form_container div[data-testid="stVerticalBlock"],
-.st-key-preview_card_container div[data-testid="stVerticalBlock"] {
-    height: 100% !important;
-    display: flex !important;
-    flex-direction: column !important;
-    flex-grow: 1 !important;
-}
-
-/* Force container layout wrappers inside columns to stretch to 100% height */
-div[data-testid="column"] div[data-testid="stLayoutWrapper"] {
-    height: 100% !important;
-    display: flex !important;
-    flex-direction: column !important;
-    flex-grow: 1 !important;
-}
-
-.st-key-sidebar_card_container,
-div[data-testid="column"]:nth-of-type(1) > div[data-testid="stVerticalBlock"],
-div[data-testid="stVerticalBlock"]:has(.sidebar-card-marker) {
+/* Precise stVerticalBlockBorder Container Card Styles */
+div[data-testid="stVerticalBlockBorder-sidebar_card_container"],
+div[data-testid="stVerticalBlockBorder-chat_card_container"],
+div[data-testid="stVerticalBlockBorder-picks_card_container"],
+div[data-testid="stVerticalBlockBorder-business_form_container"],
+div[data-testid="stVerticalBlockBorder-preview_card_container"] {
     background: white !important;
     border: 1px solid var(--line) !important;
     border-radius: 24px !important;
     box-shadow: 0 16px 38px rgba(23,43,77,.08) !important;
     height: var(--app-h) !important;
     box-sizing: border-box !important;
+    overflow: hidden !important;
+    position: relative !important;
+}
+
+div[data-testid="stVerticalBlockBorder-sidebar_card_container"] {
     padding: 26px 24px 18px 24px !important;
     overflow-y: auto !important;
 }
-.st-key-sidebar_card_container::-webkit-scrollbar,
-div[data-testid="stVerticalBlock"]:has(.sidebar-card-marker)::-webkit-scrollbar {
+div[data-testid="stVerticalBlockBorder-sidebar_card_container"]::-webkit-scrollbar {
     width: 0px !important;
     background: transparent !important;
 }
 
-.st-key-chat_card_container,
-div[data-testid="column"]:nth-of-type(2) div[data-testid="column"]:nth-of-type(1) > div[data-testid="stVerticalBlock"]:has(.chat-card-marker),
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker) {
-    background: white !important;
-    border: 1px solid var(--line) !important;
-    border-radius: 24px !important;
-    box-shadow: 0 16px 38px rgba(23,43,77,.08) !important;
-    height: 100% !important; /* Stretch to fill parent stLayoutWrapper */
-    min-height: var(--app-h) !important;
-    box-sizing: border-box !important;
-    padding: 20px 24px 14px 24px !important;
-    overflow: hidden !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: flex-start !important;
-    align-items: stretch !important;
-    position: relative !important;
+div[data-testid="stVerticalBlockBorder-chat_card_container"] {
+    padding: 24px 26px 14px 26px !important;
 }
 
-/* Ensure children inside the chat container do not shrink, except the chatbox wrapper which grows to fill space */
-.st-key-chat_card_container div[data-testid="element-container"],
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="element-container"] {
-    flex-shrink: 0 !important;
-    flex-grow: 0 !important;
-}
-.st-key-chat_card_container div[data-testid="element-container"]:has(.chatbox),
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="element-container"]:has(.chatbox) {
-    flex-grow: 1 !important;
-    flex-shrink: 1 !important;
-    min-height: 0 !important;
-    height: 100% !important;
+div[data-testid="stVerticalBlockBorder-picks_card_container"] {
+    padding: 24px 20px 14px 20px !important;
 }
 
-.st-key-picks_card_container,
-div[data-testid="column"]:nth-of-type(2) div[data-testid="column"]:nth-of-type(2) > div[data-testid="stVerticalBlock"]:has(.picks-card-marker),
-div[data-testid="stVerticalBlock"]:has(.picks-card-marker) {
-    background: white !important;
-    border: 1px solid var(--line) !important;
-    border-radius: 24px !important;
-    box-shadow: 0 16px 38px rgba(23,43,77,.08) !important;
-    height: 100% !important; /* Stretch to fill parent stLayoutWrapper */
-    min-height: var(--app-h) !important;
-    box-sizing: border-box !important;
-    padding: 20px 20px 14px 20px !important;
-    overflow: hidden !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: flex-start !important;
-    align-items: stretch !important;
-    position: relative !important;
-}
-
-/* Ensure children inside the picks container do not shrink, except the picklist wrapper which grows to fill space */
-.st-key-picks_card_container div[data-testid="element-container"],
-div[data-testid="stVerticalBlock"]:has(.picks-card-marker) div[data-testid="element-container"] {
-    flex-shrink: 0 !important;
-    flex-grow: 0 !important;
-}
-.st-key-picks_card_container div[data-testid="element-container"]:has(.picklist),
-div[data-testid="stVerticalBlock"]:has(.picks-card-marker) div[data-testid="element-container"]:has(.picklist) {
-    flex-grow: 1 !important;
-    flex-shrink: 1 !important;
-    min-height: 0 !important;
-    height: 100% !important;
-}
-
-.st-key-business_form_container,
-div[data-testid="stVerticalBlock"]:has(.business-form-marker) {
-    background: white !important;
-    border: 1px solid var(--line) !important;
-    border-radius: 24px !important;
-    box-shadow: 0 16px 38px rgba(23,43,77,.08) !important;
-    height: var(--app-h) !important;
-    box-sizing: border-box !important;
-    padding: 26px 26px 18px 26px !important;
+div[data-testid="stVerticalBlockBorder-business_form_container"] {
+    padding: 26px 28px 16px 28px !important;
     overflow-y: auto !important;
-    position: relative !important;
 }
 
-.st-key-preview_card_container,
-div[data-testid="stVerticalBlock"]:has(.preview-card-marker) {
-    background: white !important;
-    border: 1px solid var(--line) !important;
-    border-radius: 24px !important;
-    box-shadow: 0 16px 38px rgba(23,43,77,.08) !important;
-    height: var(--app-h) !important;
-    box-sizing: border-box !important;
-    padding: 26px 20px 18px 20px !important;
-    overflow: hidden !important;
-    position: relative !important;
+div[data-testid="stVerticalBlockBorder-preview_card_container"] {
+    padding: 26px 20px 16px 20px !important;
 }
 
 /* Custom Overrides to Strip Streamlit Native Border and Spacing on Forms */
@@ -799,8 +1023,7 @@ div[data-testid="stTextInput"] input:focus, div[data-testid="stTextArea"] textar
 }
 
 /* Style quick action buttons inside chat container */
-.st-key-chat_card_container div[data-testid="stButton"] button,
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stButton"] button {
+div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stButton"] button {
     border: 1px solid #D8DFEA !important;
     border-radius: 13px !important;
     min-height: 44px !important;
@@ -811,40 +1034,14 @@ div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stBut
     box-shadow: 0 2px 8px rgba(23,43,77,.025) !important;
     transition: all 0.2s ease !important;
 }
-.st-key-chat_card_container div[data-testid="stButton"] button:hover,
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stButton"] button:hover {
+div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stButton"] button:hover {
     border-color: var(--blue) !important;
     color: var(--blue) !important;
     background: #F5F9FF !important;
 }
 
-/* Style premium inputs inside chat form specifically to be 48px tall */
-.st-key-chat_card_container div[data-testid="stForm"] div[data-testid="stTextInput"] input,
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="stTextInput"] input {
-    min-height: 48px !important;
-    height: 48px !important;
-    border-radius: 14px !important;
-    font-size: 14px !important;
-    padding: 0 16px !important;
-}
-
-/* Prevent any vertical truncation of chat inputs/buttons in form container */
-.st-key-chat_card_container div[data-testid="stForm"] div[data-testid="stTextInput"],
-.st-key-chat_card_container div[data-testid="stForm"] div[data-testid="stFormSubmitButton"],
-.st-key-chat_card_container div[data-testid="stForm"] div[data-testid="element-container"],
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="stTextInput"],
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"],
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="element-container"] {
-    height: auto !important;
-    min-height: 48px !important;
-    overflow: visible !important;
-}
-
-/* Style the submit button in the chat input bar form to be 48px tall */
-.st-key-chat_card_container div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button,
-.st-key-chat_card_container div[data-testid="stForm"] div[data-testid="stButton"] button,
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button,
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="stButton"] button {
+/* Style the submit button inside chat container */
+div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button {
     background: var(--blue) !important;
     color: white !important;
     border: none !important;
@@ -857,97 +1054,58 @@ div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stFor
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    flex-direction: row !important;
 }
-.st-key-chat_card_container div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover,
-.st-key-chat_card_container div[data-testid="stForm"] div[data-testid="stButton"] button:hover,
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover,
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="stButton"] button:hover {
+div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover {
     background: #1b5ed7 !important;
     color: white !important;
     box-shadow: 0 8px 22px rgba(13,110,253,.32) !important;
 }
 
-/* Ensure the chat input form elements align perfectly and strip native margins */
-.st-key-chat_card_container div[data-testid="stForm"],
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] {
-    width: 100% !important;
-    margin-top: 8px !important;
-    margin-bottom: 0 !important;
-}
-.st-key-chat_card_container div[data-testid="stForm"] div[data-testid="stHorizontalBlock"],
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="stHorizontalBlock"] {
-    align-items: center !important;
-    gap: 8px !important;
-}
-.st-key-chat_card_container div[data-testid="stForm"] div[data-testid="element-container"],
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="element-container"] {
-    margin: 0 !important;
-    padding: 0 !important;
+/* Style premium input inside chat form specifically to be 48px tall */
+div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stForm"] div[data-testid="stTextInput"] input {
+    min-height: 48px !important;
+    height: 48px !important;
+    border-radius: 14px !important;
+    font-size: 14px !important;
 }
 
-/* Style the submit button in the business form container (Using premium Singapore Red) */
-.st-key-business_form_container div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button,
-.st-key-business_form_container div[data-testid="stForm"] div[data-testid="stButton"] button,
-div[data-testid="stVerticalBlock"]:has(.business-form-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button,
-div[data-testid="stVerticalBlock"]:has(.business-form-marker) div[data-testid="stForm"] div[data-testid="stButton"] button {
-    background: linear-gradient(90deg,#ED1B24,#C4121A) !important;
+/* Style the submit button in the business form container */
+div[data-testid="stVerticalBlockBorder-business_form_container"] div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button,
+div[data-testid="stVerticalBlockBorder-business_form_container"] div[data-testid="stForm"] div[data-testid="stButton"] button {
+    background: linear-gradient(90deg, #0D6EFD, #2563EB) !important;
     color: white !important;
     justify-content: center !important;
     font-weight: 900 !important;
     border: 0 !important;
     border-radius: 13px !important;
-    box-shadow: 0 8px 18px rgba(237,27,36,.22) !important;
+    box-shadow: 0 8px 18px rgba(13, 110, 253, 0.22) !important;
     min-height: 44px !important;
 }
-.st-key-business_form_container div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover,
-.st-key-business_form_container div[data-testid="stForm"] div[data-testid="stButton"] button:hover,
-div[data-testid="stVerticalBlock"]:has(.business-form-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover,
-div[data-testid="stVerticalBlock"]:has(.business-form-marker) div[data-testid="stForm"] div[data-testid="stButton"] button:hover {
-    background: linear-gradient(90deg,#D0141C,#A80D14) !important;
+div[data-testid="stVerticalBlockBorder-business_form_container"] div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover,
+div[data-testid="stVerticalBlockBorder-business_form_container"] div[data-testid="stForm"] div[data-testid="stButton"] button:hover {
+    background: linear-gradient(90deg, #0B5ED7, #1D4ED8) !important;
     color: white !important;
-    box-shadow: 0 8px 22px rgba(237,27,36,.32) !important;
+    box-shadow: 0 8px 22px rgba(13, 110, 253, 0.32) !important;
 }
 
-/* Red accents on focus inside business form */
-.st-key-business_form_container div[data-testid="stTextInput"] input:focus, 
-.st-key-business_form_container div[data-testid="stTextArea"] textarea:focus,
-div[data-testid="stVerticalBlock"]:has(.business-form-marker) div[data-testid="stTextInput"] input:focus, 
-div[data-testid="stVerticalBlock"]:has(.business-form-marker) div[data-testid="stTextArea"] textarea:focus {
-    border-color: #ED1B24 !important;
-    box-shadow: 0 0 0 3px rgba(237,27,36,0.15) !important;
-    outline: none !important;
-}
-
-/* Force filter buttons horizontal layout block to stay side-by-side with NO wrapping and NO grid overlap */
-div[data-testid="stHorizontalBlock"]:has(div[class*="st-key-filter_btn_"]) {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    justify-content: flex-start !important;
-    align-items: center !important;
-    gap: 5px !important;
-    width: 100% !important;
-    grid-template-columns: none !important; /* Disable grid template columns */
-}
-
-/* Force each column in the filter bar to size to its content */
-div[data-testid="stHorizontalBlock"]:has(div[class*="st-key-filter_btn_"]) > div[data-testid="column"] {
-    flex: 0 0 auto !important;
-    width: auto !important;
-    max-width: none !important;
-    min-width: 0 !important;
+/* Strip borders and backgrounds from filter button containers */
+div[data-testid*="stVerticalBlockBorder-filter_btn_"] {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
     padding: 0 !important;
+    margin: 0 !important;
+    height: auto !important;
 }
 
 /* Style filter pill buttons inside picks card container (inactive state) */
-div[class*="st-key-filter_btn_"] button {
+div[data-testid*="stVerticalBlockBorder-filter_btn_"] button {
     border: none !important;
     border-radius: 999px !important;
     min-height: 32px !important;
     height: 32px !important;
-    padding: 0px 10px !important; /* beautiful padding */
-    font-size: 11px !important;
+    padding: 0px 10px !important;
+    font-size: 11.5px !important;
     font-weight: 800 !important;
     background-color: #EEF4FF !important;
     color: #175CD3 !important;
@@ -956,76 +1114,55 @@ div[class*="st-key-filter_btn_"] button {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    flex-direction: row !important; /* side-by-side icon + text */
+    flex-direction: row;
     gap: 4px !important;
     white-space: nowrap !important;
-    width: auto !important;
+    width: 100% !important;
 }
-div[class*="st-key-filter_btn_"] button:hover {
+div[data-testid*="stVerticalBlockBorder-filter_btn_"] button:hover {
     background-color: #E0ECFF !important;
     color: #114B9E !important;
 }
 
 /* Style filter pill buttons inside picks card container (active state) */
-div[class*="st-key-filter_btn_"] button[kind="primary"] {
+div[data-testid*="stVerticalBlockBorder-filter_btn_"] button[kind="primary"] {
     background: var(--blue) !important;
     color: white !important;
 }
-div[class*="st-key-filter_btn_"] button[kind="primary"]:hover {
+div[data-testid*="stVerticalBlockBorder-filter_btn_"] button[kind="primary"]:hover {
     background: #1b5ed7 !important;
     color: white !important;
 }
 
 /* Force filter button text properties to stay compact */
-div[class*="st-key-filter_btn_"] button * {
+div[data-testid*="stVerticalBlockBorder-filter_btn_"] button * {
     white-space: nowrap !important;
     word-break: keep-all !important;
-    font-size: 11px !important;
+    font-size: 11.5px !important;
     line-height: 1 !important;
 }
 
 /* Global override to completely eradicate Streamlit background flashing and card blinking */
 div[data-testid="stVerticalBlock"][data-stale="true"],
-.st-key-sidebar_card_container[data-stale="true"],
-.st-key-chat_card_container[data-stale="true"],
-.st-key-picks_card_container[data-stale="true"],
-.st-key-business_form_container[data-stale="true"],
-.st-key-preview_card_container[data-stale="true"],
-.st-key-sidebar_card_container:has([data-stale="true"]),
-.st-key-chat_card_container:has([data-stale="true"]),
-.st-key-picks_card_container:has([data-stale="true"]),
-.st-key-business_form_container:has([data-stale="true"]),
-.st-key-preview_card_container:has([data-stale="true"]) {
+div[data-testid*="stVerticalBlockBorder-"][data-stale="true"] {
     opacity: 1 !important;
     background: white !important;
     border-color: var(--line) !important;
     transition: none !important;
 }
 
-/* Dim card contents smoothly to 0.4 opacity during processing to give premium visual loading feedback */
-.st-key-sidebar_card_container:has([data-stale="true"]) > div,
-.st-key-chat_card_container:has([data-stale="true"]) > div,
-.st-key-picks_card_container:has([data-stale="true"]) > div,
-.st-key-business_form_container:has([data-stale="true"]) > div,
-.st-key-preview_card_container:has([data-stale="true"]) > div,
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker):has([data-stale="true"]) > div,
-div[data-testid="stVerticalBlock"]:has(.picks-card-marker):has([data-stale="true"]) > div,
-div[data-testid="stVerticalBlock"]:has(.business-form-marker):has([data-stale="true"]) > div,
-div[data-testid="stVerticalBlock"]:has(.preview-card-marker):has([data-stale="true"]) > div {
+/* Dim card contents smoothly during processing to give premium visual loading feedback */
+div[data-testid*="stVerticalBlockBorder-"]:has([data-stale="true"]) > div {
     opacity: 0.40 !important;
     filter: grayscale(15%) !important;
     transition: opacity 0.15s ease !important;
 }
 
 /* Premium blurred glass-backdrop on stale cards during computation */
-.st-key-chat_card_container:has([data-stale="true"])::before,
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker):has([data-stale="true"])::before,
-.st-key-picks_card_container:has([data-stale="true"])::before,
-div[data-testid="stVerticalBlock"]:has(.picks-card-marker):has([data-stale="true"])::before,
-.st-key-business_form_container:has([data-stale="true"])::before,
-div[data-testid="stVerticalBlock"]:has(.business-form-marker):has([data-stale="true"])::before,
-.st-key-preview_card_container:has([data-stale="true"])::before,
-div[data-testid="stVerticalBlock"]:has(.preview-card-marker):has([data-stale="true"])::before {
+div[data-testid*="stVerticalBlockBorder-chat_card_container"]:has([data-stale="true"])::before,
+div[data-testid*="stVerticalBlockBorder-picks_card_container"]:has([data-stale="true"])::before,
+div[data-testid*="stVerticalBlockBorder-business_form_container"]:has([data-stale="true"])::before,
+div[data-testid*="stVerticalBlockBorder-preview_card_container"]:has([data-stale="true"])::before {
     content: "" !important;
     position: absolute !important;
     top: 0 !important;
@@ -1036,18 +1173,14 @@ div[data-testid="stVerticalBlock"]:has(.preview-card-marker):has([data-stale="tr
     backdrop-filter: blur(2px) !important;
     z-index: 999998 !important;
     border-radius: 24px !important;
-    pointer-events: all !important; /* block clicks while loading */
+    pointer-events: all !important;
 }
 
 /* High-fidelity centered blue loading spinner on top of the backdrop */
-.st-key-chat_card_container:has([data-stale="true"])::after,
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker):has([data-stale="true"])::after,
-.st-key-picks_card_container:has([data-stale="true"])::after,
-div[data-testid="stVerticalBlock"]:has(.picks-card-marker):has([data-stale="true"])::after,
-.st-key-business_form_container:has([data-stale="true"])::after,
-div[data-testid="stVerticalBlock"]:has(.business-form-marker):has([data-stale="true"])::after,
-.st-key-preview_card_container:has([data-stale="true"])::after,
-div[data-testid="stVerticalBlock"]:has(.preview-card-marker):has([data-stale="true"])::after {
+div[data-testid*="stVerticalBlockBorder-chat_card_container"]:has([data-stale="true"])::after,
+div[data-testid*="stVerticalBlockBorder-picks_card_container"]:has([data-stale="true"])::after,
+div[data-testid*="stVerticalBlockBorder-business_form_container"]:has([data-stale="true"])::after,
+div[data-testid*="stVerticalBlockBorder-preview_card_container"]:has([data-stale="true"])::after {
     content: "" !important;
     position: absolute !important;
     top: 50% !important;
@@ -1071,21 +1204,22 @@ div[data-testid="stVerticalBlock"]:has(.preview-card-marker):has([data-stale="tr
 
 /* Custom animated bouncing typing indicator */
 @keyframes typing-bounce {
-  0%, 80%, 100% { transform: translateY(0); }
-  40% { transform: translateY(-6px); }
+    0%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-6px); }
 }
 .typing-dot {
-  width: 6px;
-  height: 6px;
-  background-color: var(--muted) !important;
-  border-radius: 50%;
-  display: inline-block;
-  animation: typing-bounce 1.4s infinite ease-in-out both;
+    width: 6px;
+    height: 6px;
+    background-color: var(--muted) !important;
+    border-radius: 50%;
+    display: inline-block;
+    animation: typing-bounce 1.4s infinite ease-in-out both;
 }
 .typing-dot:nth-child(2) { animation-delay: 0.2s; }
 .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 </style>
 """, unsafe_allow_html=True)
+
 
 def render_sidebar():
     with st.container(key="sidebar_card_container"):
