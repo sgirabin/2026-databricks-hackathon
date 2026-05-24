@@ -428,8 +428,6 @@ st.session_state["geolocation_state_debug"] = {
 }
 
 is_browser_location = location_source == "browser"
-radius_label = f"{radius_m / 1000:g} km" if is_browser_location else "Singapore-wide"
-discovery_subtitle = "Discovery radius" if is_browser_location else "Discovery scope"
 weather = fetch_weather(lat, lon)
 weather_summary = f"{weather['temperature']} · {weather['forecast']}"
 
@@ -475,12 +473,11 @@ all_cards = physical_cards + search_cards
 
 safe_location = escape(location)
 safe_coords = escape(coords)
-safe_radius_label = escape(radius_label)
 safe_first_interest = escape(interests[0])
 safe_weather_summary = escape(weather_summary)
 safe_weather_source = escape(weather["source"])
 safe_location_source = "Browser location" if is_browser_location else "Default area"
-safe_pick_scope = f"within {safe_radius_label}" if is_browser_location else "across Singapore"
+safe_pick_scope = "near your selected area" if is_browser_location else "across Singapore"
 safe_near_phrase = f"near {safe_location}" if is_browser_location else "across Singapore"
 safe_databricks_source = escape(databricks_source)
 
@@ -1015,11 +1012,11 @@ h2 {
 }
 
 /* Card styling uses marker classes so it works on older Streamlit builds without st.container(key=...). */
-div[data-testid="stVerticalBlock"]:has(.sidebar-card-marker),
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker),
-div[data-testid="stVerticalBlock"]:has(.picks-card-marker),
-div[data-testid="stVerticalBlock"]:has(.business-form-marker),
-div[data-testid="stVerticalBlock"]:has(.preview-card-marker) {
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .sidebar-card-marker),
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .chat-card-marker),
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .picks-card-marker),
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker),
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .preview-card-marker) {
     background: white !important;
     border: 1px solid var(--line) !important;
     border-radius: 24px !important;
@@ -1030,24 +1027,24 @@ div[data-testid="stVerticalBlock"]:has(.preview-card-marker) {
     position: relative !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.sidebar-card-marker) {
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .sidebar-card-marker) {
     padding: 26px 24px 18px 24px !important;
     overflow-y: auto !important;
 }
-div[data-testid="stVerticalBlock"]:has(.sidebar-card-marker)::-webkit-scrollbar {
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .sidebar-card-marker)::-webkit-scrollbar {
     width: 0px !important;
     background: transparent !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker) {
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .chat-card-marker) {
     padding: 24px 26px 14px 26px !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.picks-card-marker) {
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .picks-card-marker) {
     padding: 24px 20px 14px 20px !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.business-form-marker) {
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) {
     padding: 26px 28px 16px 28px !important;
     height: auto !important;
     min-height: var(--app-h) !important;
@@ -1057,24 +1054,24 @@ div[data-testid="stVerticalBlock"]:has(.business-form-marker) {
     padding-bottom: 54px !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.preview-card-marker) {
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .preview-card-marker) {
     padding: 26px 20px 16px 20px !important;
 }
 
-div[data-testid="stMainBlockContainer"]:has(.business-page-marker) div[data-testid="stVerticalBlock"]:has(.preview-card-marker) {
+div[data-testid="stMainBlockContainer"]:has(.business-page-marker) div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .preview-card-marker) {
     height: auto !important;
     min-height: var(--app-h) !important;
     max-height: none !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.business-form-marker)::-webkit-scrollbar {
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker)::-webkit-scrollbar {
     width: 8px !important;
 }
-div[data-testid="stVerticalBlock"]:has(.business-form-marker)::-webkit-scrollbar-thumb {
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker)::-webkit-scrollbar-thumb {
     background: #CBD5E1 !important;
     border-radius: 999px !important;
 }
-div[data-testid="stVerticalBlock"]:has(.business-form-marker)::-webkit-scrollbar-track {
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker)::-webkit-scrollbar-track {
     background: transparent !important;
 }
 
@@ -1105,7 +1102,7 @@ div[data-testid="stTextInput"] input:focus, div[data-testid="stTextArea"] textar
 }
 
 /* Style quick action buttons inside chat container */
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stButton"] button {
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .chat-card-marker) div[data-testid="stButton"] button {
     border: 1px solid #D8DFEA !important;
     border-radius: 13px !important;
     min-height: 44px !important;
@@ -1116,14 +1113,14 @@ div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stBut
     box-shadow: 0 2px 8px rgba(23,43,77,.025) !important;
     transition: all 0.2s ease !important;
 }
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stButton"] button:hover {
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .chat-card-marker) div[data-testid="stButton"] button:hover {
     border-color: var(--blue) !important;
     color: var(--blue) !important;
     background: #F5F9FF !important;
 }
 
 /* Style the submit button inside chat container */
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button {
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .chat-card-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button {
     background: var(--blue) !important;
     color: white !important;
     border: none !important;
@@ -1137,14 +1134,14 @@ div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stFor
     align-items: center !important;
     justify-content: center !important;
 }
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover {
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .chat-card-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover {
     background: #1b5ed7 !important;
     color: white !important;
     box-shadow: 0 8px 22px rgba(13,110,253,.32) !important;
 }
 
 /* Style premium input inside chat form and keep the send button aligned. */
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="stTextInput"] input {
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .chat-card-marker) div[data-testid="stForm"] div[data-testid="stTextInput"] input {
     min-height: 58px !important;
     height: 58px !important;
     line-height: 58px !important;
@@ -1152,18 +1149,18 @@ div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stFor
     font-size: 14px !important;
     padding: 0 18px !important;
 }
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="stHorizontalBlock"] {
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .chat-card-marker) div[data-testid="stForm"] div[data-testid="stHorizontalBlock"] {
     align-items: center !important;
     gap: 8px !important;
 }
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="element-container"] {
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .chat-card-marker) div[data-testid="stForm"] div[data-testid="element-container"] {
     margin: 0 !important;
     padding: 0 !important;
 }
 
 /* Style the submit button in the business form container */
-div[data-testid="stVerticalBlock"]:has(.business-form-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button,
-div[data-testid="stVerticalBlock"]:has(.business-form-marker) div[data-testid="stForm"] div[data-testid="stButton"] button {
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button,
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) div[data-testid="stForm"] div[data-testid="stButton"] button {
     background: linear-gradient(90deg, #0D6EFD, #2563EB) !important;
     color: white !important;
     justify-content: center !important;
@@ -1175,8 +1172,8 @@ div[data-testid="stVerticalBlock"]:has(.business-form-marker) div[data-testid="s
     width: 100% !important;
     letter-spacing: .01em !important;
 }
-div[data-testid="stVerticalBlock"]:has(.business-form-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover,
-div[data-testid="stVerticalBlock"]:has(.business-form-marker) div[data-testid="stForm"] div[data-testid="stButton"] button:hover {
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover,
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) div[data-testid="stForm"] div[data-testid="stButton"] button:hover {
     background: linear-gradient(90deg, #0B5ED7, #1D4ED8) !important;
     color: white !important;
     box-shadow: 0 8px 22px rgba(13, 110, 253, 0.32) !important;
@@ -1238,11 +1235,11 @@ div[class*="st-key-filter_btn_"] button * {
 
 [data-stale="true"],
 div[data-testid="stVerticalBlock"][data-stale="true"],
-div[data-testid="stVerticalBlock"]:has(.sidebar-card-marker)[data-stale="true"],
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker)[data-stale="true"],
-div[data-testid="stVerticalBlock"]:has(.picks-card-marker)[data-stale="true"],
-div[data-testid="stVerticalBlock"]:has(.business-form-marker)[data-stale="true"],
-div[data-testid="stVerticalBlock"]:has(.preview-card-marker)[data-stale="true"],
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .sidebar-card-marker)[data-stale="true"],
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .chat-card-marker)[data-stale="true"],
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .picks-card-marker)[data-stale="true"],
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker)[data-stale="true"],
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .preview-card-marker)[data-stale="true"],
 [data-testid="stForm"][data-stale="true"],
 [data-testid="stMarkdownContainer"][data-stale="true"] {
     opacity: 1 !important;
@@ -1251,11 +1248,11 @@ div[data-testid="stVerticalBlock"]:has(.preview-card-marker)[data-stale="true"],
     transition: none !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.sidebar-card-marker):has([data-stale="true"]) > div,
-div[data-testid="stVerticalBlock"]:has(.chat-card-marker):has([data-stale="true"]) > div,
-div[data-testid="stVerticalBlock"]:has(.picks-card-marker):has([data-stale="true"]) > div,
-div[data-testid="stVerticalBlock"]:has(.business-form-marker):has([data-stale="true"]) > div,
-div[data-testid="stVerticalBlock"]:has(.preview-card-marker):has([data-stale="true"]) > div {
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .sidebar-card-marker):has([data-stale="true"]) > div,
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .chat-card-marker):has([data-stale="true"]) > div,
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .picks-card-marker):has([data-stale="true"]) > div,
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker):has([data-stale="true"]) > div,
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .preview-card-marker):has([data-stale="true"]) > div {
     opacity: 1 !important;
     filter: none !important;
     transition: none !important;
@@ -1295,7 +1292,6 @@ def render_sidebar():
 <div class="info-card">
   <div class="info-row"><div class="info-icon">📍</div><div><div class="info-main">{safe_location}</div><div class="info-sub">{safe_location_source}</div></div></div>
   <div class="info-row"><div class="info-icon">{weather['icon']}</div><div><div class="info-main">{safe_weather_summary}</div><div class="info-sub">{safe_weather_source}</div></div></div>
-  <div class="info-row"><div class="info-icon">◎</div><div><div class="info-main">{safe_radius_label}</div><div class="info-sub">{discovery_subtitle}</div></div></div>
   <div class="info-row"><div class="info-icon">🧭</div><div><div class="info-main">{safe_coords}</div><div class="info-sub">Approx. centre point</div></div></div>
 </div>
 <div class="small-note">No manual save is needed. Ask the chat about another place, for example: “What can I do near Chinatown?”</div>
@@ -1314,7 +1310,7 @@ if page == "today":
             st.markdown('<div class="chat-card-marker"></div>', unsafe_allow_html=True)
             st.markdown(f'''
 <h1>Ask GoAround</h1><div class="muted">Your conversation-style local assistant.</div>
-<div style="margin-top:12px; margin-bottom:12px;"><span class="status">{weather['icon']} {safe_weather_summary}</span><span class="status">📍 {safe_location}</span><span class="status">◎ {safe_radius_label}</span></div>
+<div style="margin-top:12px; margin-bottom:12px;"><span class="status">{weather['icon']} {safe_weather_summary}</span><span class="status">📍 {safe_location}</span></div>
 ''', unsafe_allow_html=True)
             
             # Conversational state tracking
@@ -1540,6 +1536,6 @@ else:  # about page
         render_sidebar()
     with content_col:
         st.markdown(f'''
-<div class="app-card full-card"><h1>What is GoAround SG?</h1><div class="muted">A source-backed local discovery assistant for Singapore. Current area scope: {safe_location} · {safe_radius_label}.</div>
+<div class="app-card full-card"><h1>What is GoAround SG?</h1><div class="muted">A source-backed local discovery assistant for Singapore. Current area: {safe_location}.</div>
 <div class="about-section"><h2>For residents and visitors</h2><p>Ask what to eat, what to do with kids, rainy-day options, nearby deals, or a short visitor plan.</p></div><div class="about-section"><h2>For businesses</h2><p>Businesses can create local promotion cards that are shown to nearby users based on location, category, interests, and timing.</p></div><div class="about-section"><h2>Why it is different</h2><p>GoAround SG combines open data, source registries, browser location, weather, ranking, and AI conversation into one daily local assistant.</p></div><div class="about-section"><h2>Databricks usage in this prototype</h2><ul><li>Databricks Apps hosts the application.</li><li>Lakehouse / Delta can store Bronze, Silver, and Gold local discovery data.</li><li>Databricks SQL warehouse can serve candidate cards when configured.</li><li>Model Serving / GenAI can power Ask GoAround when a serving endpoint is configured.</li></ul></div><div class="footer">GoAround SG — Team R4131N. Source-backed local discovery. Verify final details at source.</div></div>
 ''', unsafe_allow_html=True)
