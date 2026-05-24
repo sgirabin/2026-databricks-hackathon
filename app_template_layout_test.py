@@ -1018,10 +1018,23 @@ div[data-testid="stVerticalBlockBorder-picks_card_container"] {
 div[data-testid="stVerticalBlockBorder-business_form_container"] {
     padding: 26px 28px 16px 28px !important;
     overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-bottom: 34px !important;
 }
 
 div[data-testid="stVerticalBlockBorder-preview_card_container"] {
     padding: 26px 20px 16px 20px !important;
+}
+
+.st-key-business_form_container,
+.st-key-business_form_container > div,
+.st-key-business_form_container div[data-testid="stVerticalBlock"] {
+    height: var(--app-h) !important;
+    max-height: var(--app-h) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-bottom: 34px !important;
+    box-sizing: border-box !important;
 }
 
 /* Custom Overrides to Strip Streamlit Native Border and Spacing on Forms */
@@ -1170,9 +1183,11 @@ div[data-testid*="stVerticalBlockBorder-filter_btn_"] button * {
     line-height: 1 !important;
 }
 
-/* Keep reruns visually stable without masking the app with stale-state overlays. */
+[data-stale="true"],
 div[data-testid="stVerticalBlock"][data-stale="true"],
-div[data-testid*="stVerticalBlockBorder-"][data-stale="true"] {
+div[data-testid*="stVerticalBlockBorder-"][data-stale="true"],
+[data-testid="stForm"][data-stale="true"],
+[data-testid="stMarkdownContainer"][data-stale="true"] {
     opacity: 1 !important;
     background: white !important;
     border-color: var(--line) !important;
@@ -1282,20 +1297,17 @@ if page == "today":
                     {"role": "assistant", "content": "Hi, I’m Ask GoAround. Ask me what to eat, what to do with kids, rainy-day options, nearby deals, or a short visitor plan."}
                 ]
             
-            is_thinking = "pending_query" in st.session_state
-            
-            # Build clean HTML history
-            chat_history_html = ""
-            for msg in st.session_state["ask_messages"][-6:]:  # Show last 6 messages
-                role = msg["role"]
-                content = escape(msg["content"]).replace("\n", "<br>")
-                if role == "user":
-                    chat_history_html += f'<div style="text-align:right; margin: 10px 0;"><span class="bubble" style="background:#EAF2FF; text-align:left;">{content}</span> 👤</div>'
-                else:
-                    chat_history_html += f'<div style="margin: 10px 0;">🤖 <span class="bubble">{content}</span></div>'
-                    
-            if is_thinking:
-                chat_history_html += f'''
+            def render_chat_history(include_thinking: bool = False) -> None:
+                chat_history_html = ""
+                for msg in st.session_state["ask_messages"][-6:]:
+                    role = msg["role"]
+                    content = escape(msg["content"]).replace("\n", "<br>")
+                    if role == "user":
+                        chat_history_html += f'<div style="text-align:right; margin: 10px 0;"><span class="bubble" style="background:#EAF2FF; text-align:left;">{content}</span> 👤</div>'
+                    else:
+                        chat_history_html += f'<div style="margin: 10px 0;">🤖 <span class="bubble">{content}</span></div>'
+                if include_thinking:
+                    chat_history_html += f'''
 <div style="margin: 10px 0;">
   🤖 <span class="bubble" style="display: inline-flex; align-items: center; gap: 4px; padding: 12px 16px;">
     <span class="typing-dot"></span>
@@ -1304,24 +1316,13 @@ if page == "today":
   </span>
 </div>
 '''
-                    
-            st.markdown(f'''
+                chat_placeholder.markdown(f'''
 <div class="chatbox">
 {chat_history_html}
 </div>
 ''', unsafe_allow_html=True)
             
-            # Inline spinner/query processing is done AFTER rendering chatbox to ensure typing indicator shows
-            if is_thinking:
-                query_to_run = st.session_state.pop("pending_query")
-                ans = answer_with_databricks(
-                    question=query_to_run,
-                    context=context,
-                    ranked=ranked_physical_picks,
-                    fallback="I am looking up details..."
-                )
-                st.session_state["ask_messages"].append({"role": "assistant", "content": ans})
-                st.rerun()
+            chat_placeholder = st.empty()
             
             # Quick Actions using real Streamlit buttons inside container columns
             pending_prompt = None
@@ -1352,8 +1353,17 @@ if page == "today":
         user_query = pending_prompt or (q_input.strip() if submitted and q_input.strip() else None)
         if user_query:
             st.session_state["ask_messages"].append({"role": "user", "content": user_query})
-            st.session_state["pending_query"] = user_query
-            st.rerun()
+            render_chat_history(include_thinking=True)
+            ans = answer_with_databricks(
+                question=user_query,
+                context=context,
+                ranked=ranked_physical_picks,
+                fallback="I am looking up details...",
+            )
+            st.session_state["ask_messages"].append({"role": "assistant", "content": ans})
+            render_chat_history()
+        else:
+            render_chat_history()
 
 elif page == "business":
     sidebar_col, form_col, preview_col = st.columns([0.18, 0.56, 0.26], gap="medium")
