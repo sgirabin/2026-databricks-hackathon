@@ -623,17 +623,23 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="block-cont
 }
 div.block-container, div[data-testid="stMainBlockContainer"], .main .block-container {
     max-width: none !important;
-    padding: .55rem .75rem .35rem .75rem !important;
+    padding: .65rem 1.15rem .45rem 1.15rem !important;
     height: 100dvh !important;
     overflow: hidden !important;
     box-sizing: border-box !important;
 }
 div[data-testid="stHorizontalBlock"] {
-    gap: 1rem !important;
+    gap: .9rem !important;
     align-items: stretch !important;
+    width: 100% !important;
+    max-width: 100% !important;
 }
 div[data-testid="stVerticalBlock"] {
     gap: 0 !important;
+}
+div[data-testid="column"] {
+    min-width: 0 !important;
+    overflow: visible !important;
 }
 div[data-testid="stMainBlockContainer"]:has(.business-page-marker),
 div.block-container:has(.business-page-marker),
@@ -750,6 +756,8 @@ h2 {
     padding: 13px 14px;
     margin: 10px 0;
     box-shadow: 0 5px 16px rgba(23,43,77,.045);
+    width: 100%;
+    box-sizing: border-box;
 }
 .info-row {
     display: flex;
@@ -918,6 +926,8 @@ h2 {
     background: white;
     margin-bottom: 13px;
     box-shadow: 0 5px 16px rgba(23,43,77,.045);
+    width: 100%;
+    box-sizing: border-box;
 }
 .pick b { font-size: 15px; }
 .footer {
@@ -967,8 +977,14 @@ h2 {
     padding: 14px;
     background: #fff;
     box-shadow: 0 5px 16px rgba(23,43,77,.045);
+    overflow: hidden;
+    position: relative;
 }
 .kpi b { display: block; font-size: 1.35rem; margin-top: 4px; }
+.kpi:nth-child(1){background:linear-gradient(145deg,#ECFDF3,#FFFFFF);border-color:#B7E4CA}.kpi:nth-child(1) b{color:#047857!important}
+.kpi:nth-child(2){background:linear-gradient(145deg,#EFF6FF,#FFFFFF);border-color:#BFDBFE}.kpi:nth-child(2) b{color:#1D4ED8!important}
+.kpi:nth-child(3){background:linear-gradient(145deg,#FFF7ED,#FFFFFF);border-color:#FED7AA}.kpi:nth-child(3) b{color:#C2410C!important}
+.kpi:nth-child(4){background:linear-gradient(145deg,#F5F3FF,#FFFFFF);border-color:#DDD6FE}.kpi:nth-child(4) b{color:#6D28D9!important}
 .form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -991,10 +1007,19 @@ h2 {
     background: #fff;
     box-shadow: 0 8px 22px rgba(23,43,77,.055);
     margin-top: 14px;
+    width: 100%;
+    box-sizing: border-box;
 }
 .about-section { margin-top: 22px; }
 .about-section h2 { margin-bottom: 8px !important; }
 .about-section ul { margin-top: 8px; line-height: 1.8; }
+.demo-hero{background:linear-gradient(135deg,#EFF6FF 0%,#FFFFFF 55%,#ECFDF3 100%);border:1px solid #D8E7FF;border-radius:22px;padding:22px;margin-bottom:20px}
+.demo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:18px}
+.demo-card{border:1px solid var(--line);border-radius:18px;padding:16px;background:#fff;box-shadow:0 8px 20px rgba(23,43,77,.055)}
+.demo-card b{font-size:1rem}.demo-card p{font-size:.9rem;line-height:1.55;color:#4B5565!important}
+.tech-pill{display:inline-block;margin:5px 6px 0 0;padding:8px 11px;border-radius:999px;background:#EEF4FF;color:#175CD3!important;font-weight:850;font-size:.82rem}
+.value-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:18px 0}
+.value-item{border-radius:16px;padding:13px;background:#0D2B5C;color:#fff!important}.value-item b,.value-item span{color:#fff!important}.value-item span{font-size:.8rem;opacity:.82}
 
 @media(max-height: 760px) {
     :root { --app-h: calc(100dvh - .9rem); }
@@ -1021,14 +1046,17 @@ div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .p
     border-radius: 24px !important;
     box-shadow: 0 16px 38px rgba(23,43,77,.08) !important;
     height: var(--app-h) !important;
+    width: 100% !important;
+    max-width: 100% !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
     position: relative !important;
 }
 
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .sidebar-card-marker) {
-    padding: 26px 24px 18px 24px !important;
+    padding: 24px 18px 18px 18px !important;
     overflow-y: auto !important;
+    overflow-x: hidden !important;
 }
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .sidebar-card-marker)::-webkit-scrollbar {
     width: 0px !important;
@@ -1040,7 +1068,8 @@ div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .c
 }
 
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .picks-card-marker) {
-    padding: 24px 20px 14px 20px !important;
+    padding: 24px 18px 14px 18px !important;
+    overflow-x: hidden !important;
 }
 
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) {
@@ -1054,7 +1083,8 @@ div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .b
 }
 
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .preview-card-marker) {
-    padding: 26px 20px 16px 20px !important;
+    padding: 26px 18px 16px 18px !important;
+    overflow-x: hidden !important;
 }
 
 div[data-testid="stMainBlockContainer"]:has(.business-page-marker) div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .preview-card-marker) {
@@ -1186,6 +1216,10 @@ div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .b
     padding: 0 28px !important;
     letter-spacing: .01em !important;
 }
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button *,
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) div[data-testid="stForm"] div[data-testid="stButton"] button * {
+    color: white !important;
+}
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover,
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) div[data-testid="stForm"] div[data-testid="stButton"] button:hover {
     background: linear-gradient(135deg, #0B5ED7 0%, #1D4ED8 100%) !important;
@@ -1308,8 +1342,6 @@ def render_sidebar():
   <div class="info-row"><div class="info-icon">{weather['icon']}</div><div><div class="info-main">{safe_weather_summary}</div><div class="info-sub">{safe_weather_source}</div></div></div>
   <div class="info-row"><div class="info-icon">🧭</div><div><div class="info-main">{safe_coords}</div><div class="info-sub">Approx. centre point</div></div></div>
 </div>
-<div class="small-note">No manual save is needed. Ask the chat about another place, for example: “What can I do near Chinatown?”</div>
-<div class="sidebar-note">Source-backed. Verify details at source.</div>
 <div class="footer" style="margin-top:15px; text-align:left; font-size:11px; line-height:1.4;">©2026 GoAroundSG.<br>Terms of Service. Privacy Policy</div>
 ''', unsafe_allow_html=True)
 
@@ -1538,6 +1570,25 @@ else:  # about page
         render_sidebar()
     with content_col:
         st.markdown(f'''
-<div class="app-card full-card"><h1>What is GoAround SG?</h1><div class="muted">A source-backed local discovery assistant for Singapore. Current area: {safe_location}.</div>
-<div class="about-section"><h2>For residents and visitors</h2><p>Ask what to eat, what to do with kids, rainy-day options, nearby deals, or a short visitor plan.</p></div><div class="about-section"><h2>For businesses</h2><p>Businesses can create local promotion cards that are shown to nearby users based on location, category, interests, and timing.</p></div><div class="about-section"><h2>Why it is different</h2><p>GoAround SG combines open data, source registries, browser location, weather, ranking, and AI conversation into one daily local assistant.</p></div><div class="about-section"><h2>Databricks usage in this prototype</h2><ul><li>Databricks Apps hosts the application.</li><li>Lakehouse / Delta can store Bronze, Silver, and Gold local discovery data.</li><li>Databricks SQL warehouse can serve candidate cards when configured.</li><li>Model Serving / GenAI can power Ask GoAround when a serving endpoint is configured.</li></ul></div><div class="footer">GoAround SG — Team R4131N. Source-backed local discovery. Verify final details at source.</div></div>
+<div class="app-card full-card">
+  <div class="demo-hero">
+    <h1>GoAround SG: source-backed hyperlocal discovery</h1>
+    <div class="muted">A Databricks-powered assistant that helps residents, visitors, and local businesses discover useful things nearby. Demo area: {safe_location}.</div>
+  </div>
+  <div class="value-strip">
+    <div class="value-item"><b>Less searching</b><br><span>One local answer instead of many tabs.</span></div>
+    <div class="value-item"><b>More trust</b><br><span>Cards link back to public or business sources.</span></div>
+    <div class="value-item"><b>Context aware</b><br><span>Location, weather, distance, and interests matter.</span></div>
+    <div class="value-item"><b>Local growth</b><br><span>Nearby businesses can publish relevant promotions.</span></div>
+  </div>
+  <div class="demo-grid">
+    <div class="demo-card"><b>Problem</b><p>Singapore has many open datasets and local sources, but they are fragmented. Users must know what to search for, compare sources, and still decide what is useful nearby right now.</p></div>
+    <div class="demo-card"><b>Solution</b><p>GoAround turns open data, source registries, weather, distance, and business promotions into ranked daily picks plus a conversational assistant.</p></div>
+    <div class="demo-card"><b>Demo flow</b><p>Open Today, allow location, adjust distance and criteria, ask Ask GoAround, then publish a mock promotion from the Business page to see how merchants can join the feed.</p></div>
+  </div>
+  <div class="about-section"><h2>Who benefits?</h2><p><b>Residents</b> find food, parks, family activities, and deals without manually checking many apps. <b>Visitors</b> get a short local plan around where they are. <b>Businesses</b> can surface timely promotions to nearby users instead of relying only on broad social ads.</p></div>
+  <div class="about-section"><h2>Databricks technology used</h2><span class="tech-pill">Databricks Apps hosting</span><span class="tech-pill">Delta Lake / Lakehouse tables</span><span class="tech-pill">Databricks SQL warehouse</span><span class="tech-pill">Model Serving / GenAI-ready assistant</span><span class="tech-pill">Bronze-Silver-Gold data pipeline</span><p class="muted" style="margin-top:12px;">Candidate cards can be prepared as Gold tables, queried through Databricks SQL, ranked by context, and explained through an AI assistant with source-backed guardrails.</p></div>
+  <div class="about-section"><h2>Why it is valuable</h2><p>GoAround demonstrates how public data and merchant-submitted data can become a practical daily local companion. The product value is not just a chatbot: it is a trusted hyperlocal retrieval, ranking, and promotion layer that can scale across Singapore neighbourhoods.</p></div>
+  <div class="footer">GoAround SG — Team R4131N. Source-backed local discovery. Verify final details at source.</div>
+</div>
 ''', unsafe_allow_html=True)
