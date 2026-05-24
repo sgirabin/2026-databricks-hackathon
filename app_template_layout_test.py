@@ -19,12 +19,12 @@ st.markdown("""
   --line:#E3EAF5;
   --blue:#0D6EFD;
   --green:#10B981;
-  --app-h:calc(100dvh - 1.1rem);
+  --app-h:calc(100dvh - 1.05rem);
   --chat-body-h:clamp(280px, calc(100dvh - 395px), 560px);
   --picks-body-h:clamp(390px, calc(100dvh - 152px), 760px);
 }
 @supports not (height:100dvh){
-  :root{--app-h:calc(100vh - 1.1rem);--chat-body-h:clamp(280px, calc(100vh - 395px), 560px);--picks-body-h:clamp(390px, calc(100vh - 152px), 760px);}
+  :root{--app-h:calc(100vh - 1.05rem);--chat-body-h:clamp(280px, calc(100vh - 395px), 560px);--picks-body-h:clamp(390px, calc(100vh - 152px), 760px);}
 }
 html,body,.stApp,[data-testid="stAppViewContainer"],[data-testid="block-container"]{
   background:var(--bg)!important;
@@ -40,38 +40,25 @@ html,body,.stApp,[data-testid="stAppViewContainer"],[data-testid="block-containe
   overflow:hidden!important;
 }
 div[data-testid="stHorizontalBlock"]{gap:1rem!important;align-items:stretch!important}
-div[data-testid="stVerticalBlock"]{gap:.45rem!important}
+div[data-testid="stVerticalBlock"]{gap:0!important}
 
-/* Important: make accidental/base Streamlit bordered containers invisible.
-   Only the three real panels below should look like cards. */
-div[data-testid="stVerticalBlockBorderWrapper"]{
-  background:transparent!important;
-  border-color:transparent!important;
-  border-radius:0!important;
-  box-shadow:none!important;
-  overflow:visible!important;
-  height:auto!important;
+/* No Streamlit bordered containers in this template. These cards are the only visible shells. */
+.app-card{
+  height:var(--app-h);
+  background:white;
+  border:1px solid var(--line);
+  border-radius:24px;
+  box-shadow:0 16px 38px rgba(23,43,77,.08);
+  overflow:hidden;
+  box-sizing:border-box;
 }
-div[data-testid="stVerticalBlockBorderWrapper"]:has(.sidebar-root),
-div[data-testid="stVerticalBlockBorderWrapper"]:has(.chat-card),
-div[data-testid="stVerticalBlockBorderWrapper"]:has(.picks-card){
-  background:white!important;
-  border-color:var(--line)!important;
-  border-radius:24px!important;
-  box-shadow:0 16px 38px rgba(23,43,77,.08)!important;
-  overflow:hidden!important;
-  height:var(--app-h)!important;
-}
-div[data-testid="stVerticalBlockBorderWrapper"]:has(.sidebar-root) > div,
-div[data-testid="stVerticalBlockBorderWrapper"]:has(.chat-card) > div,
-div[data-testid="stVerticalBlockBorderWrapper"]:has(.picks-card) > div{
-  height:100%!important;
-  overflow:hidden!important;
-}
+.sidebar-card{padding:26px 24px 18px 24px}
+.chat-card{padding:28px 28px 18px 28px}
+.picks-card{padding:28px 24px 18px 24px}
 .stMarkdown,.stCaption,label,p,span,div,h1,h2,h3,h4,h5,h6,li{color:var(--text)!important}
 .muted,.stCaption,.stCaption *{color:var(--muted)!important}
-h1{font-size:clamp(1.65rem,2.2vw,2.05rem)!important;letter-spacing:.01em;margin-bottom:.15rem!important}
-h2{font-size:clamp(1.25rem,1.55vw,1.55rem)!important;margin-bottom:.15rem!important}
+h1{font-size:clamp(1.65rem,2.2vw,2.05rem)!important;letter-spacing:.01em;margin:0 0 .15rem 0!important}
+h2{font-size:clamp(1.25rem,1.55vw,1.55rem)!important;margin:0 0 .15rem 0!important}
 .brand{display:flex;gap:13px;align-items:center;margin-bottom:clamp(14px,2dvh,20px)}
 .pin{width:42px;height:42px;border-radius:50%;background:linear-gradient(145deg,#0D6EFD,#20B2AA);box-shadow:0 10px 22px rgba(13,110,253,.20);flex:0 0 auto}
 .brand-title{font-size:21px;font-weight:900;color:#0D2B5C}.green{color:var(--green)!important}
@@ -82,7 +69,6 @@ h2{font-size:clamp(1.25rem,1.55vw,1.55rem)!important;margin-bottom:.15rem!import
 .location-field{min-height:56px;align-items:flex-start;padding-top:9px;line-height:1.35}
 .tag{border-radius:999px;padding:6px 10px;background:#EEF4FF;color:#175CD3!important;font-size:11.5px;font-weight:800;display:inline-block;margin:3px}.tag-wrap{margin:7px 0 12px 0}
 .status{display:inline-block;border:1px solid var(--line);border-radius:12px;padding:9px 14px;font-size:12.5px;margin:0 8px 12px 0;background:white;box-shadow:0 2px 8px rgba(23,43,77,.025)}
-.chat-card,.picks-card,.sidebar-root{height:100%;box-sizing:border-box;overflow:hidden}
 .chatbox{height:var(--chat-body-h);border-radius:18px;background:linear-gradient(180deg,#FFFFFF 0%,#FBFCFE 100%);border:1px dashed #D8E2F0;padding:22px;overflow:hidden;box-sizing:border-box}
 .bubble{border-radius:18px;background:#F1F5F9;padding:13px 16px;display:inline-block;margin:12px;max-width:68%;font-size:14px;line-height:1.45;box-shadow:0 2px 8px rgba(23,43,77,.025)}
 .user{text-align:right}.quick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}.quick{border:1px solid #D8DFEA;border-radius:13px;min-height:44px;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;background:white;box-shadow:0 2px 8px rgba(23,43,77,.025)}
@@ -90,16 +76,15 @@ h2{font-size:clamp(1.25rem,1.55vw,1.55rem)!important;margin-bottom:.15rem!import
 .send{height:44px;width:44px;border-radius:13px;background:var(--blue);color:white!important;display:flex;align-items:center;justify-content:center;font-weight:900}
 .picklist{height:var(--picks-body-h);overflow:hidden}.pick{min-height:clamp(112px,17dvh,135px);border:1px solid var(--line);border-radius:18px;padding:15px;background:white;margin-bottom:13px;box-shadow:0 5px 16px rgba(23,43,77,.045)}.pick b{font-size:15px}
 .footer{text-align:center;color:var(--muted)!important;font-size:11.5px;margin-top:9px}.visit{display:inline-block;margin-top:10px;border:1px solid var(--line);border-radius:11px;padding:8px 11px;font-size:11.5px;background:white;color:#0D2B5C!important;font-weight:750}.save{background:linear-gradient(90deg,#0D6EFD,#2563EB)!important;color:white!important;justify-content:center!important;font-weight:900!important;border:0!important;box-shadow:0 8px 18px rgba(13,110,253,.22)!important}.main-shell-title{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.view-all{font-size:13px;color:#175CD3!important;font-weight:800;margin-top:6px}.sidebar-note{font-size:11.8px;color:var(--muted)!important;margin-top:10px;line-height:1.35}
-@media(max-height:760px){:root{--app-h:calc(100dvh - .9rem);--chat-body-h:clamp(260px, calc(100dvh - 405px), 420px);--picks-body-h:clamp(370px, calc(100dvh - 165px), 620px)}.pick{min-height:108px}.inputbar{min-height:52px}.quick{min-height:39px}.brand{margin-bottom:12px}.field{min-height:38px;margin-bottom:7px}.location-field{min-height:48px}.nav div{padding:8px 10px}.tag{padding:5px 8px}.sidebar-note{display:none}}
+@media(max-height:760px){:root{--app-h:calc(100dvh - .9rem);--chat-body-h:clamp(260px, calc(100dvh - 405px), 420px);--picks-body-h:clamp(370px, calc(100dvh - 165px), 620px)}.pick{min-height:108px}.inputbar{min-height:52px}.quick{min-height:39px}.brand{margin-bottom:12px}.field{min-height:38px;margin-bottom:7px}.location-field{min-height:48px}.nav div{padding:8px 10px}.tag{padding:5px 8px}.sidebar-note{display:none}.sidebar-card,.chat-card,.picks-card{padding-top:22px}}
 </style>
 """, unsafe_allow_html=True)
 
 left, right = st.columns([0.18, 0.82], gap="small")
 
 with left:
-    with st.container(border=True):
-        st.markdown('''
-<div class="sidebar-root">
+    st.markdown('''
+<div class="app-card sidebar-card">
 <div class="brand"><div class="pin"></div><div><div class="brand-title">GoAround <span class="green">SG</span></div><div class="subtitle">AI local discovery assistant<br>for useful lobang near you.</div></div></div>
 <div class="nav"><div class="active">● GoAround Today</div><div>○ Business Promotion</div><div>○ About Databricks</div></div>
 <div class="side-title">My area</div><div class="subtitle">Tell us where you are to get better picks.</div><br>
@@ -114,9 +99,8 @@ with left:
 with right:
     chat_col, picks_col = st.columns([0.68, 0.32], gap="large")
     with chat_col:
-        with st.container(border=True):
-            st.markdown('''
-<div class="chat-card">
+        st.markdown('''
+<div class="app-card chat-card">
 <h1>Ask GoAround</h1>
 <div class="muted">Your conversation-style local assistant.</div>
 <div style="margin-top:12px"><span class="status">☀️ 35.0°C Sunny</span><span class="status">📍 Seng Kang, Singapore</span><span class="status">◎ Within 1.5 km</span></div>
@@ -131,9 +115,8 @@ with right:
 </div>
 ''', unsafe_allow_html=True)
     with picks_col:
-        with st.container(border=True):
-            st.markdown('''
-<div class="picks-card">
+        st.markdown('''
+<div class="app-card picks-card">
 <div class="main-shell-title"><div><h2>Today’s Picks</h2><div class="muted">Curated for you based on your area and interests.</div></div><div class="view-all">View all</div></div>
 <div class="picklist">
   <div class="pick"><b>🤖 $3.50 Chicken Rice Stall</b><br><span class="muted">Food · Google Maps · 0.4 km</span><br>Popular hawker stall with good reviews and long queue.<br><span class="visit">Visit Website</span></div>
