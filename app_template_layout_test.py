@@ -759,7 +759,7 @@ h2 {
     margin: 10px 0;
     box-shadow: 0 5px 16px rgba(23,43,77,.045);
     width: 85%;
-    margin-left: auto;
+    margin-left: 0;
     margin-right: auto;
     box-sizing: border-box;
 }
