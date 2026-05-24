@@ -484,8 +484,6 @@ safe_pick_scope = f"within {safe_radius_label}" if is_browser_location else "acr
 safe_near_phrase = f"near {safe_location}" if is_browser_location else "across Singapore"
 safe_databricks_source = escape(databricks_source)
 
-# Compile the picks feed HTML, applying the active filter if selected
-active_filter = st.session_state.get("active_filter", "all")
 filter_aliases = {
     "all": ("all",),
     "food": ("food", "hawker", "eat", "restaurant", "dining"),
@@ -493,58 +491,60 @@ filter_aliases = {
     "event": ("event", "events", "community", "weekend"),
     "deal": ("deal", "deals", "promo", "promotion", "discount", "offer"),
 }
-if active_filter not in filter_aliases:
-    active_filter = "all"
-    st.session_state["active_filter"] = "all"
-if active_filter != "all":
+
+
+def build_picks_feed(active_filter: str, max_distance_km: float) -> tuple[str, str]:
+    if active_filter not in filter_aliases:
+        active_filter = "all"
     active_terms = filter_aliases[active_filter]
-    filtered_picks = []
-    for pick in ranked_picks:
-        card = pick.card
-        # Check if active filter matches card type, category, title, description, or tags
-        haystack = " ".join([
-            card.card_type,
-            card.category,
-            card.title,
-            card.description,
-            " ".join(card.tags)
-        ]).lower()
-        if any(term in haystack for term in active_terms):
-            filtered_picks.append(pick)
-            
-    if filtered_picks:
-        picks_html = "".join(render_pick_html(row) for row in filtered_picks)
-        picks_footer = f"{len(filtered_picks)} of {len(all_cards)} picks match filter⌄"
-    else:
-        picks_html = (
+    max_distance_m = max_distance_km * 1000
+    scoped_picks = [
+        pick for pick in ranked_picks
+        if pick.distance_m is None or pick.distance_m <= max_distance_m
+    ]
+    if active_filter != "all":
+        matched_picks = []
+        for pick in scoped_picks:
+            card = pick.card
+            haystack = " ".join([
+                card.card_type,
+                card.category,
+                card.title,
+                card.description,
+                " ".join(card.tags)
+            ]).lower()
+            if any(term in haystack for term in active_terms):
+                matched_picks.append(pick)
+        scoped_picks = matched_picks
+
+    if scoped_picks:
+        footer = f"{len(scoped_picks)} of {len(all_cards)} picks within {max_distance_km:g} km⌄"
+        return "".join(render_pick_html(row) for row in scoped_picks), footer
+
+    if ranked_picks:
+        empty_html = (
             '<div class="pick" style="text-align: center; padding: 30px 20px;">'
             '<b>🔍 No matching picks found</b><br>'
-            '<span class="muted" style="font-size: 0.9rem;">There are no active cards near you matching this filter.</span><br>'
-            '<span class="muted" style="font-size: 0.85rem; display: block; margin-top: 10px;">Try switching to another category above.</span>'
+            '<span class="muted" style="font-size: 0.9rem;">No active cards match this distance and keyword filter.</span><br>'
+            '<span class="muted" style="font-size: 0.85rem; display: block; margin-top: 10px;">Try increasing distance or choosing another keyword.</span>'
             '</div>'
         )
-        picks_footer = f"0 of {len(all_cards)} picks match filter⌄"
-else:
-    if ranked_picks:
-        picks_html = "".join(render_pick_html(row) for row in ranked_picks)
-        picks_footer = f"{len(all_cards)} candidates ranked via Databricks⌄"
-    else:
-        picks_html = (
-            f'<div class="pick"><b>🤖 {safe_first_interest.title()} {safe_near_phrase}</b><br>'
-            f'<span class="muted">{safe_databricks_source}</span><br>'
-            'Databricks-backed picks are unavailable, so this placeholder is shown until SQL access is configured.<br>'
-            '<span class="visit">Visit Website</span></div>'
-            f'<div class="pick"><b>{weather["icon"]} Weather-aware plan</b><br>'
-            f'<span class="muted">{safe_weather_summary}</span><br>'
-            'Use this context to choose indoor, outdoor or transport-friendly options.<br>'
-            '<span class="visit">Visit Website</span></div>'
-            '<div class="pick"><b>🏷️ Singapore deal updates</b><br>'
-            f'<span class="muted">Interests · {escape(", ".join(interests[:3]))}</span><br>'
-            'Featured grocery offers and deal sources across Singapore.<br><span class="visit">Visit Website</span></div>'
-        )
-        picks_footer = "Databricks SQL not ready⌄"
+        return empty_html, f"0 of {len(all_cards)} picks match filter⌄"
 
-safe_picks_footer = escape(picks_footer)
+    fallback_html = (
+        f'<div class="pick"><b>🤖 {safe_first_interest.title()} {safe_near_phrase}</b><br>'
+        f'<span class="muted">{safe_databricks_source}</span><br>'
+        'Databricks-backed picks are unavailable, so this placeholder is shown until SQL access is configured.<br>'
+        '<span class="visit">Visit Website</span></div>'
+        f'<div class="pick"><b>{weather["icon"]} Weather-aware plan</b><br>'
+        f'<span class="muted">{safe_weather_summary}</span><br>'
+        'Use this context to choose indoor, outdoor or transport-friendly options.<br>'
+        '<span class="visit">Visit Website</span></div>'
+        '<div class="pick"><b>🏷️ Singapore deal updates</b><br>'
+        f'<span class="muted">Interests · {escape(", ".join(interests[:3]))}</span><br>'
+        'Featured grocery offers and deal sources across Singapore.<br><span class="visit">Visit Website</span></div>'
+    )
+    return fallback_html, "Databricks SQL not ready⌄"
 
 
 def make_url(target_page: str | None = None, **updates: str) -> str:
@@ -1354,10 +1354,13 @@ if page == "today":
 ''', unsafe_allow_html=True)
             
             chat_placeholder = st.empty()
-            
+            pending_query = st.session_state.get("pending_query")
+            if pending_query:
+                render_chat_history(include_thinking=True)
+
             # Quick Actions using real Streamlit buttons inside container columns
             pending_prompt = None
-            if len(st.session_state.get("ask_messages", [])) <= 1:
+            if not pending_query and len(st.session_state.get("ask_messages", [])) <= 1:
                 prompts = [
                     ("🍴 Eat cheap", "Any cheap food spots near me?"),
                     ("📅 Weekend events", f"What weekend events are happening near {safe_location}?"),
@@ -1379,61 +1382,41 @@ if page == "today":
             st.markdown(f'''
 <div class="footer" style="margin-top:10px;">Go Around can make mistakes. Please check details at the source</div>
 ''', unsafe_allow_html=True)
-        
-        # Processing user input
-        user_query = pending_prompt or (q_input.strip() if submitted and q_input.strip() else None)
-        if user_query:
-            st.session_state["ask_messages"].append({"role": "user", "content": user_query})
-            render_chat_history(include_thinking=True)
-            ans = answer_with_databricks(
-                question=user_query,
-                context=context,
-                ranked=ranked_physical_picks,
-                fallback="I am looking up details...",
-            )
-            st.session_state["ask_messages"].append({"role": "assistant", "content": ans})
-            render_chat_history()
-            if streamlit_js_eval:
-                streamlit_js_eval(
-                    js_expressions=(
-                        "setTimeout(() => {"
-                        "const boxes = window.parent.document.querySelectorAll('.chatbox');"
-                        "const box = boxes[boxes.length - 1];"
-                        "if (box) { box.scrollTop = box.scrollHeight; }"
-                        "}, 100); 'ok';"
-                    ),
-                    key=f"chat_scroll_{len(st.session_state['ask_messages'])}",
+
+            if pending_query:
+                st.session_state.pop("pending_query", None)
+                ans = answer_with_databricks(
+                    question=pending_query,
+                    context=context,
+                    ranked=ranked_physical_picks,
+                    fallback="I am looking up details...",
                 )
-        else:
-            render_chat_history()
+                st.session_state["ask_messages"].append({"role": "assistant", "content": ans})
+                render_chat_history()
+                if streamlit_js_eval:
+                    streamlit_js_eval(
+                        js_expressions=(
+                            "setTimeout(() => {"
+                            "const boxes = window.parent.document.querySelectorAll('.chatbox');"
+                            "const box = boxes[boxes.length - 1];"
+                            "if (box) { box.scrollTop = box.scrollHeight; }"
+                            "}, 100); 'ok';"
+                        ),
+                        key=f"chat_scroll_{len(st.session_state['ask_messages'])}",
+                    )
+            else:
+                render_chat_history()
+
+        # Processing user input after the chat card exists lets the next run hide the starter immediately.
+        user_query = pending_prompt or (q_input.strip() if submitted and q_input.strip() else None)
+        if user_query and not pending_query:
+            st.session_state["ask_messages"].append({"role": "user", "content": user_query})
+            st.session_state["pending_query"] = user_query
+            st.rerun()
 
     with picks_col:
         with st.container():
             st.markdown('<div class="picks-card-marker"></div>', unsafe_allow_html=True)
-            filter_options = [
-                ("🌟 All", "all"),
-                ("🍴 Food", "food"),
-                ("🛒 Grocery", "grocery"),
-                ("📅 Events", "event"),
-                ("🏷️ Deals", "deal")
-            ]
-
-            if "active_filter" not in st.session_state:
-                st.session_state["active_filter"] = "all"
-
-            cols = st.columns(len(filter_options))
-            for idx, (label, val) in enumerate(filter_options):
-                is_active = (st.session_state["active_filter"] == val)
-                if cols[idx].button(
-                    label,
-                    key=f"filter_btn_{val}",
-                    type="primary" if is_active else "secondary",
-                    use_container_width=True
-                ):
-                    if st.session_state["active_filter"] != val:
-                        st.session_state["active_filter"] = val
-                        st.rerun()
-
             st.markdown(f'''
 <div class="main-shell-title" style="margin-top: 14px; margin-bottom: 12px;">
   <div>
@@ -1442,6 +1425,30 @@ if page == "today":
   </div>
 </div>
 ''', unsafe_allow_html=True)
+            distance_filter_km = st.slider(
+                "Distance radius",
+                min_value=0.0,
+                max_value=3.0,
+                value=float(st.session_state.get("distance_filter_km", min(radius_m / 1000, 3.0))),
+                step=0.1,
+                format="%.1f km",
+                key="distance_filter_km",
+            )
+            filter_labels = {
+                "all": "🌟 All keywords",
+                "food": "🍴 Food, hawker, dining",
+                "grocery": "🛒 Grocery, supermarket, market",
+                "event": "📅 Events, community, weekend",
+                "deal": "🏷️ Deals, promos, offers",
+            }
+            active_filter = st.selectbox(
+                "Filter keyword",
+                options=list(filter_labels.keys()),
+                format_func=lambda value: filter_labels[value],
+                key="active_filter",
+            )
+            picks_html, picks_footer = build_picks_feed(active_filter, distance_filter_km)
+            safe_picks_footer = escape(picks_footer)
 
             st.markdown(f'''
 <div class="picklist" style="margin-top: 14px;">{picks_html}</div>
