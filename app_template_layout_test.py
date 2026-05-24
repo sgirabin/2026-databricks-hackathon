@@ -637,6 +637,20 @@ div[data-testid="stHorizontalBlock"] {
 div[data-testid="stVerticalBlock"] {
     gap: 0 !important;
 }
+div[data-testid="stMainBlockContainer"]:has(.business-page-marker),
+div.block-container:has(.business-page-marker),
+[data-testid="stAppViewContainer"]:has(.business-page-marker) {
+    height: auto !important;
+    min-height: 100dvh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+html:has(.business-page-marker),
+body:has(.business-page-marker),
+.stApp:has(.business-page-marker) {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
 .app-card {
     height: var(--app-h);
     background: white;
@@ -1017,16 +1031,22 @@ div[data-testid="stVerticalBlockBorder-picks_card_container"] {
 
 div[data-testid="stVerticalBlockBorder-business_form_container"] {
     padding: 26px 28px 16px 28px !important;
-    height: var(--app-h) !important;
-    max-height: var(--app-h) !important;
-    overflow-y: auto !important;
+    height: auto !important;
+    min-height: var(--app-h) !important;
+    max-height: none !important;
+    overflow-y: visible !important;
     overflow-x: hidden !important;
-    padding-bottom: 42px !important;
-    overscroll-behavior: contain !important;
+    padding-bottom: 54px !important;
 }
 
 div[data-testid="stVerticalBlockBorder-preview_card_container"] {
     padding: 26px 20px 16px 20px !important;
+}
+
+div[data-testid="stMainBlockContainer"]:has(.business-page-marker) div[data-testid="stVerticalBlockBorder-preview_card_container"] {
+    height: auto !important;
+    min-height: var(--app-h) !important;
+    max-height: none !important;
 }
 
 div[data-testid="stVerticalBlockBorder-business_form_container"]::-webkit-scrollbar {
@@ -1105,13 +1125,22 @@ div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="st
     box-shadow: 0 8px 22px rgba(13,110,253,.32) !important;
 }
 
-/* Style premium input inside chat form specifically to be taller and easier to tap. */
+/* Style premium input inside chat form and keep the send button aligned. */
 div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stForm"] div[data-testid="stTextInput"] input {
-    min-height: 58px !important;
-    height: 58px !important;
-    border-radius: 16px !important;
+    min-height: 48px !important;
+    height: 48px !important;
+    line-height: 48px !important;
+    border-radius: 14px !important;
     font-size: 14px !important;
-    padding: 0 18px !important;
+    padding: 0 16px !important;
+}
+div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stForm"] div[data-testid="stHorizontalBlock"] {
+    align-items: center !important;
+    gap: 8px !important;
+}
+div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stForm"] div[data-testid="element-container"] {
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 /* Style the submit button in the business form container */
@@ -1320,6 +1349,7 @@ if page == "today":
   </span>
 </div>
 '''
+                chat_history_html += '<div id="chat-bottom"></div>'
                 chat_placeholder.markdown(f'''
 <div class="chatbox">
 {chat_history_html}
@@ -1366,10 +1396,22 @@ if page == "today":
             )
             st.session_state["ask_messages"].append({"role": "assistant", "content": ans})
             render_chat_history()
+            if streamlit_js_eval:
+                streamlit_js_eval(
+                    js_expressions=(
+                        "setTimeout(() => {"
+                        "const boxes = window.parent.document.querySelectorAll('.chatbox');"
+                        "const box = boxes[boxes.length - 1];"
+                        "if (box) { box.scrollTop = box.scrollHeight; }"
+                        "}, 100); 'ok';"
+                    ),
+                    key=f"chat_scroll_{len(st.session_state['ask_messages'])}",
+                )
         else:
             render_chat_history()
 
 elif page == "business":
+    st.markdown('<div class="business-page-marker"></div>', unsafe_allow_html=True)
     sidebar_col, form_col, preview_col = st.columns([0.18, 0.56, 0.26], gap="medium")
     with sidebar_col:
         render_sidebar()
