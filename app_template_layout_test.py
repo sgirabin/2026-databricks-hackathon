@@ -41,7 +41,20 @@ html,body,.stApp,[data-testid="stAppViewContainer"],[data-testid="block-containe
 }
 div[data-testid="stHorizontalBlock"]{gap:1rem!important;align-items:stretch!important}
 div[data-testid="stVerticalBlock"]{gap:.45rem!important}
+
+/* Important: make accidental/base Streamlit bordered containers invisible.
+   Only the three real panels below should look like cards. */
 div[data-testid="stVerticalBlockBorderWrapper"]{
+  background:transparent!important;
+  border-color:transparent!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  overflow:visible!important;
+  height:auto!important;
+}
+div[data-testid="stVerticalBlockBorderWrapper"]:has(.sidebar-root),
+div[data-testid="stVerticalBlockBorderWrapper"]:has(.chat-card),
+div[data-testid="stVerticalBlockBorderWrapper"]:has(.picks-card){
   background:white!important;
   border-color:var(--line)!important;
   border-radius:24px!important;
@@ -49,7 +62,9 @@ div[data-testid="stVerticalBlockBorderWrapper"]{
   overflow:hidden!important;
   height:var(--app-h)!important;
 }
-div[data-testid="stVerticalBlockBorderWrapper"] > div{
+div[data-testid="stVerticalBlockBorderWrapper"]:has(.sidebar-root) > div,
+div[data-testid="stVerticalBlockBorderWrapper"]:has(.chat-card) > div,
+div[data-testid="stVerticalBlockBorderWrapper"]:has(.picks-card) > div{
   height:100%!important;
   overflow:hidden!important;
 }
@@ -67,7 +82,7 @@ h2{font-size:clamp(1.25rem,1.55vw,1.55rem)!important;margin-bottom:.15rem!import
 .location-field{min-height:56px;align-items:flex-start;padding-top:9px;line-height:1.35}
 .tag{border-radius:999px;padding:6px 10px;background:#EEF4FF;color:#175CD3!important;font-size:11.5px;font-weight:800;display:inline-block;margin:3px}.tag-wrap{margin:7px 0 12px 0}
 .status{display:inline-block;border:1px solid var(--line);border-radius:12px;padding:9px 14px;font-size:12.5px;margin:0 8px 12px 0;background:white;box-shadow:0 2px 8px rgba(23,43,77,.025)}
-.chat-card,.picks-card{height:100%;box-sizing:border-box;overflow:hidden}
+.chat-card,.picks-card,.sidebar-root{height:100%;box-sizing:border-box;overflow:hidden}
 .chatbox{height:var(--chat-body-h);border-radius:18px;background:linear-gradient(180deg,#FFFFFF 0%,#FBFCFE 100%);border:1px dashed #D8E2F0;padding:22px;overflow:hidden;box-sizing:border-box}
 .bubble{border-radius:18px;background:#F1F5F9;padding:13px 16px;display:inline-block;margin:12px;max-width:68%;font-size:14px;line-height:1.45;box-shadow:0 2px 8px rgba(23,43,77,.025)}
 .user{text-align:right}.quick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}.quick{border:1px solid #D8DFEA;border-radius:13px;min-height:44px;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;background:white;box-shadow:0 2px 8px rgba(23,43,77,.025)}
@@ -84,6 +99,7 @@ left, right = st.columns([0.18, 0.82], gap="small")
 with left:
     with st.container(border=True):
         st.markdown('''
+<div class="sidebar-root">
 <div class="brand"><div class="pin"></div><div><div class="brand-title">GoAround <span class="green">SG</span></div><div class="subtitle">AI local discovery assistant<br>for useful lobang near you.</div></div></div>
 <div class="nav"><div class="active">● GoAround Today</div><div>○ Business Promotion</div><div>○ About Databricks</div></div>
 <div class="side-title">My area</div><div class="subtitle">Tell us where you are to get better picks.</div><br>
@@ -92,6 +108,7 @@ with left:
 <div class="tag-wrap"><span class="tag">cheap food ×</span><span class="tag">grocery ×</span><span class="tag">event ×</span><span class="tag">deal ×</span></div>
 <div class="field save">💾 Save my area</div>
 <div class="sidebar-note">Source-backed. Verify details at source.</div>
+</div>
 ''', unsafe_allow_html=True)
 
 with right:
