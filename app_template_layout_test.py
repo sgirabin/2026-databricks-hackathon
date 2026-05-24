@@ -553,12 +553,12 @@ def render_tags(items: list[str]) -> str:
 
 st.markdown("""
 <style>
-:root{color-scheme:light!important;--bg:#F4F7FB;--text:#172B4D;--muted:#667085;--line:#E3EAF5;--blue:#0D6EFD;--green:#10B981;--app-h:calc(100dvh - 1.05rem);--chat-body-h:clamp(240px,calc(100dvh - 490px),560px);--picks-body-h:clamp(390px,calc(100dvh - 152px),760px)}
-@supports not (height:100dvh){:root{--app-h:calc(100vh - 1.05rem);--chat-body-h:clamp(240px,calc(100vh - 490px),560px);--picks-body-h:clamp(390px,calc(100vh - 152px),760px)}}
+:root{color-scheme:light!important;--bg:#F4F7FB;--text:#172B4D;--muted:#667085;--line:#E3EAF5;--blue:#0D6EFD;--green:#10B981;--app-h:calc(100dvh - 1.05rem);--chat-body-h:clamp(180px,calc(var(--app-h) - 320px),1200px);--picks-body-h:clamp(200px,calc(var(--app-h) - 180px),1200px)}
+@supports not (height:100dvh){:root{--app-h:calc(100vh - 1.05rem);--chat-body-h:clamp(180px,calc(var(--app-h) - 320px),1200px);--picks-body-h:clamp(200px,calc(var(--app-h) - 180px),1200px)}}
 html,body,.stApp,[data-testid="stAppViewContainer"],[data-testid="block-container"]{background:var(--bg)!important;color:var(--text)!important;color-scheme:light!important;overflow:hidden!important}
-[data-testid="stHeader"],section[data-testid="stSidebar"]{display:none!important}.main .block-container{max-width:none!important;padding:.55rem .75rem .35rem .75rem!important;height:100dvh!important;overflow:hidden!important}
+[data-testid="stHeader"],section[data-testid="stSidebar"]{display:none!important}div.block-container,div[data-testid="stMainBlockContainer"],.main .block-container{max-width:none!important;padding:.55rem .75rem .35rem .75rem!important;height:100dvh!important;overflow:hidden!important;box-sizing:border-box!important}
 div[data-testid="stHorizontalBlock"]{gap:1rem!important;align-items:stretch!important}div[data-testid="stVerticalBlock"]{gap:0!important}
-.app-card{height:var(--app-h);background:white;border:1px solid var(--line);border-radius:24px;box-shadow:0 16px 38px rgba(23,43,77,.08);overflow:hidden;box-sizing:border-box}.sidebar-card{padding:26px 24px 18px 24px}.chat-card{padding:28px 28px 18px 28px}.picks-card{padding:28px 24px 18px 24px}.full-card{padding:30px 32px 20px 32px}
+.app-card{height:var(--app-h);background:white;border:1px solid var(--line);border-radius:24px;box-shadow:0 16px 38px rgba(23,43,77,.08);overflow:hidden;box-sizing:border-box}.sidebar-card{padding:26px 24px 18px 24px}.chat-card{padding:28px 28px 18px 28px}.picks-card{padding:28px 24px 18px 24px}.full-card{padding:30px 32px 20px 32px;overflow-y:auto!important}
 .stMarkdown,.stCaption,label,p,span,div,h1,h2,h3,h4,h5,h6,li{color:var(--text)!important}.muted,.stCaption,.stCaption *{color:var(--muted)!important}h1{font-size:clamp(1.65rem,2.2vw,2.05rem)!important;letter-spacing:.01em;margin:0 0 .15rem 0!important}h2{font-size:clamp(1.25rem,1.55vw,1.55rem)!important;margin:0 0 .15rem 0!important}
 .brand{display:flex;gap:13px;align-items:center;margin-bottom:clamp(14px,2dvh,20px)}.pin{width:42px;height:42px;border-radius:50%;background:linear-gradient(145deg,#0D6EFD,#20B2AA);box-shadow:0 10px 22px rgba(13,110,253,.20);flex:0 0 auto}.brand-title{font-size:21px;font-weight:900;color:#0D2B5C}.green{color:var(--green)!important}.subtitle{font-size:12.5px;line-height:1.45;color:var(--muted)!important;margin-top:4px}
 .nav{border-top:1px solid var(--line);padding-top:14px;margin-top:8px}.nav a{display:block;text-decoration:none!important;border-radius:13px;padding:10px 12px;font-size:13.5px;font-weight:800;margin-bottom:5px;color:var(--text)!important}.nav a.active{background:linear-gradient(90deg,#EAF2FF,#F6FAFF);color:#175CD3!important;box-shadow:inset 3px 0 0 #0D6EFD}
@@ -567,7 +567,8 @@ div[data-testid="stHorizontalBlock"]{gap:1rem!important;align-items:stretch!impo
 .picklist{height:var(--picks-body-h);overflow-y:auto}.pick{min-height:clamp(112px,17dvh,135px);border:1px solid var(--line);border-radius:18px;padding:15px;background:white;margin-bottom:13px;box-shadow:0 5px 16px rgba(23,43,77,.045)}.pick b{font-size:15px}.footer{text-align:center;color:var(--muted)!important;font-size:11.5px;margin-top:9px}.visit{display:inline-block;margin-top:10px;border:1px solid var(--line);border-radius:11px;padding:8px 11px;font-size:11.5px;background:white;color:#0D2B5C!important;font-weight:750}.main-shell-title{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.view-all{font-size:13px;color:#175CD3!important;font-weight:800;margin-top:6px}.sidebar-note{font-size:11.8px;color:var(--muted)!important;margin-top:10px;line-height:1.35}
 .kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}.kpi{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fff;box-shadow:0 5px 16px rgba(23,43,77,.045)}.kpi b{display:block;font-size:1.35rem;margin-top:4px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.form-field{border:1px solid #D8DFEA;border-radius:13px;padding:12px;background:#fff;color:#4B5565!important;font-size:13px}
 .wide{grid-column:1/-1}.preview-card{border:1px solid var(--line);border-radius:22px;padding:18px;background:#fff;box-shadow:0 8px 22px rgba(23,43,77,.055);margin-top:14px}.about-section{margin-top:22px}.about-section h2{margin-bottom:8px!important}.about-section ul{margin-top:8px;line-height:1.8}
-@media(max-height:760px){:root{--app-h:calc(100dvh - .9rem);--chat-body-h:clamp(200px,calc(100dvh - 500px),420px);--picks-body-h:clamp(370px,calc(100dvh - 165px),620px)}.pick{min-height:108px}.inputbar{min-height:52px}.quick{min-height:39px}.brand{margin-bottom:12px}.field{min-height:38px;margin-bottom:7px}.nav a{padding:8px 10px}.tag{padding:5px 8px}.sidebar-note{display:none}.sidebar-card,.chat-card,.picks-card,.full-card{padding-top:22px}.info-card{padding:10px 12px}.small-note{display:none}}
+@media(max-height:760px){:root{--app-h:calc(100dvh - .9rem)}.pick{min-height:108px}.inputbar{min-height:52px}.quick{min-height:39px}.brand{margin-bottom:12px}.field{min-height:38px;margin-bottom:7px}.nav a{padding:8px 10px}.tag{padding:5px 8px}.sidebar-note{display:none}.sidebar-card,.chat-card,.picks-card,.full-card{padding-top:22px}.info-card{padding:10px 12px}.small-note{display:none}}
+div[data-testid="stVerticalBlockBorder-sidebar_card_container"],
 div[data-testid="stVerticalBlockBorder-chat_card_container"],
 div[data-testid="stVerticalBlockBorder-picks_card_container"],
 div[data-testid="stVerticalBlockBorder-business_form_container"],
@@ -578,6 +579,14 @@ div[data-testid="stVerticalBlockBorder-preview_card_container"] {
     box-shadow: 0 16px 38px rgba(23,43,77,.08) !important;
     height: var(--app-h) !important;
     box-sizing: border-box !important;
+}
+div[data-testid="stVerticalBlockBorder-sidebar_card_container"] {
+    padding: 26px 24px 18px 24px !important;
+    overflow-y: auto !important;
+}
+div[data-testid="stVerticalBlockBorder-sidebar_card_container"]::-webkit-scrollbar {
+    width: 0px !important;
+    background: transparent !important;
 }
 div[data-testid="stVerticalBlockBorder-chat_card_container"] {
     padding: 28px 28px 18px 28px !important;
@@ -706,8 +715,8 @@ div[data-testid="stVerticalBlockBorder-picks_card_container"] div[data-testid="s
 left, right = st.columns([0.18, 0.82], gap="small")
 
 with left:
-    st.markdown(f'''
-<div class="app-card sidebar-card">
+    with st.container(key="sidebar_card_container", border=True):
+        st.markdown(f'''
 <div class="brand"><div class="pin"></div><div><div class="brand-title">GoAround <span class="green">SG</span></div><div class="subtitle">AI local discovery assistant<br>for useful lobang near you.</div></div></div>
 <div class="nav"><a class="{active('today')}" href="{make_url('today')}" target="_self">● GoAround Today</a><a class="{active('business')}" href="{make_url('business')}" target="_self">○ Business Promotion</a><a class="{active('about')}" href="{make_url('about')}" target="_self">○ What is GoAround?</a></div>
 <div class="side-title">My area</div><div class="subtitle">Auto-detected when browser permission is allowed.</div>
@@ -719,7 +728,6 @@ with left:
 </div>
 <div class="small-note">No manual save is needed. Ask the chat about another place, for example: “What can I do near Chinatown?”</div>
 <div class="sidebar-note">Source-backed. Verify details at source.</div>
-</div>
 ''', unsafe_allow_html=True)
 
 with right:
