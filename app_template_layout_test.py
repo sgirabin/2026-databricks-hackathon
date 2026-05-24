@@ -558,7 +558,7 @@ def render_tags(items: list[str]) -> str:
 # Try to load and base64-encode the logo
 import base64
 
-def get_logo_base64(filename: str = "logo_1.png") -> str:
+def get_logo_base64(filename: str = "logo.jpg") -> str:
     try:
         current_dir = os.path.dirname(os.path.abspath(__file__))
         path = os.path.join(current_dir, "static", filename)
@@ -572,17 +572,17 @@ def get_logo_base64(filename: str = "logo_1.png") -> str:
     return ""
 
 
-logo_b64 = get_logo_base64("logo_1.png")
+logo_b64 = get_logo_base64("logo.jpg")
 if logo_b64:
-    logo_html = f'<img src="data:image/png;base64,{logo_b64}" class="pin">'
+    logo_html = f'<img src="data:image/jpeg;base64,{logo_b64}" class="pin">'
 else:
     logo_html = '<div class="pin-fallback"></div>'
 
 
 st.markdown("""
 <style>
-:root{color-scheme:light!important;--bg:#F4F7FB;--text:#172B4D;--muted:#667085;--line:#E3EAF5;--blue:#0D6EFD;--green:#10B981;--app-h:calc(100dvh - 1.05rem);--chat-body-h:clamp(180px,calc(var(--app-h) - 320px),1200px);--picks-body-h:clamp(200px,calc(var(--app-h) - 180px),1200px)}
-@supports not (height:100dvh){:root{--app-h:calc(100vh - 1.05rem);--chat-body-h:clamp(180px,calc(var(--app-h) - 320px),1200px);--picks-body-h:clamp(200px,calc(var(--app-h) - 180px),1200px)}}
+:root{color-scheme:light!important;--bg:#F4F7FB;--text:#172B4D;--muted:#667085;--line:#E3EAF5;--blue:#0D6EFD;--green:#10B981;--app-h:calc(100dvh - 1.05rem);--chat-body-h:clamp(180px,calc(var(--app-h) - 370px),1200px);--picks-body-h:clamp(200px,calc(var(--app-h) - 180px),1200px)}
+@supports not (height:100dvh){:root{--app-h:calc(100vh - 1.05rem);--chat-body-h:clamp(180px,calc(var(--app-h) - 370px),1200px);--picks-body-h:clamp(200px,calc(var(--app-h) - 180px),1200px)}}
 html,body,.stApp,[data-testid="stAppViewContainer"],[data-testid="block-container"]{background:var(--bg)!important;color:var(--text)!important;color-scheme:light!important;overflow:hidden!important}
 [data-testid="stHeader"],section[data-testid="stSidebar"]{display:none!important}div.block-container,div[data-testid="stMainBlockContainer"],.main .block-container{max-width:none!important;padding:.55rem .75rem .35rem .75rem!important;height:100dvh!important;overflow:hidden!important;box-sizing:border-box!important}
 div[data-testid="stHorizontalBlock"]{gap:1rem!important;align-items:stretch!important}div[data-testid="stVerticalBlock"]{gap:0!important}
@@ -596,48 +596,180 @@ div[data-testid="stHorizontalBlock"]{gap:1rem!important;align-items:stretch!impo
 .subtitle{font-size:12.5px;line-height:1.45;color:var(--muted)!important;margin-top:4px}
 .nav{border-top:1px solid var(--line);padding-top:14px;margin-top:8px}.nav a{display:block;text-decoration:none!important;border-radius:13px;padding:10px 12px;font-size:13.5px;font-weight:800;margin-bottom:5px;color:var(--text)!important}.nav a.active{background:linear-gradient(90deg,#EAF2FF,#F6FAFF);color:#175CD3!important;box-shadow:inset 3px 0 0 #0D6EFD}
 .side-title{font-size:20px;font-weight:900;margin:clamp(13px,2dvh,18px) 0 5px 0}.info-card{border:1px solid #D8DFEA;border-radius:18px;background:linear-gradient(180deg,#fff,#FBFCFE);padding:13px 14px;margin:10px 0;box-shadow:0 5px 16px rgba(23,43,77,.045)}.info-row{display:flex;gap:10px;align-items:flex-start;margin:8px 0}.info-icon{width:22px;text-align:center;flex:0 0 auto}.info-main{font-size:13px;font-weight:850;color:#172B4D!important;line-height:1.35}.info-sub{font-size:11.5px;color:var(--muted)!important;line-height:1.35}.tag{border-radius:999px;padding:6px 10px;background:#EEF4FF;color:#175CD3!important;font-size:11.5px;font-weight:800;display:inline-block;margin:3px}.tag-wrap{margin:7px 0 12px 0}.area-label{font-size:11.8px;color:var(--muted)!important;font-weight:750;margin:8px 0 5px 2px}.small-note{border:1px solid #E8EEF8;border-radius:13px;background:#F8FBFF;padding:10px 12px;font-size:11.5px;color:#4B5565!important;line-height:1.4}.save{background:linear-gradient(90deg,#ED1B24,#C4121A)!important;color:white!important;justify-content:center!important;font-weight:900!important;border:0!important;box-shadow:0 8px 18px rgba(237,27,36,.22)!important}.field{min-height:44px;border:1px solid #D8DFEA;border-radius:13px;background:white;display:flex;align-items:center;padding:0 13px;font-size:12.5px;color:#4B5565!important;margin-bottom:9px;box-shadow:0 2px 8px rgba(23,43,77,.025);box-sizing:border-box}
-.status{display:inline-block;border:1px solid var(--line);border-radius:12px;padding:9px 14px;font-size:12.5px;margin:0 8px 12px 0;background:white;box-shadow:0 2px 8px rgba(23,43,77,.025)}.chatbox{height:var(--chat-body-h);border-radius:18px;background:linear-gradient(180deg,#FFFFFF 0%,#FBFCFE 100%);border:1px dashed #D8E2F0;padding:22px;overflow-y:auto;box-sizing:border-box}.bubble{border-radius:18px;background:#F1F5F9;padding:13px 16px;display:inline-block;margin:12px;max-width:68%;font-size:14px;line-height:1.45;box-shadow:0 2px 8px rgba(23,43,77,.025)}.user{text-align:right}.quick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}.quick{border:1px solid #D8DFEA;border-radius:13px;min-height:44px;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;background:white;box-shadow:0 2px 8px rgba(23,43,77,.025)}.inputbar{min-height:58px;border:1px solid #D8DFEA;border-radius:18px;background:white;display:grid;grid-template-columns:46px 1fr 58px;align-items:center;margin-top:14px;box-shadow:0 6px 18px rgba(23,43,77,.045)}.send{height:44px;width:44px;border-radius:13px;background:var(--blue);color:white!important;display:flex;align-items:center;justify-content:center;font-weight:900}
-.picklist{height:var(--picks-body-h);overflow-y:auto}.pick{display:flow-root!important;min-height:clamp(112px,17dvh,135px);border:1px solid var(--line);border-radius:18px;padding:15px;background:white;margin-bottom:13px;box-shadow:0 5px 16px rgba(23,43,77,.045)}.pick b{font-size:15px}.footer{text-align:center;color:var(--muted)!important;font-size:11.5px;margin-top:9px}.visit{float:right!important;margin-top:10px;border:1px solid var(--line);border-radius:11px;padding:8px 11px;font-size:11.5px;background:white;color:#0D2B5C!important;font-weight:750}.main-shell-title{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.view-all{font-size:13px;color:#175CD3!important;font-weight:800;margin-top:6px;}.sidebar-note{font-size:11.8px;color:var(--muted)!important;margin-top:10px;line-height:1.35}
+.status{display:inline-block;border:1px solid var(--line);border-radius:12px;padding:9px 14px;font-size:12.5px;margin:0 8px 12px 0;background:white;box-shadow:0 2px 8px rgba(23,43,77,.025)}.chatbox{height:100%;border-radius:18px;background:linear-gradient(180deg,#FFFFFF 0%,#FBFCFE 100%);border:1px dashed #D8E2F0;padding:22px;overflow-y:auto;box-sizing:border-box}.bubble{border-radius:18px;background:#F1F5F9;padding:13px 16px;display:inline-block;margin:12px;max-width:68%;font-size:14px;line-height:1.45;box-shadow:0 2px 8px rgba(23,43,77,.025)}.user{text-align:right}.quick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}.quick{border:1px solid #D8DFEA;border-radius:13px;min-height:44px;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;background:white;box-shadow:0 2px 8px rgba(23,43,77,.025)}.inputbar{min-height:58px;border:1px solid #D8DFEA;border-radius:18px;background:white;display:grid;grid-template-columns:46px 1fr 58px;align-items:center;margin-top:14px;box-shadow:0 6px 18px rgba(23,43,77,.045)}.send{height:44px;width:44px;border-radius:13px;background:var(--blue);color:white!important;display:flex;align-items:center;justify-content:center;font-weight:900}
+.picklist{height:100%;overflow-y:auto}.pick{display:flow-root!important;min-height:clamp(112px,17dvh,135px);border:1px solid var(--line);border-radius:18px;padding:15px;background:white;margin-bottom:13px;box-shadow:0 5px 16px rgba(23,43,77,.045)}.pick b{font-size:15px}.footer{text-align:center;color:var(--muted)!important;font-size:11.5px;margin-top:9px}.visit{float:right!important;margin-top:10px;border:1px solid var(--line);border-radius:11px;padding:8px 11px;font-size:11.5px;background:white;color:#0D2B5C!important;font-weight:750}.main-shell-title{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.view-all{font-size:13px;color:#175CD3!important;font-weight:800;margin-top:6px;}.sidebar-note{font-size:11.8px;color:var(--muted)!important;margin-top:10px;line-height:1.35}
 .kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}
 .kpi{border:1px solid var(--line);border-top:3px solid #ED1B24!important;border-radius:16px;padding:14px;background:#fff;box-shadow:0 5px 16px rgba(23,43,77,.045)}
 .kpi b{display:block;font-size:1.35rem;margin-top:4px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.form-field{border:1px solid #D8DFEA;border-radius:13px;padding:12px;background:#fff;color:#4B5565!important;font-size:13px}
 .wide{grid-column:1/-1}.preview-card{border:1px solid var(--line);border-radius:22px;padding:18px;background:#fff;box-shadow:0 8px 22px rgba(23,43,77,.055);margin-top:14px}.about-section{margin-top:22px}.about-section h2{margin-bottom:8px!important}.about-section ul{margin-top:8px;line-height:1.8}
 @media(max-height:760px){:root{--app-h:calc(100dvh - .9rem)}.pick{min-height:108px}.inputbar{min-height:52px}.quick{min-height:39px}.brand{margin-bottom:12px}.field{min-height:38px;margin-bottom:7px}.nav a{padding:8px 10px}.tag{padding:5px 8px}.sidebar-note{display:none}.sidebar-card,.chat-card,.picks-card,.full-card{padding-top:22px}.info-card{padding:10px 12px}.small-note{display:none}}
-div[data-testid="stVerticalBlockBorder-sidebar_card_container"],
-div[data-testid="stVerticalBlockBorder-chat_card_container"],
-div[data-testid="stVerticalBlockBorder-picks_card_container"],
-div[data-testid="stVerticalBlockBorder-business_form_container"],
-div[data-testid="stVerticalBlockBorder-preview_card_container"] {
+
+/* Card Container Layout Structure using key-based classes, column-index, and relational fallbacks */
+/* Force the main vertical block of the page to stretch to 100% */
+div[data-testid="stMainBlockContainer"] > div[data-testid="stVerticalBlock"] {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex-grow: 1 !important;
+}
+
+/* Force the element containers that contain horizontal layout blocks to stretch to 100% */
+div[data-testid="stMainBlockContainer"] > div[data-testid="stVerticalBlock"] > div[data-testid="element-container"]:has(div[data-testid="stHorizontalBlock"]),
+div[data-testid="column"] > div[data-testid="stVerticalBlock"] > div[data-testid="element-container"]:has(div[data-testid="stHorizontalBlock"]) {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex-grow: 1 !important;
+    min-height: 0 !important;
+}
+
+/* Force main horizontal layout rows to stretch to full height */
+div[data-testid="stHorizontalBlock"]:has(.sidebar-card-marker),
+div[data-testid="stHorizontalBlock"]:has(.chat-card-marker),
+div[data-testid="stHorizontalBlock"]:has(.picks-card-marker),
+div[data-testid="stHorizontalBlock"]:has(.business-form-marker) {
+    height: 100% !important;
+    display: flex !important;
+    flex-grow: 1 !important;
+    min-height: 0 !important;
+}
+
+/* Force Streamlit columns to stretch to 100% height and layout as flex columns */
+div[data-testid="column"] > div[data-testid="stVerticalBlock"] {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex-grow: 1 !important;
+}
+
+/* Force inner vertical blocks inside custom key cards to stretch to 100% height and layout as flex columns */
+.st-key-sidebar_card_container div[data-testid="stVerticalBlock"],
+.st-key-chat_card_container div[data-testid="stVerticalBlock"],
+.st-key-picks_card_container div[data-testid="stVerticalBlock"],
+.st-key-business_form_container div[data-testid="stVerticalBlock"],
+.st-key-preview_card_container div[data-testid="stVerticalBlock"] {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex-grow: 1 !important;
+}
+
+/* Force container layout wrappers inside columns to stretch to 100% height */
+div[data-testid="column"] div[data-testid="stLayoutWrapper"] {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex-grow: 1 !important;
+}
+
+.st-key-sidebar_card_container,
+div[data-testid="column"]:nth-of-type(1) > div[data-testid="stVerticalBlock"],
+div[data-testid="stVerticalBlock"]:has(.sidebar-card-marker) {
     background: white !important;
     border: 1px solid var(--line) !important;
     border-radius: 24px !important;
     box-shadow: 0 16px 38px rgba(23,43,77,.08) !important;
     height: var(--app-h) !important;
     box-sizing: border-box !important;
-}
-div[data-testid="stVerticalBlockBorder-sidebar_card_container"] {
     padding: 26px 24px 18px 24px !important;
     overflow-y: auto !important;
 }
-div[data-testid="stVerticalBlockBorder-sidebar_card_container"]::-webkit-scrollbar {
+.st-key-sidebar_card_container::-webkit-scrollbar,
+div[data-testid="stVerticalBlock"]:has(.sidebar-card-marker)::-webkit-scrollbar {
     width: 0px !important;
     background: transparent !important;
 }
-div[data-testid="stVerticalBlockBorder-chat_card_container"] {
-    padding: 28px 28px 18px 28px !important;
+
+.st-key-chat_card_container,
+div[data-testid="column"]:nth-of-type(2) div[data-testid="column"]:nth-of-type(1) > div[data-testid="stVerticalBlock"]:has(.chat-card-marker),
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker) {
+    background: white !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 16px 38px rgba(23,43,77,.08) !important;
+    height: 100% !important; /* Stretch to fill parent stLayoutWrapper */
+    min-height: var(--app-h) !important;
+    box-sizing: border-box !important;
+    padding: 20px 24px 14px 24px !important;
     overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    position: relative !important;
 }
-div[data-testid="stVerticalBlockBorder-picks_card_container"] {
-    padding: 28px 24px 18px 24px !important;
+
+/* Ensure children inside the chat container do not shrink, except the chatbox wrapper which grows to fill space */
+.st-key-chat_card_container div[data-testid="element-container"],
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="element-container"] {
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+}
+.st-key-chat_card_container div[data-testid="element-container"]:has(.chatbox),
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="element-container"]:has(.chatbox) {
+    flex-grow: 1 !important;
+    flex-shrink: 1 !important;
+    min-height: 0 !important;
+    height: 100% !important;
+}
+
+.st-key-picks_card_container,
+div[data-testid="column"]:nth-of-type(2) div[data-testid="column"]:nth-of-type(2) > div[data-testid="stVerticalBlock"]:has(.picks-card-marker),
+div[data-testid="stVerticalBlock"]:has(.picks-card-marker) {
+    background: white !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 16px 38px rgba(23,43,77,.08) !important;
+    height: 100% !important; /* Stretch to fill parent stLayoutWrapper */
+    min-height: var(--app-h) !important;
+    box-sizing: border-box !important;
+    padding: 20px 20px 14px 20px !important;
     overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    position: relative !important;
 }
-div[data-testid="stVerticalBlockBorder-business_form_container"] {
-    padding: 28px 28px 18px 28px !important;
+
+/* Ensure children inside the picks container do not shrink, except the picklist wrapper which grows to fill space */
+.st-key-picks_card_container div[data-testid="element-container"],
+div[data-testid="stVerticalBlock"]:has(.picks-card-marker) div[data-testid="element-container"] {
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+}
+.st-key-picks_card_container div[data-testid="element-container"]:has(.picklist),
+div[data-testid="stVerticalBlock"]:has(.picks-card-marker) div[data-testid="element-container"]:has(.picklist) {
+    flex-grow: 1 !important;
+    flex-shrink: 1 !important;
+    min-height: 0 !important;
+    height: 100% !important;
+}
+
+.st-key-business_form_container,
+div[data-testid="stVerticalBlock"]:has(.business-form-marker) {
+    background: white !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 16px 38px rgba(23,43,77,.08) !important;
+    height: var(--app-h) !important;
+    box-sizing: border-box !important;
+    padding: 26px 26px 18px 26px !important;
     overflow-y: auto !important;
+    position: relative !important;
 }
-div[data-testid="stVerticalBlockBorder-preview_card_container"] {
-    padding: 28px 24px 18px 24px !important;
+
+.st-key-preview_card_container,
+div[data-testid="stVerticalBlock"]:has(.preview-card-marker) {
+    background: white !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 16px 38px rgba(23,43,77,.08) !important;
+    height: var(--app-h) !important;
+    box-sizing: border-box !important;
+    padding: 26px 20px 18px 20px !important;
     overflow: hidden !important;
+    position: relative !important;
 }
 
 /* Custom Overrides to Strip Streamlit Native Border and Spacing on Forms */
@@ -667,7 +799,8 @@ div[data-testid="stTextInput"] input:focus, div[data-testid="stTextArea"] textar
 }
 
 /* Style quick action buttons inside chat container */
-div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stButton"] button {
+.st-key-chat_card_container div[data-testid="stButton"] button,
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stButton"] button {
     border: 1px solid #D8DFEA !important;
     border-radius: 13px !important;
     min-height: 44px !important;
@@ -678,44 +811,86 @@ div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="st
     box-shadow: 0 2px 8px rgba(23,43,77,.025) !important;
     transition: all 0.2s ease !important;
 }
-div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stButton"] button:hover {
+.st-key-chat_card_container div[data-testid="stButton"] button:hover,
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stButton"] button:hover {
     border-color: var(--blue) !important;
     color: var(--blue) !important;
     background: #F5F9FF !important;
 }
 
-/* Style premium inputs inside chat form specifically to be 52px tall */
-div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stForm"] div[data-testid="stTextInput"] input {
-    min-height: 52px !important;
-    height: 52px !important;
-    border-radius: 16px !important;
-    font-size: 14.5px !important;
-    padding: 0 18px !important;
+/* Style premium inputs inside chat form specifically to be 48px tall */
+.st-key-chat_card_container div[data-testid="stForm"] div[data-testid="stTextInput"] input,
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="stTextInput"] input {
+    min-height: 48px !important;
+    height: 48px !important;
+    border-radius: 14px !important;
+    font-size: 14px !important;
+    padding: 0 16px !important;
 }
 
-/* Style the submit button in the chat input bar form to be 52px tall */
-div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stForm"] div[data-testid="stButton"] button {
+/* Prevent any vertical truncation of chat inputs/buttons in form container */
+.st-key-chat_card_container div[data-testid="stForm"] div[data-testid="stTextInput"],
+.st-key-chat_card_container div[data-testid="stForm"] div[data-testid="stFormSubmitButton"],
+.st-key-chat_card_container div[data-testid="stForm"] div[data-testid="element-container"],
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="stTextInput"],
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"],
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="element-container"] {
+    height: auto !important;
+    min-height: 48px !important;
+    overflow: visible !important;
+}
+
+/* Style the submit button in the chat input bar form to be 48px tall */
+.st-key-chat_card_container div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button,
+.st-key-chat_card_container div[data-testid="stForm"] div[data-testid="stButton"] button,
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button,
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="stButton"] button {
     background: var(--blue) !important;
     color: white !important;
     border: none !important;
-    border-radius: 16px !important;
-    font-size: 18px !important;
+    border-radius: 14px !important;
+    font-size: 16px !important;
     font-weight: 900 !important;
     box-shadow: 0 8px 18px rgba(13,110,253,.22) !important;
-    min-height: 52px !important;
-    height: 52px !important;
+    min-height: 48px !important;
+    height: 48px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    flex-direction: row !important;
 }
-div[data-testid="stVerticalBlockBorder-chat_card_container"] div[data-testid="stForm"] div[data-testid="stButton"] button:hover {
+.st-key-chat_card_container div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover,
+.st-key-chat_card_container div[data-testid="stForm"] div[data-testid="stButton"] button:hover,
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover,
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="stButton"] button:hover {
     background: #1b5ed7 !important;
     color: white !important;
     box-shadow: 0 8px 22px rgba(13,110,253,.32) !important;
 }
 
+/* Ensure the chat input form elements align perfectly and strip native margins */
+.st-key-chat_card_container div[data-testid="stForm"],
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] {
+    width: 100% !important;
+    margin-top: 8px !important;
+    margin-bottom: 0 !important;
+}
+.st-key-chat_card_container div[data-testid="stForm"] div[data-testid="stHorizontalBlock"],
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="stHorizontalBlock"] {
+    align-items: center !important;
+    gap: 8px !important;
+}
+.st-key-chat_card_container div[data-testid="stForm"] div[data-testid="element-container"],
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker) div[data-testid="stForm"] div[data-testid="element-container"] {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
 /* Style the submit button in the business form container (Using premium Singapore Red) */
-div[data-testid="stVerticalBlockBorder-business_form_container"] div[data-testid="stForm"] div[data-testid="stButton"] button {
+.st-key-business_form_container div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button,
+.st-key-business_form_container div[data-testid="stForm"] div[data-testid="stButton"] button,
+div[data-testid="stVerticalBlock"]:has(.business-form-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button,
+div[data-testid="stVerticalBlock"]:has(.business-form-marker) div[data-testid="stForm"] div[data-testid="stButton"] button {
     background: linear-gradient(90deg,#ED1B24,#C4121A) !important;
     color: white !important;
     justify-content: center !important;
@@ -725,51 +900,173 @@ div[data-testid="stVerticalBlockBorder-business_form_container"] div[data-testid
     box-shadow: 0 8px 18px rgba(237,27,36,.22) !important;
     min-height: 44px !important;
 }
-div[data-testid="stVerticalBlockBorder-business_form_container"] div[data-testid="stForm"] div[data-testid="stButton"] button:hover {
+.st-key-business_form_container div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover,
+.st-key-business_form_container div[data-testid="stForm"] div[data-testid="stButton"] button:hover,
+div[data-testid="stVerticalBlock"]:has(.business-form-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover,
+div[data-testid="stVerticalBlock"]:has(.business-form-marker) div[data-testid="stForm"] div[data-testid="stButton"] button:hover {
     background: linear-gradient(90deg,#D0141C,#A80D14) !important;
     color: white !important;
     box-shadow: 0 8px 22px rgba(237,27,36,.32) !important;
 }
 
 /* Red accents on focus inside business form */
-div[data-testid="stVerticalBlockBorder-business_form_container"] div[data-testid="stTextInput"] input:focus, 
-div[data-testid="stVerticalBlockBorder-business_form_container"] div[data-testid="stTextArea"] textarea:focus {
+.st-key-business_form_container div[data-testid="stTextInput"] input:focus, 
+.st-key-business_form_container div[data-testid="stTextArea"] textarea:focus,
+div[data-testid="stVerticalBlock"]:has(.business-form-marker) div[data-testid="stTextInput"] input:focus, 
+div[data-testid="stVerticalBlock"]:has(.business-form-marker) div[data-testid="stTextArea"] textarea:focus {
     border-color: #ED1B24 !important;
     box-shadow: 0 0 0 3px rgba(237,27,36,0.15) !important;
     outline: none !important;
 }
 
-/* Style filter pill buttons inside picks card container (inactive state - secondary button) */
-div[data-testid="stVerticalBlockBorder-picks_card_container"] div[data-testid="stButton"] button {
+/* Force filter buttons horizontal layout block to stay side-by-side with NO wrapping and NO grid overlap */
+div[data-testid="stHorizontalBlock"]:has(div[class*="st-key-filter_btn_"]) {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    gap: 5px !important;
+    width: 100% !important;
+    grid-template-columns: none !important; /* Disable grid template columns */
+}
+
+/* Force each column in the filter bar to size to its content */
+div[data-testid="stHorizontalBlock"]:has(div[class*="st-key-filter_btn_"]) > div[data-testid="column"] {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+}
+
+/* Style filter pill buttons inside picks card container (inactive state) */
+div[class*="st-key-filter_btn_"] button {
     border: none !important;
     border-radius: 999px !important;
-    min-height: 34px !important;
-    height: 34px !important;
-    padding: 4px 12px !important;
-    font-size: 12px !important;
+    min-height: 32px !important;
+    height: 32px !important;
+    padding: 0px 10px !important; /* beautiful padding */
+    font-size: 11px !important;
     font-weight: 800 !important;
     background-color: #EEF4FF !important;
     color: #175CD3 !important;
     box-shadow: none !important;
     transition: all 0.2s ease !important;
-    white-space: nowrap !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
+    flex-direction: row !important; /* side-by-side icon + text */
+    gap: 4px !important;
+    white-space: nowrap !important;
+    width: auto !important;
 }
-div[data-testid="stVerticalBlockBorder-picks_card_container"] div[data-testid="stButton"] button:hover {
+div[class*="st-key-filter_btn_"] button:hover {
     background-color: #E0ECFF !important;
     color: #114B9E !important;
 }
 
-/* Style filter pill buttons inside picks card container (active state - primary button) */
-div[data-testid="stVerticalBlockBorder-picks_card_container"] div[data-testid="stButton"] button[kind="primary"] {
+/* Style filter pill buttons inside picks card container (active state) */
+div[class*="st-key-filter_btn_"] button[kind="primary"] {
     background: var(--blue) !important;
     color: white !important;
 }
-div[data-testid="stVerticalBlockBorder-picks_card_container"] div[data-testid="stButton"] button[kind="primary"]:hover {
+div[class*="st-key-filter_btn_"] button[kind="primary"]:hover {
     background: #1b5ed7 !important;
     color: white !important;
+}
+
+/* Force filter button text properties to stay compact */
+div[class*="st-key-filter_btn_"] button * {
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    font-size: 11px !important;
+    line-height: 1 !important;
+}
+
+/* Global override to completely eradicate Streamlit background flashing and card blinking */
+div[data-testid="stVerticalBlock"][data-stale="true"],
+.st-key-sidebar_card_container[data-stale="true"],
+.st-key-chat_card_container[data-stale="true"],
+.st-key-picks_card_container[data-stale="true"],
+.st-key-business_form_container[data-stale="true"],
+.st-key-preview_card_container[data-stale="true"],
+.st-key-sidebar_card_container:has([data-stale="true"]),
+.st-key-chat_card_container:has([data-stale="true"]),
+.st-key-picks_card_container:has([data-stale="true"]),
+.st-key-business_form_container:has([data-stale="true"]),
+.st-key-preview_card_container:has([data-stale="true"]) {
+    opacity: 1 !important;
+    background: white !important;
+    border-color: var(--line) !important;
+    transition: none !important;
+}
+
+/* Dim card contents smoothly to 0.4 opacity during processing to give premium visual loading feedback */
+.st-key-sidebar_card_container:has([data-stale="true"]) > div,
+.st-key-chat_card_container:has([data-stale="true"]) > div,
+.st-key-picks_card_container:has([data-stale="true"]) > div,
+.st-key-business_form_container:has([data-stale="true"]) > div,
+.st-key-preview_card_container:has([data-stale="true"]) > div,
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker):has([data-stale="true"]) > div,
+div[data-testid="stVerticalBlock"]:has(.picks-card-marker):has([data-stale="true"]) > div,
+div[data-testid="stVerticalBlock"]:has(.business-form-marker):has([data-stale="true"]) > div,
+div[data-testid="stVerticalBlock"]:has(.preview-card-marker):has([data-stale="true"]) > div {
+    opacity: 0.40 !important;
+    filter: grayscale(15%) !important;
+    transition: opacity 0.15s ease !important;
+}
+
+/* Premium blurred glass-backdrop on stale cards during computation */
+.st-key-chat_card_container:has([data-stale="true"])::before,
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker):has([data-stale="true"])::before,
+.st-key-picks_card_container:has([data-stale="true"])::before,
+div[data-testid="stVerticalBlock"]:has(.picks-card-marker):has([data-stale="true"])::before,
+.st-key-business_form_container:has([data-stale="true"])::before,
+div[data-testid="stVerticalBlock"]:has(.business-form-marker):has([data-stale="true"])::before,
+.st-key-preview_card_container:has([data-stale="true"])::before,
+div[data-testid="stVerticalBlock"]:has(.preview-card-marker):has([data-stale="true"])::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(255, 255, 255, 0.65) !important;
+    backdrop-filter: blur(2px) !important;
+    z-index: 999998 !important;
+    border-radius: 24px !important;
+    pointer-events: all !important; /* block clicks while loading */
+}
+
+/* High-fidelity centered blue loading spinner on top of the backdrop */
+.st-key-chat_card_container:has([data-stale="true"])::after,
+div[data-testid="stVerticalBlock"]:has(.chat-card-marker):has([data-stale="true"])::after,
+.st-key-picks_card_container:has([data-stale="true"])::after,
+div[data-testid="stVerticalBlock"]:has(.picks-card-marker):has([data-stale="true"])::after,
+.st-key-business_form_container:has([data-stale="true"])::after,
+div[data-testid="stVerticalBlock"]:has(.business-form-marker):has([data-stale="true"])::after,
+.st-key-preview_card_container:has([data-stale="true"])::after,
+div[data-testid="stVerticalBlock"]:has(.preview-card-marker):has([data-stale="true"])::after {
+    content: "" !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    width: 36px !important;
+    height: 36px !important;
+    margin-top: -18px !important;
+    margin-left: -18px !important;
+    border: 4px solid rgba(13,110,253,0.15) !important;
+    border-top-color: var(--blue) !important;
+    border-radius: 50% !important;
+    animation: spin 0.8s linear infinite !important;
+    z-index: 999999 !important;
+    pointer-events: none !important;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 /* Custom animated bouncing typing indicator */
@@ -790,10 +1087,9 @@ div[data-testid="stVerticalBlockBorder-picks_card_container"] div[data-testid="s
 </style>
 """, unsafe_allow_html=True)
 
-left, right = st.columns([0.18, 0.82], gap="small")
-
-with left:
-    with st.container(key="sidebar_card_container", border=True):
+def render_sidebar():
+    with st.container(key="sidebar_card_container"):
+        st.markdown('<div class="sidebar-card-marker"></div>', unsafe_allow_html=True)
         st.markdown(f'''
 <div class="brand">{logo_html}<div><div class="brand-title">GoAround <span class="sg-red">SG</span></div><div class="subtitle">AI local discovery assistant<br>for useful lobang near you.</div></div></div>
 <div class="nav"><a class="{active('today')}" href="{make_url('today')}" target="_self">● GoAround Today</a><a class="{active('business')}" href="{make_url('business')}" target="_self">○ Business Promotion</a><a class="{active('about')}" href="{make_url('about')}" target="_self">○ What is GoAround?</a></div>
@@ -809,36 +1105,39 @@ with left:
 <div class="footer" style="margin-top:15px; text-align:left; font-size:11px; line-height:1.4;">©2026 GoAroundSG.<br>Terms of Service. Privacy Policy</div>
 ''', unsafe_allow_html=True)
 
-with right:
-    if page == "today":
-        chat_col, picks_col = st.columns([0.68, 0.32], gap="large")
-        with chat_col:
-            with st.container(key="chat_card_container", border=True):
-                st.markdown(f'''
+
+if page == "today":
+    sidebar_col, chat_col, picks_col = st.columns([0.18, 0.56, 0.26], gap="medium")
+    with sidebar_col:
+        render_sidebar()
+    with chat_col:
+        with st.container(key="chat_card_container"):
+            st.markdown('<div class="chat-card-marker"></div>', unsafe_allow_html=True)
+            st.markdown(f'''
 <h1>Ask GoAround</h1><div class="muted">Your conversation-style local assistant.</div>
 <div style="margin-top:12px; margin-bottom:12px;"><span class="status">{weather['icon']} {safe_weather_summary}</span><span class="status">📍 {safe_location}</span><span class="status">◎ {safe_radius_label}</span></div>
 ''', unsafe_allow_html=True)
-                
-                # Conversational state tracking
-                if "ask_messages" not in st.session_state:
-                    st.session_state["ask_messages"] = [
-                        {"role": "assistant", "content": "Hi, I’m Ask GoAround. Ask me what to eat, what to do with kids, rainy-day options, nearby deals, or a short visitor plan."}
-                    ]
-                
-                is_thinking = "pending_query" in st.session_state
-                
-                # Build clean HTML history
-                chat_history_html = ""
-                for msg in st.session_state["ask_messages"][-6:]:  # Show last 6 messages
-                    role = msg["role"]
-                    content = escape(msg["content"]).replace("\n", "<br>")
-                    if role == "user":
-                        chat_history_html += f'<div style="text-align:right; margin: 10px 0;"><span class="bubble" style="background:#EAF2FF; text-align:left;">{content}</span> 👤</div>'
-                    else:
-                        chat_history_html += f'<div style="margin: 10px 0;">🤖 <span class="bubble">{content}</span></div>'
-                        
-                if is_thinking:
-                    chat_history_html += f'''
+            
+            # Conversational state tracking
+            if "ask_messages" not in st.session_state:
+                st.session_state["ask_messages"] = [
+                    {"role": "assistant", "content": "Hi, I’m Ask GoAround. Ask me what to eat, what to do with kids, rainy-day options, nearby deals, or a short visitor plan."}
+                ]
+            
+            is_thinking = "pending_query" in st.session_state
+            
+            # Build clean HTML history
+            chat_history_html = ""
+            for msg in st.session_state["ask_messages"][-6:]:  # Show last 6 messages
+                role = msg["role"]
+                content = escape(msg["content"]).replace("\n", "<br>")
+                if role == "user":
+                    chat_history_html += f'<div style="text-align:right; margin: 10px 0;"><span class="bubble" style="background:#EAF2FF; text-align:left;">{content}</span> 👤</div>'
+                else:
+                    chat_history_html += f'<div style="margin: 10px 0;">🤖 <span class="bubble">{content}</span></div>'
+                    
+            if is_thinking:
+                chat_history_html += f'''
 <div style="margin: 10px 0;">
   🤖 <span class="bubble" style="display: inline-flex; align-items: center; gap: 4px; padding: 12px 16px;">
     <span class="typing-dot"></span>
@@ -847,84 +1146,85 @@ with right:
   </span>
 </div>
 '''
-                        
-                st.markdown(f'''
-<div class="chatbox" style="height:var(--chat-body-h); overflow-y:auto; margin-bottom:12px;">
+                    
+            st.markdown(f'''
+<div class="chatbox" style="height:100%; overflow-y:auto; margin-bottom:12px;">
 {chat_history_html}
 </div>
 ''', unsafe_allow_html=True)
-                
-                # Inline spinner/query processing is done AFTER rendering chatbox to ensure typing indicator shows
-                if is_thinking:
-                    query_to_run = st.session_state.pop("pending_query")
-                    ans = answer_with_databricks(
-                        question=query_to_run,
-                        context=context,
-                        ranked=ranked_physical_picks,
-                        fallback="I am looking up details..."
-                    )
-                    st.session_state["ask_messages"].append({"role": "assistant", "content": ans})
-                    st.rerun()
-                
-                # Quick Actions using real Streamlit buttons inside container columns
-                pending_prompt = None
-                if len(st.session_state.get("ask_messages", [])) <= 1:
-                    prompts = [
-                        ("🍴 Eat cheap", "Any cheap food spots near me?"),
-                        ("📅 Weekend events", f"What weekend events are happening near {safe_location}?"),
-                        ("🌧️ Rainy-day ideas", "What are some good rainy-day indoor ideas?"),
-                        ("🛒 Grocery deals", "Are there any grocery deals or promos?")
-                    ]
-                    
-                    cols = st.columns(4)
-                    for idx, (label, query_text) in enumerate(prompts):
-                        if cols[idx].button(label, key=f"quick_{idx}", use_container_width=True):
-                            pending_prompt = query_text
-                        
-                # Real input form with native text input that styles beautifully
-                with st.form("ask_form", clear_on_submit=True):
-                    ic, sc = st.columns([9, 1])
-                    q_input = ic.text_input("Ask", placeholder="Ask GoAround about this area or another place...", label_visibility="collapsed")
-                    submitted = sc.form_submit_button("➤", use_container_width=True)
-                    
-                st.markdown(f'''
-<div class="footer" style="margin-top:10px;">Go Around can make mistakes. Please check details at the source</div>
-''', unsafe_allow_html=True)
             
-            # Processing user input
-            user_query = pending_prompt or (q_input.strip() if submitted and q_input.strip() else None)
-            if user_query:
-                st.session_state["ask_messages"].append({"role": "user", "content": user_query})
-                st.session_state["pending_query"] = user_query
+            # Inline spinner/query processing is done AFTER rendering chatbox to ensure typing indicator shows
+            if is_thinking:
+                query_to_run = st.session_state.pop("pending_query")
+                ans = answer_with_databricks(
+                    question=query_to_run,
+                    context=context,
+                    ranked=ranked_physical_picks,
+                    fallback="I am looking up details..."
+                )
+                st.session_state["ask_messages"].append({"role": "assistant", "content": ans})
                 st.rerun()
-
-        with picks_col:
-            with st.container(key="picks_card_container", border=True):
-                # Filter pills at the very top of the picks column!
-                filter_options = [
-                    ("🌟 All", "all"),
-                    ("🍴 Food", "food"),
-                    ("🛒 Grocery", "grocery"),
-                    ("📅 Events", "event"),
-                    ("🏷️ Deals", "deal")
+            
+            # Quick Actions using real Streamlit buttons inside container columns
+            pending_prompt = None
+            if len(st.session_state.get("ask_messages", [])) <= 1:
+                prompts = [
+                    ("🍴 Eat cheap", "Any cheap food spots near me?"),
+                    ("📅 Weekend events", f"What weekend events are happening near {safe_location}?"),
+                    ("🌧️ Rainy-day ideas", "What are some good rainy-day indoor ideas?"),
+                    ("🛒 Grocery deals", "Are there any grocery deals or promos?")
                 ]
                 
-                if "active_filter" not in st.session_state:
-                    st.session_state["active_filter"] = "all"
+                cols = st.columns(4)
+                for idx, (label, query_text) in enumerate(prompts):
+                    if cols[idx].button(label, key=f"quick_{idx}", use_container_width=True):
+                        pending_prompt = query_text
                     
-                cols = st.columns(len(filter_options))
-                for idx, (label, val) in enumerate(filter_options):
-                    is_active = (st.session_state["active_filter"] == val)
-                    if cols[idx].button(
-                        label,
-                        key=f"filter_btn_{val}",
-                        type="primary" if is_active else "secondary",
-                        use_container_width=True
-                    ):
-                        st.session_state["active_filter"] = val
-                        st.rerun()
+            # Real input form with native text input that styles beautifully
+            with st.form("ask_form", clear_on_submit=True):
+                ic, sc = st.columns([9, 1])
+                q_input = ic.text_input("Ask", placeholder="Ask GoAround about this area or another place...", label_visibility="collapsed")
+                submitted = sc.form_submit_button("➤", use_container_width=True)
+                
+            st.markdown(f'''
+<div class="footer" style="margin-top:10px;">Go Around can make mistakes. Please check details at the source</div>
+''', unsafe_allow_html=True)
+        
+        # Processing user input
+        user_query = pending_prompt or (q_input.strip() if submitted and q_input.strip() else None)
+        if user_query:
+            st.session_state["ask_messages"].append({"role": "user", "content": user_query})
+            st.session_state["pending_query"] = user_query
+            st.rerun()
 
-                st.markdown(f'''
+    with picks_col:
+        with st.container(key="picks_card_container"):
+            st.markdown('<div class="picks-card-marker"></div>', unsafe_allow_html=True)
+            # Filter pills at the very top of the picks column!
+            filter_options = [
+                ("🌟 All", "all"),
+                ("🍴 Food", "food"),
+                ("🛒 Grocery", "grocery"),
+                ("📅 Events", "event"),
+                ("🏷️ Deals", "deal")
+            ]
+            
+            if "active_filter" not in st.session_state:
+                st.session_state["active_filter"] = "all"
+                
+            cols = st.columns(len(filter_options))
+            for idx, (label, val) in enumerate(filter_options):
+                is_active = (st.session_state["active_filter"] == val)
+                if cols[idx].button(
+                    label,
+                    key=f"filter_btn_{val}",
+                    type="primary" if is_active else "secondary",
+                    use_container_width=True
+                ):
+                    st.session_state["active_filter"] = val
+                    st.rerun()
+
+            st.markdown(f'''
 <div class="main-shell-title" style="margin-top: 14px; margin-bottom: 12px;">
   <div>
     <h2>Today’s Picks</h2>
@@ -932,73 +1232,77 @@ with right:
   </div>
 </div>
 ''', unsafe_allow_html=True)
-                
-                st.markdown(f'''
-<div class="picklist" style="overflow-y:auto; height:calc(var(--picks-body-h) - 100px); margin-top: 14px;">{picks_html}</div>
+            
+            st.markdown(f'''
+<div class="picklist" style="overflow-y:auto; height:100%; margin-top: 14px;">{picks_html}</div>
 <div class="footer" style="color:#175CD3!important;font-weight:800; margin-top: 10px;">{safe_picks_footer}</div>
 ''', unsafe_allow_html=True)
-            
-    elif page == "business":
-        form_col, preview_col = st.columns([0.68, 0.32], gap="large")
-        with form_col:
-            with st.container(key="business_form_container", border=True):
-                st.markdown(f'''
+
+elif page == "business":
+    sidebar_col, form_col, preview_col = st.columns([0.18, 0.56, 0.26], gap="medium")
+    with sidebar_col:
+        render_sidebar()
+    with form_col:
+        with st.container(key="business_form_container"):
+            st.markdown('<div class="business-form-marker"></div>', unsafe_allow_html=True)
+            st.markdown(f'''
 <h1>Business Promotion</h1><div class="muted">Create a local promotion that can appear in Today’s Picks for {safe_location}.</div>
 <div class="kpi-grid"><div class="kpi"><span class="muted">Active</span><b>3</b></div><div class="kpi"><span class="muted">Clicks</span><b>128</b></div><div class="kpi"><span class="muted">Saves</span><b>47</b></div><div class="kpi"><span class="muted">Views</span><b>612</b></div></div>
 <h2>Create Promotion</h2>
 ''', unsafe_allow_html=True)
+            
+            # Interactive Streamlit form
+            with st.form("business_form"):
+                col1, col2 = st.columns(2)
+                b_name = col1.text_input("Business name", value="Ah Boyz Chicken Rice")
+                p_title = col2.text_input("Promotion title *", value="50% Off Signature Chicken Rice (Dinner Special)")
                 
-                # Interactive Streamlit form
-                with st.form("business_form"):
-                    col1, col2 = st.columns(2)
-                    b_name = col1.text_input("Business name", value="Ah Boyz Chicken Rice")
-                    p_title = col2.text_input("Promotion title *", value="50% Off Signature Chicken Rice (Dinner Special)")
-                    
-                    col3, col4 = st.columns(2)
-                    p_category = col3.selectbox("Category *", ["Food & Dining", "Grocery", "Mall", "Family", "Fitness"])
-                    p_area = col4.text_input("Location / Area *", value=location)
-                    
-                    col5, col6 = st.columns(2)
-                    p_from = col5.date_input("Valid from")
-                    p_to = col6.date_input("Valid to")
-                    
-                    p_interests = st.multiselect("Audience / Interests", ["food", "grocery", "event", "deal", "fitness", "tourist"], default=["food", "deal"])
-                    
-                    p_description = st.text_area("Short description *", value="Enjoy our signature Hainanese Chicken Rice at 50% off for dinner! Freshly steamed chicken, fragrant rice, and our homemade chilli.")
-                    p_url = st.text_input("CTA link (source url) *", value="https://example.com/AhBoyzDinnerDeal")
-                    
-                    publish_btn = st.form_submit_button("Publish Promotion", use_container_width=True)
-                    
-                st.markdown(f'''
+                col3, col4 = st.columns(2)
+                p_category = col3.selectbox("Category *", ["Food & Dining", "Grocery", "Mall", "Family", "Fitness"])
+                p_area = col4.text_input("Location / Area *", value=location)
+                
+                col5, col6 = st.columns(2)
+                p_from = col5.date_input("Valid from")
+                p_to = col6.date_input("Valid to")
+                
+                p_interests = st.multiselect("Audience / Interests", ["food", "grocery", "event", "deal", "fitness", "tourist"], default=["food", "deal"])
+                
+                p_description = st.text_area("Short description *", value="Enjoy our signature Hainanese Chicken Rice at 50% off for dinner! Freshly steamed chicken, fragrant rice, and our homemade chilli.")
+                p_url = st.text_input("CTA link (source url) *", value="https://example.com/AhBoyzDinnerDeal")
+                
+                publish_btn = st.form_submit_button("Publish Promotion", use_container_width=True)
+                
+            st.markdown(f'''
 <div class="footer" style="margin-top:10px;">Submitted promotions appear immediately in Today's Picks on the homepage.</div>
 ''', unsafe_allow_html=True)
-            
-            if publish_btn:
-                if not p_url.startswith("http"):
-                    st.error("Please provide a valid source URL starting with http:// or https:// to verify this deal.")
+        
+        if publish_btn:
+            if not p_url.startswith("http"):
+                st.error("Please provide a valid source URL starting with http:// or https:// to verify this deal.")
+            else:
+                new_promo = create_business_promo_card(
+                    business_name=b_name,
+                    title=p_title,
+                    description=p_description,
+                    category=p_category,
+                    source_url=p_url,
+                    lat=lat,
+                    lon=lon,
+                    location_name=p_area,
+                    valid_until=p_to.isoformat(),
+                    tags=p_interests,
+                )
+                saved = save_business_promotion(new_promo, databricks_sql_settings())
+                if saved:
+                    st.success("🎉 Promotion published to Databricks SQL successfully! Check the 'GoAround Today' tab to see it ranked near you.")
                 else:
-                    new_promo = create_business_promo_card(
-                        business_name=b_name,
-                        title=p_title,
-                        description=p_description,
-                        category=p_category,
-                        source_url=p_url,
-                        lat=lat,
-                        lon=lon,
-                        location_name=p_area,
-                        valid_until=p_to.isoformat(),
-                        tags=p_interests,
-                    )
-                    saved = save_business_promotion(new_promo, databricks_sql_settings())
-                    if saved:
-                        st.success("🎉 Promotion published to Databricks SQL successfully! Check the 'GoAround Today' tab to see it ranked near you.")
-                    else:
-                        st.warning("⚠️ Saved promotion locally as backup. Check the 'GoAround Today' tab to see it ranked near you.")
-                    st.rerun()
-                    
-        with preview_col:
-            with st.container(key="preview_card_container", border=True):
-                st.markdown(f'''
+                    st.warning("⚠️ Saved promotion locally as backup. Check the 'GoAround Today' tab to see it ranked near you.")
+                st.rerun()
+                
+    with preview_col:
+        with st.container(key="preview_card_container"):
+            st.markdown('<div class="preview-card-marker"></div>', unsafe_allow_html=True)
+            st.markdown(f'''
 <h2>Preview</h2><div class="muted">How your promotion appears to users in real-time.</div>
 <div class="preview-card" style="margin-top:20px;">
 <div class="tag" style="background:#FFE6E2; color:#D32F2F !important;">{escape(p_category.upper())}</div>
@@ -1011,8 +1315,12 @@ with right:
 <a class="visit" href="{escape(p_url)}" target="_blank">View details ↗</a>
 </div>
 ''', unsafe_allow_html=True)
-            
-    else:
+
+else:  # about page
+    sidebar_col, content_col = st.columns([0.18, 0.82], gap="medium")
+    with sidebar_col:
+        render_sidebar()
+    with content_col:
         st.markdown(f'''
 <div class="app-card full-card"><h1>What is GoAround SG?</h1><div class="muted">A source-backed local discovery assistant for Singapore. Current area scope: {safe_location} · {safe_radius_label}.</div>
 <div class="about-section"><h2>For residents and visitors</h2><p>Ask what to eat, what to do with kids, rainy-day options, nearby deals, or a short visitor plan.</p></div><div class="about-section"><h2>For businesses</h2><p>Businesses can create local promotion cards that are shown to nearby users based on location, category, interests, and timing.</p></div><div class="about-section"><h2>Why it is different</h2><p>GoAround SG combines open data, source registries, browser location, weather, ranking, and AI conversation into one daily local assistant.</p></div><div class="about-section"><h2>Databricks usage in this prototype</h2><ul><li>Databricks Apps hosts the application.</li><li>Lakehouse / Delta can store Bronze, Silver, and Gold local discovery data.</li><li>Databricks SQL warehouse can serve candidate cards when configured.</li><li>Model Serving / GenAI can power Ask GoAround when a serving endpoint is configured.</li></ul></div><div class="footer">GoAround SG — Team R4131N. Source-backed local discovery. Verify final details at source.</div></div>
