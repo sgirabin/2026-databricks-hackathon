@@ -480,24 +480,55 @@ safe_pick_scope = f"within {safe_radius_label}" if is_browser_location else "acr
 safe_near_phrase = f"near {safe_location}" if is_browser_location else "across Singapore"
 safe_databricks_source = escape(databricks_source)
 
-if ranked_picks:
-    picks_html = "".join(render_pick_html(row) for row in ranked_picks)
-    picks_footer = f"{len(all_cards)} candidates ranked via Databricks⌄"
+# Compile the picks feed HTML, applying the active filter if selected
+active_filter = st.session_state.get("active_filter", "all")
+if active_filter != "all":
+    filtered_picks = []
+    for pick in ranked_picks:
+        card = pick.card
+        # Check if active filter matches card type, category, title, description, or tags
+        haystack = " ".join([
+            card.card_type,
+            card.category,
+            card.title,
+            card.description,
+            " ".join(card.tags)
+        ]).lower()
+        if active_filter in haystack:
+            filtered_picks.append(pick)
+            
+    if filtered_picks:
+        picks_html = "".join(render_pick_html(row) for row in filtered_picks)
+        picks_footer = f"{len(filtered_picks)} of {len(all_cards)} picks match filter⌄"
+    else:
+        picks_html = (
+            '<div class="pick" style="text-align: center; padding: 30px 20px;">'
+            '<b>🔍 No matching picks found</b><br>'
+            '<span class="muted" style="font-size: 0.9rem;">There are no active cards near you matching this filter.</span><br>'
+            '<span class="muted" style="font-size: 0.85rem; display: block; margin-top: 10px;">Try switching to another category above.</span>'
+            '</div>'
+        )
+        picks_footer = f"0 of {len(all_cards)} picks match filter⌄"
 else:
-    picks_html = (
-        f'<div class="pick"><b>🤖 {safe_first_interest.title()} {safe_near_phrase}</b><br>'
-        f'<span class="muted">{safe_databricks_source}</span><br>'
-        'Databricks-backed picks are unavailable, so this placeholder is shown until SQL access is configured.<br>'
-        '<span class="visit">Visit Website</span></div>'
-        f'<div class="pick"><b>{weather["icon"]} Weather-aware plan</b><br>'
-        f'<span class="muted">{safe_weather_summary}</span><br>'
-        'Use this context to choose indoor, outdoor or transport-friendly options.<br>'
-        '<span class="visit">Visit Website</span></div>'
-        '<div class="pick"><b>🏷️ Singapore deal updates</b><br>'
-        f'<span class="muted">Interests · {escape(", ".join(interests[:3]))}</span><br>'
-        'Featured grocery offers and deal sources across Singapore.<br><span class="visit">Visit Website</span></div>'
-    )
-    picks_footer = "Databricks SQL not ready⌄"
+    if ranked_picks:
+        picks_html = "".join(render_pick_html(row) for row in ranked_picks)
+        picks_footer = f"{len(all_cards)} candidates ranked via Databricks⌄"
+    else:
+        picks_html = (
+            f'<div class="pick"><b>🤖 {safe_first_interest.title()} {safe_near_phrase}</b><br>'
+            f'<span class="muted">{safe_databricks_source}</span><br>'
+            'Databricks-backed picks are unavailable, so this placeholder is shown until SQL access is configured.<br>'
+            '<span class="visit">Visit Website</span></div>'
+            f'<div class="pick"><b>{weather["icon"]} Weather-aware plan</b><br>'
+            f'<span class="muted">{safe_weather_summary}</span><br>'
+            'Use this context to choose indoor, outdoor or transport-friendly options.<br>'
+            '<span class="visit">Visit Website</span></div>'
+            '<div class="pick"><b>🏷️ Singapore deal updates</b><br>'
+            f'<span class="muted">Interests · {escape(", ".join(interests[:3]))}</span><br>'
+            'Featured grocery offers and deal sources across Singapore.<br><span class="visit">Visit Website</span></div>'
+        )
+        picks_footer = "Databricks SQL not ready⌄"
+
 safe_picks_footer = escape(picks_footer)
 
 
@@ -640,6 +671,35 @@ div[data-testid="stVerticalBlockBorder-business_form_container"] div[data-testid
     background: linear-gradient(90deg,#0b5ed7,#1d4ed8) !important;
     color: white !important;
 }
+
+/* Style filter pill buttons inside picks card container (inactive state - secondary button) */
+div[data-testid="stVerticalBlockBorder-picks_card_container"] div[data-testid="stButton"] button {
+    border: none !important;
+    border-radius: 999px !important;
+    min-height: 32px !important;
+    height: 32px !important;
+    padding: 4px 10px !important;
+    font-size: 11.5px !important;
+    font-weight: 800 !important;
+    background-color: #EEF4FF !important;
+    color: #175CD3 !important;
+    box-shadow: none !important;
+    transition: all 0.2s ease !important;
+}
+div[data-testid="stVerticalBlockBorder-picks_card_container"] div[data-testid="stButton"] button:hover {
+    background-color: #E0ECFF !important;
+    color: #114B9E !important;
+}
+
+/* Style filter pill buttons inside picks card container (active state - primary button) */
+div[data-testid="stVerticalBlockBorder-picks_card_container"] div[data-testid="stButton"] button[kind="primary"] {
+    background: var(--blue) !important;
+    color: white !important;
+}
+div[data-testid="stVerticalBlockBorder-picks_card_container"] div[data-testid="stButton"] button[kind="primary"]:hover {
+    background: #1b5ed7 !important;
+    color: white !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -657,7 +717,6 @@ with left:
   <div class="info-row"><div class="info-icon">◎</div><div><div class="info-main">{safe_radius_label}</div><div class="info-sub">{discovery_subtitle}</div></div></div>
   <div class="info-row"><div class="info-icon">🧭</div><div><div class="info-main">{safe_coords}</div><div class="info-sub">Approx. centre point</div></div></div>
 </div>
-<div class="area-label">Useful interests</div><div class="tag-wrap">{render_tags(interests)}</div>
 <div class="small-note">No manual save is needed. Ask the chat about another place, for example: “What can I do near Chinatown?”</div>
 <div class="sidebar-note">Source-backed. Verify details at source.</div>
 </div>
@@ -737,8 +796,40 @@ with right:
         with picks_col:
             with st.container(key="picks_card_container", border=True):
                 st.markdown(f'''
-<div class="main-shell-title"><div><h2>Today’s Picks</h2><div class="muted">Curated for {safe_location} based on weather, area and interests.</div></div><div class="view-all">View all</div></div>
-<div class="picklist" style="overflow-y:auto; height:var(--picks-body-h);">{picks_html}</div><div class="footer" style="color:#175CD3!important;font-weight:800">{safe_picks_footer}</div>
+<div class="main-shell-title" style="margin-bottom: 12px;">
+  <div>
+    <h2>Today’s Picks</h2>
+    <div class="muted">Curated for {safe_location} based on weather, area and interests.</div>
+  </div>
+</div>
+''', unsafe_allow_html=True)
+
+                filter_options = [
+                    ("🌟 All", "all"),
+                    ("🍴 Food", "cheap food"),
+                    ("🛒 Grocery", "grocery"),
+                    ("📅 Events", "event"),
+                    ("🏷️ Deals", "deal")
+                ]
+                
+                if "active_filter" not in st.session_state:
+                    st.session_state["active_filter"] = "all"
+                    
+                cols = st.columns(len(filter_options))
+                for idx, (label, val) in enumerate(filter_options):
+                    is_active = (st.session_state["active_filter"] == val)
+                    if cols[idx].button(
+                        label,
+                        key=f"filter_btn_{val}",
+                        type="primary" if is_active else "secondary",
+                        use_container_width=True
+                    ):
+                        st.session_state["active_filter"] = val
+                        st.rerun()
+                
+                st.markdown(f'''
+<div class="picklist" style="overflow-y:auto; height:calc(var(--picks-body-h) - 48px); margin-top: 14px;">{picks_html}</div>
+<div class="footer" style="color:#175CD3!important;font-weight:800; margin-top: 10px;">{safe_picks_footer}</div>
 ''', unsafe_allow_html=True)
             
     elif page == "business":
