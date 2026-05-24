@@ -5,6 +5,7 @@ import os
 from html import escape
 from typing import Any
 from urllib.parse import urlencode
+from datetime import datetime
 
 import requests
 import streamlit as st
@@ -16,11 +17,18 @@ except Exception:  # pragma: no cover - keeps local/dev startup safe if package 
     streamlit_js_eval = None
 
 st.set_page_config(
-    page_title="LAYOUT TARGET - GoAround SG",
+    page_title="GoAround SG - Hyperlocal Discovery",
     page_icon="📍",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
+
+# GoAround SG imports
+from src.goaround.models import UserContext, PickCard, RankedPick
+from src.goaround.ranking import rank_cards, infer_time_of_day
+from src.goaround.seed_data import source_registry_cards, area_anchor_cards
+from src.goaround.business import create_business_promo_card
+from src.goaround.agent import answer_with_databricks
 
 DEFAULT_LOCATION = "Singapore"
 DEFAULT_COORDS = "1.3521, 103.8198"
@@ -265,12 +273,14 @@ def databricks_sql_settings() -> tuple[str | None, str | None, str | None, str, 
     http_path = os.getenv("DATABRICKS_HTTP_PATH") or DEFAULT_SQL_HTTP_PATH
     token = os.getenv("DATABRICKS_TOKEN")
     catalog = os.getenv("GOAROUND_CATALOG", "workspace")
+    if catalog == "goaround_sg":
+        catalog = "workspace"
     schema = os.getenv("GOAROUND_SCHEMA", "goaround_sg")
     return host, http_path, token, catalog, schema
 
 
 @st.cache_data(ttl=300, show_spinner=False)
-def load_nearby_databricks_picks(user_lat: float, user_lon: float, limit: int = 160) -> tuple[list[dict[str, Any]], str]:
+def load_nearby_databricks_picks(user_lat: float, user_lon: float, limit: int = 160) -> tuple[list[PickCard], str]:
     host, http_path, token, catalog, schema = databricks_sql_settings()
     if not token:
         return [], "Databricks token is not configured"
@@ -313,68 +323,44 @@ def load_nearby_databricks_picks(user_lat: float, user_lon: float, limit: int = 
             columns = [column[0] for column in cursor.description]
             rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
             cursor.close()
-        return rows, f"{table} via Databricks SQL"
+            
+        cards = []
+        for idx, r in enumerate(rows):
+            title = r.get("title") or r.get("category") or "Local Update"
+            # Clean up cryptic geo-tags (like 'kml_22') to make them beautiful for end-users
+            if title.startswith("kml_") or title.startswith("KML_"):
+                src_name = r.get("source_name") or "Public Registry"
+                title = f"{src_name} Facility ({title.upper()})"
+                
+            cards.append(PickCard(
+                id=f"sql-{idx}-{abs(hash(title)) % 100000}",
+                card_type=r.get("card_type") or "local_update",
+                title=title,
+                description=r.get("description") or "Local area update.",
+                source_name=r.get("source_name") or "Databricks Delta Lake",
+                source_url=r.get("source_url") or "https://data.gov.sg/",
+                category=r.get("category") or "local",
+                lat=None if r.get("lat") is None else float(r["lat"]),
+                lon=None if r.get("lon") is None else float(r["lon"]),
+                source_reliability=float(r.get("source_reliability") or 0.8),
+                freshness_score=float(r.get("freshness_score") or 0.7),
+            ))
+        return cards, f"{table} via Databricks SQL"
     except Exception as exc:
         return [], f"Databricks SQL unavailable: {exc}"
 
 
-def rank_pick_rows(rows: list[dict[str, Any]], context_interests: list[str], forecast: str) -> list[dict[str, Any]]:
-    wanted = {item.lower() for item in context_interests}
-    rainy = any(word in forecast.lower() for word in ["rain", "shower", "thunder"])
-    scored: list[dict[str, Any]] = []
-    for row in rows:
-        category = str(row.get("category") or "").lower()
-        card_type = str(row.get("card_type") or "").lower()
-        title = str(row.get("title") or "")
-        description = str(row.get("description") or "")
-        haystack = f"{category} {card_type} {title} {description}".lower()
-        distance_m = float(row.get("distance_m") or 0)
-        score = max(0.0, 1.0 - min(distance_m, 5000) / 5000)
-        if any(term in haystack for term in wanted):
-            score += 0.45
-        if category in {"food", "grocery", "community", "park", "tourist"} or card_type in {"food", "deal", "event", "plan"}:
-            score += 0.2
-        if rainy and any(term in haystack for term in ["mrt", "transport", "community", "health", "family"]):
-            score += 0.15
-        if card_type == "transport":
-            score -= 0.12
-        row = {**row, "score": score}
-        scored.append(row)
-
-    scored.sort(key=lambda item: item["score"], reverse=True)
-    selected: list[dict[str, Any]] = []
-    used_categories: set[str] = set()
-    for row in scored:
-        category = str(row.get("category") or "local")
-        if category in used_categories and len(selected) < 3:
-            continue
-        selected.append(row)
-        used_categories.add(category)
-        if len(selected) == 3:
-            break
-    if len(selected) < 3:
-        for row in scored:
-            if row not in selected:
-                selected.append(row)
-            if len(selected) == 3:
-                break
-    return selected
-
-
-def render_pick_html(row: dict[str, Any], fallback_scope: str) -> str:
-    card_type = str(row.get("card_type") or "local_update")
-    category = str(row.get("category") or "local")
-    title = escape(str(row.get("title") or "Local pick"))
-    description = escape(str(row.get("description") or "Source-backed local open-data card."))
-    source_name = escape(str(row.get("source_name") or "Databricks Gold table"))
-    source_url = escape(normalized_url(str(row.get("source_url") or "")))
-    try:
-        distance_m = float(row.get("distance_m"))
-    except (TypeError, ValueError):
-        distance_m = None
-    meta = escape(f"{source_name} · {distance_label(distance_m)}")
+def render_pick_html(pick: RankedPick) -> str:
+    card = pick.card
+    card_type = str(card.card_type or "local_update")
+    category = str(card.category or "local")
+    title = escape(str(card.title or "Local pick"))
+    description = escape(str(card.description or "Source-backed local open-data card."))
+    source_name = escape(str(card.source_name or "Databricks Gold table"))
+    source_url = escape(normalized_url(str(card.source_url or "")))
+    meta = escape(f"{source_name} · {distance_label(pick.distance_m)}")
     icon = source_icon(card_type, category)
-    why = escape(f"Shown from Databricks Gold cards for {fallback_scope}.")
+    why = escape(pick.why_shown)
     return (
         f'<div class="pick"><b>{icon} {title}</b><br>'
         f'<span class="muted">{meta}</span><br>{description}<br>'
@@ -442,8 +428,30 @@ radius_label = f"{radius_m / 1000:g} km" if is_browser_location else "Singapore-
 discovery_subtitle = "Discovery radius" if is_browser_location else "Discovery scope"
 weather = fetch_weather(lat, lon)
 weather_summary = f"{weather['temperature']} · {weather['forecast']}"
-databricks_rows, databricks_source = load_nearby_databricks_picks(lat, lon)
-ranked_picks = rank_pick_rows(databricks_rows, interests, weather["forecast"])
+
+# Core dynamic recommendations querying and compilation
+db_cards, databricks_source = load_nearby_databricks_picks(lat, lon)
+all_cards = list(db_cards) if db_cards else list(source_registry_cards())
+all_cards.extend(area_anchor_cards(location, lat, lon))
+
+# Append merchant-submitted promotions from session state
+business_cards = st.session_state.get("business_cards", [])
+all_cards.extend(business_cards)
+
+# Construct rich user context
+context = UserContext(
+    mode=params.get("mode", st.session_state.get("mode", "resident")),
+    address=location,
+    lat=lat,
+    lon=lon,
+    radius_m=radius_m,
+    interests=tuple(interests),
+    time_of_day=infer_time_of_day(),
+    weather=weather["forecast"],
+)
+
+# Apply formal dynamic ranking engine
+ranked_picks = rank_cards(all_cards, context, limit=12)
 
 safe_location = escape(location)
 safe_coords = escape(coords)
@@ -455,9 +463,10 @@ safe_location_source = "Browser location" if is_browser_location else "Default a
 safe_pick_scope = f"within {safe_radius_label}" if is_browser_location else "across Singapore"
 safe_near_phrase = f"near {safe_location}" if is_browser_location else "across Singapore"
 safe_databricks_source = escape(databricks_source)
+
 if ranked_picks:
-    picks_html = "".join(render_pick_html(row, safe_pick_scope) for row in ranked_picks)
-    picks_footer = f"{len(databricks_rows)} candidates from Databricks⌄"
+    picks_html = "".join(render_pick_html(row) for row in ranked_picks)
+    picks_footer = f"{len(all_cards)} candidates ranked via Databricks⌄"
 else:
     picks_html = (
         f'<div class="pick"><b>🤖 {safe_first_interest.title()} {safe_near_phrase}</b><br>'
@@ -497,8 +506,8 @@ def render_tags(items: list[str]) -> str:
 
 st.markdown("""
 <style>
-:root{color-scheme:light!important;--bg:#F4F7FB;--text:#172B4D;--muted:#667085;--line:#E3EAF5;--blue:#0D6EFD;--green:#10B981;--app-h:calc(100dvh - 1.05rem);--chat-body-h:clamp(280px,calc(100dvh - 395px),560px);--picks-body-h:clamp(390px,calc(100dvh - 152px),760px)}
-@supports not (height:100dvh){:root{--app-h:calc(100vh - 1.05rem);--chat-body-h:clamp(280px,calc(100vh - 395px),560px);--picks-body-h:clamp(390px,calc(100vh - 152px),760px)}}
+:root{color-scheme:light!important;--bg:#F4F7FB;--text:#172B4D;--muted:#667085;--line:#E3EAF5;--blue:#0D6EFD;--green:#10B981;--app-h:calc(100dvh - 1.05rem);--chat-body-h:clamp(280px,calc(100dvh - 435px),560px);--picks-body-h:clamp(390px,calc(100dvh - 152px),760px)}
+@supports not (height:100dvh){:root{--app-h:calc(100vh - 1.05rem);--chat-body-h:clamp(280px,calc(100vh - 435px),560px);--picks-body-h:clamp(390px,calc(100vh - 152px),760px)}}
 html,body,.stApp,[data-testid="stAppViewContainer"],[data-testid="block-container"]{background:var(--bg)!important;color:var(--text)!important;color-scheme:light!important;overflow:hidden!important}
 [data-testid="stHeader"],section[data-testid="stSidebar"]{display:none!important}.main .block-container{max-width:none!important;padding:.55rem .75rem .35rem .75rem!important;height:100dvh!important;overflow:hidden!important}
 div[data-testid="stHorizontalBlock"]{gap:1rem!important;align-items:stretch!important}div[data-testid="stVerticalBlock"]{gap:0!important}
@@ -507,10 +516,11 @@ div[data-testid="stHorizontalBlock"]{gap:1rem!important;align-items:stretch!impo
 .brand{display:flex;gap:13px;align-items:center;margin-bottom:clamp(14px,2dvh,20px)}.pin{width:42px;height:42px;border-radius:50%;background:linear-gradient(145deg,#0D6EFD,#20B2AA);box-shadow:0 10px 22px rgba(13,110,253,.20);flex:0 0 auto}.brand-title{font-size:21px;font-weight:900;color:#0D2B5C}.green{color:var(--green)!important}.subtitle{font-size:12.5px;line-height:1.45;color:var(--muted)!important;margin-top:4px}
 .nav{border-top:1px solid var(--line);padding-top:14px;margin-top:8px}.nav a{display:block;text-decoration:none!important;border-radius:13px;padding:10px 12px;font-size:13.5px;font-weight:800;margin-bottom:5px;color:var(--text)!important}.nav a.active{background:linear-gradient(90deg,#EAF2FF,#F6FAFF);color:#175CD3!important;box-shadow:inset 3px 0 0 #0D6EFD}
 .side-title{font-size:20px;font-weight:900;margin:clamp(13px,2dvh,18px) 0 5px 0}.info-card{border:1px solid #D8DFEA;border-radius:18px;background:linear-gradient(180deg,#fff,#FBFCFE);padding:13px 14px;margin:10px 0;box-shadow:0 5px 16px rgba(23,43,77,.045)}.info-row{display:flex;gap:10px;align-items:flex-start;margin:8px 0}.info-icon{width:22px;text-align:center;flex:0 0 auto}.info-main{font-size:13px;font-weight:850;color:#172B4D!important;line-height:1.35}.info-sub{font-size:11.5px;color:var(--muted)!important;line-height:1.35}.tag{border-radius:999px;padding:6px 10px;background:#EEF4FF;color:#175CD3!important;font-size:11.5px;font-weight:800;display:inline-block;margin:3px}.tag-wrap{margin:7px 0 12px 0}.area-label{font-size:11.8px;color:var(--muted)!important;font-weight:750;margin:8px 0 5px 2px}.small-note{border:1px solid #E8EEF8;border-radius:13px;background:#F8FBFF;padding:10px 12px;font-size:11.5px;color:#4B5565!important;line-height:1.4}.save{background:linear-gradient(90deg,#0D6EFD,#2563EB)!important;color:white!important;justify-content:center!important;font-weight:900!important;border:0!important;box-shadow:0 8px 18px rgba(13,110,253,.22)!important}.field{min-height:44px;border:1px solid #D8DFEA;border-radius:13px;background:white;display:flex;align-items:center;padding:0 13px;font-size:12.5px;color:#4B5565!important;margin-bottom:9px;box-shadow:0 2px 8px rgba(23,43,77,.025);box-sizing:border-box}
-.status{display:inline-block;border:1px solid var(--line);border-radius:12px;padding:9px 14px;font-size:12.5px;margin:0 8px 12px 0;background:white;box-shadow:0 2px 8px rgba(23,43,77,.025)}.chatbox{height:var(--chat-body-h);border-radius:18px;background:linear-gradient(180deg,#FFFFFF 0%,#FBFCFE 100%);border:1px dashed #D8E2F0;padding:22px;overflow:hidden;box-sizing:border-box}.bubble{border-radius:18px;background:#F1F5F9;padding:13px 16px;display:inline-block;margin:12px;max-width:68%;font-size:14px;line-height:1.45;box-shadow:0 2px 8px rgba(23,43,77,.025)}.user{text-align:right}.quick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}.quick{border:1px solid #D8DFEA;border-radius:13px;min-height:44px;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;background:white;box-shadow:0 2px 8px rgba(23,43,77,.025)}.inputbar{min-height:58px;border:1px solid #D8DFEA;border-radius:18px;background:white;display:grid;grid-template-columns:46px 1fr 58px;align-items:center;margin-top:14px;box-shadow:0 6px 18px rgba(23,43,77,.045)}.send{height:44px;width:44px;border-radius:13px;background:var(--blue);color:white!important;display:flex;align-items:center;justify-content:center;font-weight:900}
-.picklist{height:var(--picks-body-h);overflow:hidden}.pick{min-height:clamp(112px,17dvh,135px);border:1px solid var(--line);border-radius:18px;padding:15px;background:white;margin-bottom:13px;box-shadow:0 5px 16px rgba(23,43,77,.045)}.pick b{font-size:15px}.footer{text-align:center;color:var(--muted)!important;font-size:11.5px;margin-top:9px}.visit{display:inline-block;margin-top:10px;border:1px solid var(--line);border-radius:11px;padding:8px 11px;font-size:11.5px;background:white;color:#0D2B5C!important;font-weight:750}.main-shell-title{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.view-all{font-size:13px;color:#175CD3!important;font-weight:800;margin-top:6px}.sidebar-note{font-size:11.8px;color:var(--muted)!important;margin-top:10px;line-height:1.35}
-.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}.kpi{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fff;box-shadow:0 5px 16px rgba(23,43,77,.045)}.kpi b{display:block;font-size:1.35rem;margin-top:4px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.form-field{border:1px solid #D8DFEA;border-radius:13px;padding:12px;background:#fff;color:#4B5565!important;font-size:13px}.wide{grid-column:1/-1}.preview-card{border:1px solid var(--line);border-radius:22px;padding:18px;background:#fff;box-shadow:0 8px 22px rgba(23,43,77,.055);margin-top:14px}.about-section{margin-top:22px}.about-section h2{margin-bottom:8px!important}.about-section ul{margin-top:8px;line-height:1.8}
-@media(max-height:760px){:root{--app-h:calc(100dvh - .9rem);--chat-body-h:clamp(260px,calc(100dvh - 405px),420px);--picks-body-h:clamp(370px,calc(100dvh - 165px),620px)}.pick{min-height:108px}.inputbar{min-height:52px}.quick{min-height:39px}.brand{margin-bottom:12px}.field{min-height:38px;margin-bottom:7px}.nav a{padding:8px 10px}.tag{padding:5px 8px}.sidebar-note{display:none}.sidebar-card,.chat-card,.picks-card,.full-card{padding-top:22px}.info-card{padding:10px 12px}.small-note{display:none}}
+.status{display:inline-block;border:1px solid var(--line);border-radius:12px;padding:9px 14px;font-size:12.5px;margin:0 8px 12px 0;background:white;box-shadow:0 2px 8px rgba(23,43,77,.025)}.chatbox{height:var(--chat-body-h);border-radius:18px;background:linear-gradient(180deg,#FFFFFF 0%,#FBFCFE 100%);border:1px dashed #D8E2F0;padding:22px;overflow-y:auto;box-sizing:border-box}.bubble{border-radius:18px;background:#F1F5F9;padding:13px 16px;display:inline-block;margin:12px;max-width:68%;font-size:14px;line-height:1.45;box-shadow:0 2px 8px rgba(23,43,77,.025)}.user{text-align:right}.quick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}.quick{border:1px solid #D8DFEA;border-radius:13px;min-height:44px;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;background:white;box-shadow:0 2px 8px rgba(23,43,77,.025)}.inputbar{min-height:58px;border:1px solid #D8DFEA;border-radius:18px;background:white;display:grid;grid-template-columns:46px 1fr 58px;align-items:center;margin-top:14px;box-shadow:0 6px 18px rgba(23,43,77,.045)}.send{height:44px;width:44px;border-radius:13px;background:var(--blue);color:white!important;display:flex;align-items:center;justify-content:center;font-weight:900}
+.picklist{height:var(--picks-body-h);overflow-y:auto}.pick{min-height:clamp(112px,17dvh,135px);border:1px solid var(--line);border-radius:18px;padding:15px;background:white;margin-bottom:13px;box-shadow:0 5px 16px rgba(23,43,77,.045)}.pick b{font-size:15px}.footer{text-align:center;color:var(--muted)!important;font-size:11.5px;margin-top:9px}.visit{display:inline-block;margin-top:10px;border:1px solid var(--line);border-radius:11px;padding:8px 11px;font-size:11.5px;background:white;color:#0D2B5C!important;font-weight:750}.main-shell-title{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.view-all{font-size:13px;color:#175CD3!important;font-weight:800;margin-top:6px}.sidebar-note{font-size:11.8px;color:var(--muted)!important;margin-top:10px;line-height:1.35}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}.kpi{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fff;box-shadow:0 5px 16px rgba(23,43,77,.045)}.kpi b{display:block;font-size:1.35rem;margin-top:4px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.form-field{border:1px solid #D8DFEA;border-radius:13px;padding:12px;background:#fff;color:#4B5565!important;font-size:13px}
+.wide{grid-column:1/-1}.preview-card{border:1px solid var(--line);border-radius:22px;padding:18px;background:#fff;box-shadow:0 8px 22px rgba(23,43,77,.055);margin-top:14px}.about-section{margin-top:22px}.about-section h2{margin-bottom:8px!important}.about-section ul{margin-top:8px;line-height:1.8}
+@media(max-height:760px){:root{--app-h:calc(100dvh - .9rem);--chat-body-h:clamp(260px,calc(100dvh - 445px),420px);--picks-body-h:clamp(370px,calc(100dvh - 165px),620px)}.pick{min-height:108px}.inputbar{min-height:52px}.quick{min-height:39px}.brand{margin-bottom:12px}.field{min-height:38px;margin-bottom:7px}.nav a{padding:8px 10px}.tag{padding:5px 8px}.sidebar-note{display:none}.sidebar-card,.chat-card,.picks-card,.full-card{padding-top:22px}.info-card{padding:10px 12px}.small-note{display:none}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -539,31 +549,148 @@ with right:
         chat_col, picks_col = st.columns([0.68, 0.32], gap="large")
         with chat_col:
             st.markdown(f'''
-<div class="app-card chat-card"><h1>Ask GoAround</h1><div class="muted">Your conversation-style local assistant.</div>
-<div style="margin-top:12px"><span class="status">{weather['icon']} {safe_weather_summary}</span><span class="status">📍 {safe_location}</span><span class="status">◎ {safe_radius_label}</span></div>
-<div class="chatbox"><div>🤖 <span class="bubble">Hi, I’m Ask GoAround. Ask me what to eat, what to do with kids, rainy-day options, nearby deals, or a short visitor plan.</span></div><div class="user"><span class="bubble">Any cheap food spots near me?</span> 👤</div><div>🤖 <span class="bubble">Here are some budget-friendly options {safe_near_phrase}. Weather now: {safe_weather_summary}.</span></div></div>
-<div class="quick-grid"><div class="quick">🍴 Eat cheap</div><div class="quick">📅 Weekend events</div><div class="quick">🌧️ Rainy-day ideas</div><div class="quick">🛒 Grocery deals</div></div>
-<div class="inputbar"><div style="text-align:center">📎</div><div class="muted">Ask GoAround about this area or another place...</div><div class="send">➤</div></div>
-<div class="footer">GoAround SG. Source-backed local discovery only. Verify deals, events and official updates at source before acting.</div></div>
+<div class="app-card chat-card" style="height:var(--app-h);"><h1>Ask GoAround</h1><div class="muted">Your conversation-style local assistant.</div>
+<div style="margin-top:12px; margin-bottom:12px;"><span class="status">{weather['icon']} {safe_weather_summary}</span><span class="status">📍 {safe_location}</span><span class="status">◎ {safe_radius_label}</span></div>
 ''', unsafe_allow_html=True)
+            
+            # Conversational state tracking
+            if "ask_messages" not in st.session_state:
+                st.session_state["ask_messages"] = [
+                    {"role": "assistant", "content": "Hi, I’m Ask GoAround. Ask me what to eat, what to do with kids, rainy-day options, nearby deals, or a short visitor plan."}
+                ]
+                
+            # Build clean HTML history
+            chat_history_html = ""
+            for msg in st.session_state["ask_messages"][-6:]:  # Show last 6 messages
+                role = msg["role"]
+                content = escape(msg["content"]).replace("\n", "<br>")
+                if role == "user":
+                    chat_history_html += f'<div style="text-align:right; margin: 10px 0;"><span class="bubble" style="background:#EAF2FF; text-align:left;">{content}</span> 👤</div>'
+                else:
+                    chat_history_html += f'<div style="margin: 10px 0;">🤖 <span class="bubble">{content}</span></div>'
+                    
+            st.markdown(f'''
+<div class="chatbox" style="height:var(--chat-body-h); overflow-y:auto; margin-bottom:12px;">
+{chat_history_html}
+</div>
+''', unsafe_allow_html=True)
+            
+            # Quick Actions using real Streamlit buttons inside container columns
+            prompts = [
+                ("🍴 Eat cheap", "Any cheap food spots near me?"),
+                ("📅 Weekend events", f"What weekend events are happening near {safe_location}?"),
+                ("🌧️ Rainy-day ideas", "What are some good rainy-day indoor ideas?"),
+                ("🛒 Grocery deals", "Are there any grocery deals or promos?")
+            ]
+            
+            cols = st.columns(4)
+            pending_prompt = None
+            for idx, (label, query_text) in enumerate(prompts):
+                if cols[idx].button(label, key=f"quick_{idx}", use_container_width=True):
+                    pending_prompt = query_text
+                    
+            # Real input form with native text input that styles beautifully
+            with st.form("ask_form", clear_on_submit=True):
+                ic, sc = st.columns([9, 1])
+                q_input = ic.text_input("Ask", placeholder="Ask GoAround about this area or another place...", label_visibility="collapsed")
+                submitted = sc.form_submit_button("➤", use_container_width=True)
+                
+            st.markdown(f'''
+<div class="footer" style="margin-top:10px;">GoAround SG. Source-backed local discovery only. Verify deals, events and official updates at source before acting.</div></div>
+''', unsafe_allow_html=True)
+            
+            # Processing user input
+            user_query = pending_prompt or (q_input.strip() if submitted and q_input.strip() else None)
+            if user_query:
+                st.session_state["ask_messages"].append({"role": "user", "content": user_query})
+                # Show spinner while waiting for LLM or rules fallback
+                with st.spinner("Asking GoAround..."):
+                    ans = answer_with_databricks(
+                        question=user_query,
+                        context=context,
+                        ranked=ranked_picks,
+                        fallback="I am looking up details..."
+                    )
+                st.session_state["ask_messages"].append({"role": "assistant", "content": ans})
+                st.rerun()
+
         with picks_col:
             st.markdown(f'''
-<div class="app-card picks-card"><div class="main-shell-title"><div><h2>Today’s Picks</h2><div class="muted">Curated for {safe_location} based on weather, area and interests.</div></div><div class="view-all">View all</div></div>
-<div class="picklist">{picks_html}</div><div class="footer" style="color:#175CD3!important;font-weight:800">{safe_picks_footer}</div></div>
+<div class="app-card picks-card"><div class="main-shell-title"><div><h2>Today’s Picks</h2><div class="muted">Curated for Curated for {safe_location} based on weather, area and interests.</div></div><div class="view-all">View all</div></div>
+<div class="picklist" style="overflow-y:auto; height:var(--picks-body-h);">{picks_html}</div><div class="footer" style="color:#175CD3!important;font-weight:800">{safe_picks_footer}</div></div>
 ''', unsafe_allow_html=True)
+            
     elif page == "business":
         form_col, preview_col = st.columns([0.68, 0.32], gap="large")
         with form_col:
             st.markdown(f'''
-<div class="app-card chat-card"><h1>Business Promotion</h1><div class="muted">Create a local promotion that can appear in Today’s Picks for {safe_location}.</div>
+<div class="app-card chat-card" style="height:var(--app-h); overflow-y:auto; padding-bottom:30px;">
+<h1>Business Promotion</h1><div class="muted">Create a local promotion that can appear in Today’s Picks for {safe_location}.</div>
 <div class="kpi-grid"><div class="kpi"><span class="muted">Active</span><b>3</b></div><div class="kpi"><span class="muted">Clicks</span><b>128</b></div><div class="kpi"><span class="muted">Saves</span><b>47</b></div><div class="kpi"><span class="muted">Views</span><b>612</b></div></div>
-<h2>Create Promotion</h2><div class="form-grid"><div class="form-field">Business name</div><div class="form-field">Promotion title</div><div class="form-field">Category</div><div class="form-field">Location / Area: {safe_location}</div><div class="form-field">Valid from</div><div class="form-field">Valid to</div><div class="form-field wide">Audience / Interests: {escape(', '.join(interests))}</div><div class="form-field wide" style="min-height:90px;align-items:flex-start">Short description</div><div class="form-field wide">CTA link</div></div>
-<div class="field save" style="max-width:220px;margin-top:16px">Publish Promotion</div><div class="footer">Business layout placeholder only. Save logic comes later.</div></div>
+<h2>Create Promotion</h2>
 ''', unsafe_allow_html=True)
+            
+            # Interactive Streamlit form
+            with st.form("business_form"):
+                col1, col2 = st.columns(2)
+                b_name = col1.text_input("Business name", value="Ah Boyz Chicken Rice")
+                p_title = col2.text_input("Promotion title *", value="50% Off Signature Chicken Rice (Dinner Special)")
+                
+                col3, col4 = st.columns(2)
+                p_category = col3.selectbox("Category *", ["Food & Dining", "Grocery", "Mall", "Family", "Fitness"])
+                p_area = col4.text_input("Location / Area *", value=location)
+                
+                col5, col6 = st.columns(2)
+                p_from = col5.date_input("Valid from")
+                p_to = col6.date_input("Valid to")
+                
+                p_interests = st.multiselect("Audience / Interests", ["cheap food", "grocery", "event", "deal", "fitness", "tourist"], default=["cheap food", "deal"])
+                
+                p_description = st.text_area("Short description *", value="Enjoy our signature Hainanese Chicken Rice at 50% off for dinner! Freshly steamed chicken, fragrant rice, and our homemade chilli.")
+                p_url = st.text_input("CTA link (source url) *", value="https://example.com/AhBoyzDinnerDeal")
+                
+                publish_btn = st.form_submit_button("Publish Promotion", use_container_width=True)
+                
+            st.markdown(f'''
+<div class="footer" style="margin-top:10px;">Submitted promotions appear immediately in Today's Picks on the homepage.</div></div>
+''', unsafe_allow_html=True)
+            
+            if publish_btn:
+                if not p_url.startswith("http"):
+                    st.error("Please provide a valid source URL starting with http:// or https:// to verify this deal.")
+                else:
+                    new_promo = create_business_promo_card(
+                        business_name=b_name,
+                        title=p_title,
+                        description=p_description,
+                        category=p_category,
+                        source_url=p_url,
+                        lat=lat,
+                        lon=lon,
+                        location_name=p_area,
+                        valid_until=p_to.isoformat(),
+                        tags=p_interests,
+                    )
+                    st.session_state.setdefault("business_cards", []).append(new_promo)
+                    st.success("🎉 Promotion published successfully! Check the 'GoAround Today' tab to see it ranked near you.")
+                    st.rerun()
+                    
         with preview_col:
             st.markdown(f'''
-<div class="app-card picks-card"><h2>Preview</h2><div class="muted">How your promotion appears to users.</div><div class="preview-card"><div class="tag">FOOD & DINING</div><h2 style="margin-top:16px!important">50% Off Chicken Rice</h2><div class="muted">Fresh chicken, fragrant rice and homemade chilli in Singapore.</div><br><span class="status">📍 {safe_location}</span><br><span class="visit">View details ↗</span></div></div>
+<div class="app-card picks-card" style="height:var(--app-h);"><h2>Preview</h2><div class="muted">How your promotion appears to users in real-time.</div>
+<div class="preview-card" style="margin-top:20px;">
+<div class="tag" style="background:#FFE6E2; color:#D32F2F !important;">{escape(p_category.upper())}</div>
+<h2 style="margin-top:16px!important; font-size: 1.25rem;">{escape(p_title)}</h2>
+<div class="muted" style="font-size:0.9rem; margin-top:8px;">{escape(p_description)}</div>
+<br>
+<div style="font-size:0.85rem; color:var(--muted);"><span class="info-icon">📍</span> {escape(p_area)}</div>
+<div style="font-size:0.85rem; color:var(--muted); margin-top:4px;"><span class="info-icon">🏢</span> {escape(b_name)}</div>
+<br>
+<a class="visit" href="{escape(p_url)}" target="_blank">View details ↗</a>
+</div>
+</div>
 ''', unsafe_allow_html=True)
+            
     else:
         st.markdown(f'''
 <div class="app-card full-card"><h1>What is GoAround SG?</h1><div class="muted">A source-backed local discovery assistant for Singapore. Current area scope: {safe_location} · {safe_radius_label}.</div>
