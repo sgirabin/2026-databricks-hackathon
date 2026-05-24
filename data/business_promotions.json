@@ -1,0 +1,27 @@
+[
+  {
+    "id": "business-f4d03d42ff",
+    "card_type": "deal",
+    "category": "Food & Dining",
+    "title": "50% Off Signature Chicken Rice (Dinner Special)",
+    "description": "Enjoy our signature Hainanese Chicken Rice at 50% off for dinner! Freshly steamed chicken, fragrant rice, and our homemade chilli.",
+    "source_name": "Ah Boyz Chicken Rice",
+    "source_url": "https://example.com/AhBoyzDinnerDeal",
+    "lat": 1.2939,
+    "lon": 103.8461,
+    "location_name": "City Hall, Singapore",
+    "end_at": "2026-05-24",
+    "tags": [
+      "deal",
+      "food",
+      "business",
+      "deal",
+      "promotion"
+    ],
+    "source_reliability": 0.68,
+    "freshness_score": 0.9,
+    "metadata": {
+      "submitted_at": "2026-05-24T23:04:11"
+    }
+  }
+]

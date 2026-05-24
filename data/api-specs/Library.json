@@ -1,0 +1,1005 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Library",
+    "description": "REST Web Service that returns a list of NLB library details.",
+    "version": "v1"
+  },
+  "servers": [
+    {
+      "url": "https://openweb.nlb.gov.sg/api/v1/Library"
+    }
+  ],
+  "paths": {
+    "/GetBranches": {
+      "get": {
+        "tags": [
+          "Library"
+        ],
+        "summary": "Getting library branches based on search criteria",
+        "description": "This function may be used to retrieve library branches.",
+        "parameters": [
+          {
+            "name": "BranchCodes",
+            "in": "query",
+            "description": "branch code, comma separate for more than one filter",
+            "schema": {
+              "maxLength": 150,
+              "type": "string",
+              "example": "AMKPL,BEPL"
+            },
+            "example": "AMKPL,BEPL"
+          },
+          {
+            "name": "ListType",
+            "in": "query",
+            "description": "<p>choose from the given listing type, if empty, filter with active branch</p>\r\n            <p>onsite - active and visible on site branch</p>\r\n            <p>active - active branch</p>\r\n            <p>inactive - inactive branch</p>\r\n            <p>event - active and event type branch</p>\r\n            <p>location - active and location type branch</p>\r\n            <p>reservation - active and reservation type branch</p>\r\n            <p>rur-reservation - active and rur-reservation type branch</p>\r\n            <p>highlight - active and highlight type branch</p>\r\n            <p>Available values : onsite, active, inactive, event, location, reservation, highlight</p>",
+            "schema": {
+              "pattern": "^(onsite|active|inactive|event|location|reservation|rur-reservation|highlight)$",
+              "type": "string",
+              "default": "active",
+              "example": "onsite"
+            },
+            "example": "onsite"
+          },
+          {
+            "name": "LibraryTypes",
+            "in": "query",
+            "description": "<p>choose from the given library type, comma separate for more than one filter</p>\r\n            <p>PL - Public Library</p>\r\n            <p>NL - National Library</p>\r\n            <p>O - Other</p>\r\n            <p>RL - Regional Library</p>\r\n            <p>Available values : PL, NL, RL, O</p>",
+            "schema": {
+              "maxLength": 12,
+              "type": "string",
+              "example": "PL,NL"
+            },
+            "example": "PL,NL"
+          },
+          {
+            "name": "Interests",
+            "in": "query",
+            "description": "<p>interest id, comma separate for more than one filter</p>\r\n            <p>e.g: 87733333-4f9c-4e19-a4d0-0ac899eb63b8,44504444-fffe-4e11-8e9c-28fdaf16d06e</p>",
+            "schema": {
+              "type": "string",
+              "example": "87733333-4f9c-4e19-a4d0-0ac899eb63b8"
+            },
+            "example": "87733333-4f9c-4e19-a4d0-0ac899eb63b8"
+          },
+          {
+            "name": "Facilities",
+            "in": "query",
+            "description": "<p>facility id, comma separate for more than one filter</p>\r\n            <p>e.g: 01c6dc68-27b0-4a47-bd9f-32222243d0fb,a6a5c6b6-9e48-4d9f-8140-3d42dc111112</p>",
+            "schema": {
+              "type": "string",
+              "example": "01c6dc68-27b0-4a47-bd9f-32222243d0fb"
+            },
+            "example": "01c6dc68-27b0-4a47-bd9f-32222243d0fb"
+          },
+          {
+            "name": "SortFields",
+            "in": "query",
+            "description": "<p>Supported values are branchCode, branchName.</p>\r\n\t\t\t<p>Note: Do URL encode the value.</p>\r\n            <ul>\r\n            <li>Use prefix + or - to sort by ascending or descending and comma(,) separated for multiple sort fields.</li>\r\n            <li>+branchCode</li>\r\n            <li>-branchName</li>\r\n            </ul>",
+            "schema": {
+              "maxLength": 50,
+              "type": "string",
+              "example": "+branchCode,+branchName"
+            },
+            "example": "+branchCode,+branchName"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetBranchesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method Not Allowed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MethodNotAllowedError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TooManyRequestsError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKey": [ ],
+            "AppCode": [ ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Activity": {
+        "type": "object",
+        "properties": {
+          "activityId": {
+            "type": "string",
+            "description": "Activity code",
+            "nullable": true,
+            "example": "EVENT"
+          },
+          "activityName": {
+            "type": "string",
+            "description": "Activity name",
+            "nullable": true,
+            "example": "Event List"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Address": {
+        "type": "object",
+        "properties": {
+          "block": {
+            "type": "string",
+            "description": "Building block",
+            "nullable": true,
+            "example": "4300"
+          },
+          "streetName": {
+            "type": "string",
+            "description": "Street name",
+            "nullable": true,
+            "example": "Ang Mo Kio Avenue 6"
+          },
+          "buildingName": {
+            "type": "string",
+            "description": "Building name",
+            "nullable": true,
+            "example": "Ang Mo Kio building"
+          },
+          "unit": {
+            "type": "string",
+            "description": "Unit number",
+            "nullable": true,
+            "example": null
+          },
+          "country": {
+            "type": "string",
+            "description": "Country name",
+            "nullable": true,
+            "example": "Singapore"
+          },
+          "postalCode": {
+            "type": "string",
+            "description": "Postal code",
+            "nullable": true,
+            "example": "569842"
+          }
+        },
+        "additionalProperties": false
+      },
+      "BadRequestError": {
+        "required": [
+          "error",
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "description": "The status code of the error.",
+            "format": "int32",
+            "example": 400
+          },
+          "error": {
+            "minLength": 1,
+            "type": "string",
+            "description": "The type of the error.",
+            "example": "Bad Request"
+          },
+          "message": {
+            "minLength": 1,
+            "type": "string",
+            "description": "The message of the error.",
+            "example": "FieldName is missing."
+          }
+        },
+        "additionalProperties": false,
+        "description": "Error contents including the specific error"
+      },
+      "Branch": {
+        "type": "object",
+        "properties": {
+          "branchCode": {
+            "type": "string",
+            "description": "Branch Code",
+            "nullable": true,
+            "example": "AMKPL"
+          },
+          "branchName": {
+            "type": "string",
+            "description": "Branch Name",
+            "nullable": true,
+            "example": "Ang Mo Kio Public Library"
+          },
+          "shortName": {
+            "type": "string",
+            "description": "Branch Short Name",
+            "nullable": true,
+            "example": "Ang Mo Kio"
+          },
+          "isVisibleOnSite": {
+            "type": "boolean",
+            "description": "Branch is visible in the listing or site",
+            "example": true
+          },
+          "branchType": {
+            "$ref": "#/components/schemas/BranchType"
+          },
+          "factSheet": {
+            "type": "string",
+            "description": "Location of the file and file name",
+            "nullable": true,
+            "example": "https://eservice.nlb.gov.sg/library/images/branch/documents/amkpl/ang_mo_kio_factsheet.pdf"
+          },
+          "socialStoryFile": {
+            "type": "string",
+            "description": "Social story file and file name",
+            "nullable": true,
+            "example": "https://eservice.nlb.gov.sg/library/images/branch/documents/amkpl/social_story_file.pdf"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Branch code is active or not",
+            "example": true
+          },
+          "contactInformation": {
+            "$ref": "#/components/schemas/ContactInformation"
+          },
+          "wheelAccessibility": {
+            "$ref": "#/components/schemas/WheelAccessibility"
+          },
+          "notes": {
+            "$ref": "#/components/schemas/Notes"
+          },
+          "timing": {
+            "$ref": "#/components/schemas/Timing"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "transportation": {
+            "$ref": "#/components/schemas/Transportation"
+          },
+          "coordinates": {
+            "$ref": "#/components/schemas/Coordinates"
+          },
+          "manager": {
+            "$ref": "#/components/schemas/Manager"
+          },
+          "libraryImages": {
+            "$ref": "#/components/schemas/LibraryImages"
+          },
+          "schedules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScheduleDay"
+            },
+            "nullable": true
+          },
+          "closureSchedules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClosureDay"
+            },
+            "nullable": true
+          },
+          "socialMedias": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SocialMedia"
+            },
+            "nullable": true
+          },
+          "remarks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Remark"
+            },
+            "nullable": true
+          },
+          "libraryActivities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Activity"
+            },
+            "nullable": true
+          },
+          "libraryFacilities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Facility"
+            },
+            "nullable": true
+          },
+          "libraryInterests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Interest"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BranchType": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Branch type code",
+            "nullable": true,
+            "example": "PL"
+          },
+          "description": {
+            "type": "string",
+            "description": "Branch type description",
+            "nullable": true,
+            "example": "Public Library"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ClosureDay": {
+        "type": "object",
+        "properties": {
+          "day": {
+            "type": "string",
+            "description": "name of the day",
+            "nullable": true,
+            "example": "Monday"
+          },
+          "openingTime": {
+            "type": "string",
+            "description": "Opening time for the day",
+            "nullable": true,
+            "example": "09:00:00"
+          },
+          "closingTime": {
+            "type": "string",
+            "description": "Closing time for the day",
+            "nullable": true,
+            "example": "22:00:00"
+          },
+          "date": {
+            "type": "string",
+            "description": "Closure date",
+            "format": "date",
+            "example": "2022-01-01"
+          },
+          "closureName": {
+            "type": "string",
+            "description": "Closure name of the day",
+            "nullable": true,
+            "example": "New Year's Day"
+          },
+          "closureType": {
+            "type": "string",
+            "description": "Closure type of the day",
+            "nullable": true,
+            "example": "Public Holiday"
+          },
+          "remark": {
+            "type": "string",
+            "description": "Closing date remark of the day",
+            "nullable": true,
+            "example": "Library closed on New Year"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ContactInformation": {
+        "type": "object",
+        "properties": {
+          "telephoneNumber": {
+            "type": "string",
+            "description": "Telephone number of the branch",
+            "nullable": true,
+            "example": "63323255"
+          },
+          "faxNumber": {
+            "type": "string",
+            "description": "Fax number of the branch",
+            "nullable": true,
+            "example": "65535519"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address",
+            "nullable": true,
+            "example": "enquiry@nlb.gov.sg"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Coordinates": {
+        "type": "object",
+        "properties": {
+          "geoLatitude": {
+            "type": "string",
+            "description": "Geo latitude",
+            "nullable": true,
+            "example": "1.374784"
+          },
+          "geoLongitude": {
+            "type": "string",
+            "description": "Geo longitude",
+            "nullable": true,
+            "example": "103.845581"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Facility": {
+        "type": "object",
+        "properties": {
+          "facilityId": {
+            "type": "string",
+            "description": "Facility id with uuid",
+            "format": "uuid",
+            "example": "01c6dc68-27b0-4a47-bd9f-36746d43d0fb"
+          },
+          "facilityName": {
+            "type": "string",
+            "description": "Facility name",
+            "nullable": true,
+            "example": "eNewspaper Stations"
+          }
+        },
+        "additionalProperties": false
+      },
+      "FloorMap": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Image title",
+            "nullable": true,
+            "example": "1st Floor"
+          },
+          "image": {
+            "type": "string",
+            "description": "Image url",
+            "nullable": true,
+            "example": "https://eservice.nlb.gov.sg/assets/branches/images/amkpl/first_floor.jpg"
+          },
+          "thumbnailImage": {
+            "type": "string",
+            "description": "Thumbnail image url",
+            "nullable": true,
+            "example": null
+          },
+          "description": {
+            "type": "string",
+            "description": "Image description",
+            "nullable": true,
+            "example": null
+          }
+        },
+        "additionalProperties": false
+      },
+      "GetBranchesResponse": {
+        "type": "object",
+        "properties": {
+          "totalRecords": {
+            "type": "integer",
+            "description": "Total number of records returned.",
+            "format": "int32",
+            "example": 20
+          },
+          "branches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Branch"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "Interest": {
+        "type": "object",
+        "properties": {
+          "interestId": {
+            "type": "string",
+            "description": "Interest id with uuid",
+            "format": "uuid",
+            "example": "877f9229-4f9c-4e19-a4d0-0ac899eb63b8"
+          },
+          "interestName": {
+            "type": "string",
+            "description": "Interest name",
+            "nullable": true,
+            "example": "Reading"
+          }
+        },
+        "additionalProperties": false
+      },
+      "InternalServerError": {
+        "required": [
+          "error",
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "description": "The status code of the error.",
+            "format": "int32",
+            "example": 500
+          },
+          "error": {
+            "minLength": 1,
+            "type": "string",
+            "description": "The type of the error.",
+            "example": "Internal Server Error"
+          },
+          "message": {
+            "minLength": 1,
+            "type": "string",
+            "description": "The message of the error.",
+            "example": "Internal server error"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Error contents including the specific error"
+      },
+      "LibraryImages": {
+        "type": "object",
+        "properties": {
+          "mainImage": {
+            "type": "string",
+            "description": "Location of the file and file name",
+            "nullable": true,
+            "example": "https://eservice.nlb.gov.sg/assets/branches/images/amkpl/amkpl.jpg"
+          },
+          "floorMaps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FloorMap"
+            },
+            "nullable": true
+          },
+          "supplementaryImages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplementaryImage"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Manager": {
+        "type": "object",
+        "properties": {
+          "salutation": {
+            "type": "string",
+            "description": "Salutation type",
+            "nullable": true,
+            "example": "Ms."
+          },
+          "firstName": {
+            "type": "string",
+            "description": "Manager's first name",
+            "nullable": true,
+            "example": "Sheila"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Manager's last name",
+            "nullable": true,
+            "example": "Estrada"
+          },
+          "imageFile": {
+            "type": "string",
+            "description": "Location of the file and file name",
+            "nullable": true,
+            "example": "https://eservice.nlb.gov.sg/assets/branches/images/managers/sheila.jpg"
+          },
+          "message": {
+            "type": "string",
+            "description": "Manager's welcome message",
+            "nullable": true,
+            "example": "Welcome to Bedok Public Library!"
+          }
+        },
+        "additionalProperties": false,
+        "nullable": true
+      },
+      "MethodNotAllowedError": {
+        "required": [
+          "error",
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "description": "The status code of the error.",
+            "format": "int32",
+            "example": 405
+          },
+          "error": {
+            "minLength": 1,
+            "type": "string",
+            "description": "The type of the error.",
+            "example": "Method Not Allowed"
+          },
+          "message": {
+            "minLength": 1,
+            "type": "string",
+            "description": "The message of the error.",
+            "example": "The requested resource does not support http method 'PUT'"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Error contents including the specific error"
+      },
+      "NotFoundError": {
+        "required": [
+          "error",
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "description": "The status code of the error.",
+            "format": "int32",
+            "example": 404
+          },
+          "error": {
+            "minLength": 1,
+            "type": "string",
+            "description": "The type of the error.",
+            "example": "Not Found"
+          },
+          "message": {
+            "minLength": 1,
+            "type": "string",
+            "description": "The message of the error.",
+            "example": "Record(s) not found"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Error contents including the specific error"
+      },
+      "Notes": {
+        "type": "object",
+        "properties": {
+          "rsvLockerNote": {
+            "type": "string",
+            "description": "Reservation locker notes",
+            "nullable": true,
+            "example": "Locker"
+          },
+          "locationNote": {
+            "type": "string",
+            "description": "Location notes",
+            "nullable": true,
+            "example": "Location"
+          },
+          "description": {
+            "type": "string",
+            "description": "Branch description",
+            "nullable": true,
+            "example": "Ang Mo Kio Public Library was officially opened on 17 August 1985 by Mr Yeo Toon Chia, Member of Parliament for Ang Mo Kio Constituency. A prominent landmark in the centre of Ang Mo Kio, the library was closed for upgrading in April 2002 and re-opened on 25 January 2003"
+          },
+          "introductoryNote": {
+            "type": "string",
+            "description": "Branch introduction",
+            "nullable": true,
+            "example": "Ang Mo Kio Public Library introduction"
+          },
+          "serviceHighlight": {
+            "type": "string",
+            "description": "Branch service highlights",
+            "nullable": true,
+            "example": "Ang Mo Kio Public Library highlights"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Remark": {
+        "type": "object",
+        "properties": {
+          "sequence": {
+            "type": "integer",
+            "description": "Sequence number",
+            "format": "int32",
+            "example": 1
+          },
+          "description": {
+            "type": "string",
+            "description": "Remark description",
+            "nullable": true,
+            "example": "IMPORTANT NOTICE - Patrons who visit our facilities must observe the Ministry of Health's advisories such as the use of SafeEntry for check in and check out, compulsory wearing of mask, temperature taking, and safe distancing measures."
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScheduleDay": {
+        "type": "object",
+        "properties": {
+          "day": {
+            "type": "string",
+            "description": "name of the day",
+            "nullable": true,
+            "example": "Monday"
+          },
+          "openingTime": {
+            "type": "string",
+            "description": "Opening time for the day",
+            "nullable": true,
+            "example": "09:00:00"
+          },
+          "closingTime": {
+            "type": "string",
+            "description": "Closing time for the day",
+            "nullable": true,
+            "example": "22:00:00"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SocialMedia": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Social media type",
+            "nullable": true,
+            "example": "FB"
+          },
+          "url": {
+            "type": "string",
+            "description": "Social media url",
+            "nullable": true,
+            "example": "https://www.facebook.com/AMKPL/"
+          },
+          "description": {
+            "type": "string",
+            "description": "Social media content",
+            "nullable": true,
+            "example": "Ang Mo Kio social media website"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SupplementaryImage": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Image title",
+            "nullable": true,
+            "example": "Main Foyer"
+          },
+          "image": {
+            "type": "string",
+            "description": "Image url",
+            "nullable": true,
+            "example": "https://eservice.nlb.gov.sg/assets/branches/images/amkpl/test_sup.jpg"
+          },
+          "thumbnailImage": {
+            "type": "string",
+            "description": "Thumbnail image url",
+            "nullable": true,
+            "example": "https://eservice.nlb.gov.sg/assets/branches/images/amkpl/test_thumbnail.jpg"
+          },
+          "description": {
+            "type": "string",
+            "description": "Image description",
+            "nullable": true,
+            "example": "Ang Mo Kio library is the public library in Singapore"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Timing": {
+        "type": "object",
+        "properties": {
+          "openingHours": {
+            "type": "string",
+            "description": "Opening hours schedule",
+            "nullable": true,
+            "example": "Mon - Sun: 09:00 AM - 10:00 PM"
+          },
+          "closedDateRemarks": {
+            "type": "string",
+            "description": "Closed date schedule",
+            "nullable": true,
+            "example": "Closed at 5.00pm on eves of Christmas, New Year and Chinese New Year. Closed on Public Holidays"
+          },
+          "bookDropOperatingHour": {
+            "type": "string",
+            "description": "Book drop schedule hour",
+            "nullable": true,
+            "example": "24-hour"
+          },
+          "rsvLockerOperatingHour": {
+            "type": "string",
+            "description": "Reservation locker opening hour",
+            "nullable": true,
+            "example": "24-hour"
+          }
+        },
+        "additionalProperties": false
+      },
+      "TooManyRequestsError": {
+        "required": [
+          "error",
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "description": "The status code of the error.",
+            "format": "int32",
+            "example": 429
+          },
+          "error": {
+            "minLength": 1,
+            "type": "string",
+            "description": "The type of the error.",
+            "example": "Too Many Requests"
+          },
+          "message": {
+            "minLength": 1,
+            "type": "string",
+            "description": "The message of the error.",
+            "example": "API calls quota exceeded"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Error contents including the specific error"
+      },
+      "Transportation": {
+        "type": "object",
+        "properties": {
+          "mrtStation": {
+            "type": "string",
+            "description": "Nearest MRT station",
+            "nullable": true,
+            "example": "Ang Mo Kio"
+          },
+          "busInterchange": {
+            "type": "string",
+            "description": "Nearest bus interchange",
+            "nullable": true,
+            "example": "Ang Mo Kio"
+          },
+          "buses": {
+            "type": "string",
+            "description": "Bus numbers",
+            "nullable": true,
+            "example": "13, 86, 162, 138, 851, 852, 853"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UnauthorizedError": {
+        "required": [
+          "error",
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "description": "The status code of the error.",
+            "format": "int32",
+            "example": 401
+          },
+          "error": {
+            "minLength": 1,
+            "type": "string",
+            "description": "The type of the error.",
+            "example": "Unauthorized"
+          },
+          "message": {
+            "minLength": 1,
+            "type": "string",
+            "description": "The message of the error.",
+            "example": "Invalid API Key"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Error contents including the specific error"
+      },
+      "WheelAccessibility": {
+        "type": "object",
+        "properties": {
+          "wheelchairRouteBusFile": {
+            "type": "string",
+            "description": "Location of the file and file name for wheelchair bus route",
+            "nullable": true,
+            "example": "https://eservice.nlb.gov.sg/library/images/branch/documents/amkpl/wheelchair_bus_route.pdf"
+          },
+          "wheelchairRouteMRTFile": {
+            "type": "string",
+            "description": "Location of the file and file name for wheelchair MRT route",
+            "nullable": true,
+            "example": "https://eservice.nlb.gov.sg/library/images/branch/documents/amkpl/wheelchair_mrt_route.pdf"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "ApiKey": {
+        "type": "apiKey",
+        "description": "API Key",
+        "name": "X-Api-Key",
+        "in": "header"
+      },
+      "AppCode": {
+        "type": "apiKey",
+        "description": "App Code",
+        "name": "X-App-Code",
+        "in": "header"
+      }
+    }
+  }
+}
