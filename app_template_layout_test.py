@@ -58,7 +58,7 @@ with left:
     st.markdown(f'''
 <div class="app-card sidebar-card">
 <div class="brand"><div class="pin"></div><div><div class="brand-title">GoAround <span class="green">SG</span></div><div class="subtitle">AI local discovery assistant<br>for useful lobang near you.</div></div></div>
-<div class="nav"><a class="{active('today')}" href="?page=today">● GoAround Today</a><a class="{active('business')}" href="?page=business">○ Business Promotion</a><a class="{active('about')}" href="?page=about">○ What is GoAround?</a></div>
+<div class="nav"><a class="{active('today')}" href="?page=today" target="_self">● GoAround Today</a><a class="{active('business')}" href="?page=business" target="_self">○ Business Promotion</a><a class="{active('about')}" href="?page=about" target="_self">○ What is GoAround?</a></div>
 <div class="side-title">My area</div><div class="subtitle">Tell us where you are to get better picks.</div><br>
 <div class="field">Auto / Current location</div><div class="field">◎ Detect current location</div><div class="field location-field">Seng Kang, Singapore<br>(1.3871, 103.8915)</div>
 <div class="subtitle">Discovery radius: 1.5 km</div><div class="field">────────●────────</div>
