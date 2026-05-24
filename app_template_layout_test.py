@@ -758,7 +758,9 @@ h2 {
     padding: 12px 12px;
     margin: 10px 0;
     box-shadow: 0 5px 16px rgba(23,43,77,.045);
-    width: calc(100% - 2px);
+    width: 85%;
+    margin-left: auto;
+    margin-right: auto;
     box-sizing: border-box;
 }
 .info-row {
