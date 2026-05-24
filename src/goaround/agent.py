@@ -106,6 +106,26 @@ def fallback_answer(question: str, context: UserContext, ranked: list[RankedPick
 def answer_with_databricks(question: str, context: UserContext, ranked: list[RankedPick], fallback: str) -> str:
     """Answer through Databricks Model Serving when configured; otherwise use local intent fallback."""
 
+    q = question.lower().strip()
+    for char in "?!.":
+        q = q.replace(char, "")
+    q = q.strip()
+
+    greetings = {
+        "hi", "hello", "hey", "yo", "good morning", "good afternoon", "good evening",
+        "greetings", "whats up", "what's up", "howdy", "hi there", "hello there", "how are you"
+    }
+    if q in greetings:
+        return (
+            f"Hello! I'm **Ask GoAround**, your hyperlocal discovery assistant. 😊\n\n"
+            f"Since you're near **{context.address}**, I can help you find things like:\n"
+            f"- 🍲 **Local Food & Coffee**: Hidden gems or cheap eats nearby.\n"
+            f"- 🏷️ **Lobang & Deals**: Supermarket discounts and retail promotions.\n"
+            f"- 🎪 **Things To Do**: Parks, events, and family activities.\n"
+            f"- ☔ **Weather-Aware Ideas**: Great indoor plans if it's rainy outside.\n\n"
+            f"What are you in the mood for today?"
+        )
+
     host = os.getenv("DATABRICKS_HOST")
     token = os.getenv("DATABRICKS_TOKEN")
     endpoint = os.getenv("DATABRICKS_MODEL_ENDPOINT", "databricks-meta-llama-3-3-70b-instruct")
