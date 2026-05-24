@@ -490,16 +490,15 @@ filter_aliases = {
 }
 
 
-def build_picks_feed(active_filter: str, max_distance_km: float) -> tuple[str, str]:
-    if active_filter not in filter_aliases:
-        active_filter = "all"
-    active_terms = filter_aliases[active_filter]
+def build_picks_feed(active_filters: list[str], max_distance_km: float) -> tuple[str, str]:
+    selected_filters = [value for value in active_filters if value in filter_aliases and value != "all"]
+    active_terms = tuple(term for value in selected_filters for term in filter_aliases[value])
     max_distance_m = max_distance_km * 1000
     scoped_picks = [
         pick for pick in ranked_picks
         if pick.distance_m is None or pick.distance_m <= max_distance_m
     ]
-    if active_filter != "all":
+    if selected_filters:
         matched_picks = []
         for pick in scoped_picks:
             card = pick.card
@@ -1161,22 +1160,24 @@ div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .c
 /* Style the submit button in the business form container */
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button,
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) div[data-testid="stForm"] div[data-testid="stButton"] button {
-    background: linear-gradient(90deg, #0D6EFD, #2563EB) !important;
+    background: linear-gradient(135deg, #ED1B24 0%, #F97316 100%) !important;
     color: white !important;
     justify-content: center !important;
     font-weight: 900 !important;
     border: 0 !important;
-    border-radius: 16px !important;
-    box-shadow: 0 12px 24px rgba(13, 110, 253, 0.26) !important;
-    min-height: 52px !important;
-    width: 100% !important;
+    border-radius: 999px !important;
+    box-shadow: 0 14px 26px rgba(237, 27, 36, 0.24) !important;
+    min-height: 48px !important;
+    width: auto !important;
+    min-width: 210px !important;
+    padding: 0 28px !important;
     letter-spacing: .01em !important;
 }
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover,
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) div[data-testid="stForm"] div[data-testid="stButton"] button:hover {
-    background: linear-gradient(90deg, #0B5ED7, #1D4ED8) !important;
+    background: linear-gradient(135deg, #C4121A 0%, #EA580C 100%) !important;
     color: white !important;
-    box-shadow: 0 8px 22px rgba(13, 110, 253, 0.32) !important;
+    box-shadow: 0 16px 30px rgba(237, 27, 36, 0.30) !important;
 }
 
 /* Strip borders and backgrounds from filter button containers */
@@ -1311,20 +1312,17 @@ if page == "today":
             st.markdown(f'''
 <h1>Ask GoAround</h1><div class="muted">Your conversation-style local assistant.</div>
 <div style="margin-top:12px; margin-bottom:12px;"><span class="status">{weather['icon']} {safe_weather_summary}</span><span class="status">📍 {safe_location}</span></div>
+<div class="small-note" style="margin-bottom:14px;">Try asking: “What can I eat nearby?”, “Any rainy-day ideas?”, or “What deals are around Sengkang?”</div>
 ''', unsafe_allow_html=True)
-            
+
             # Conversational state tracking
             if "ask_messages" not in st.session_state:
-                st.session_state["ask_messages"] = [
-                    {"role": "assistant", "content": "Hi, I’m Ask GoAround. Ask me what to eat, what to do with kids, rainy-day options, nearby deals, or a short visitor plan."}
-                ]
+                st.session_state["ask_messages"] = []
             
             def render_chat_history(include_thinking: bool = False) -> None:
                 chat_history_html = ""
                 conversation_messages = st.session_state["ask_messages"]
-                if len(conversation_messages) > 1 and conversation_messages[0]["role"] == "assistant":
-                    conversation_messages = conversation_messages[1:]
-                chatbox_class = "chatbox expanded" if len(conversation_messages) > 1 else "chatbox"
+                chatbox_class = "chatbox expanded" if conversation_messages else "chatbox"
                 for msg in conversation_messages[-8:]:
                     role = msg["role"]
                     content = escape(msg["content"]).replace("\n", "<br>")
@@ -1356,7 +1354,7 @@ if page == "today":
 
             # Quick Actions using real Streamlit buttons inside container columns
             pending_prompt = None
-            if not pending_query and len(st.session_state.get("ask_messages", [])) <= 1:
+            if not pending_query and len(st.session_state.get("ask_messages", [])) == 0:
                 prompts = [
                     ("🍴 Eat cheap", "Any cheap food spots near me?"),
                     ("📅 Weekend events", f"What weekend events are happening near {safe_location}?"),
@@ -1431,19 +1429,19 @@ if page == "today":
                 key="distance_filter_km",
             )
             filter_labels = {
-                "all": "🌟 All keywords",
                 "food": "🍴 Food, hawker, dining",
                 "grocery": "🛒 Grocery, supermarket, market",
                 "event": "📅 Events, community, weekend",
                 "deal": "🏷️ Deals, promos, offers",
             }
-            active_filter = st.selectbox(
-                "Filter keyword",
+            active_filters = st.multiselect(
+                "Filter criteria",
                 options=list(filter_labels.keys()),
                 format_func=lambda value: filter_labels[value],
-                key="active_filter",
+                default=st.session_state.get("active_filters", []),
+                key="active_filters",
             )
-            picks_html, picks_footer = build_picks_feed(active_filter, distance_filter_km)
+            picks_html, picks_footer = build_picks_feed(active_filters, distance_filter_km)
             safe_picks_footer = escape(picks_footer)
 
             st.markdown(f'''
@@ -1484,7 +1482,7 @@ elif page == "business":
                 p_description = st.text_area("Short description *", value="Enjoy our signature Hainanese Chicken Rice at 50% off for dinner! Freshly steamed chicken, fragrant rice, and our homemade chilli.")
                 p_url = st.text_input("CTA link (source url) *", value="https://example.com/AhBoyzDinnerDeal")
                 
-                publish_btn = st.form_submit_button("Publish Promotion", use_container_width=True)
+                publish_btn = st.form_submit_button("Publish Promotion", use_container_width=False)
                 
             st.markdown(f'''
 <div class="footer" style="margin-top:10px;">Submitted promotions appear immediately in Today's Picks on the homepage.</div>
