@@ -1,184 +1,167 @@
-# GoAround SG — Databricks Hackathon 2026
+# GoAround SG - Databricks Hackathon 2026
 
 **Track:** Social Impact / Open Data  
 **Theme:** Building Intelligent Apps with Data + AI
 
-GoAround SG is a Databricks-powered daily neighbourhood intelligence app for Singapore residents. A resident saves their block, postal code, or address, and the app turns open data, location intelligence, AI summaries, community updates, transport context, promotions, and credible-source evidence into a useful daily view of what is happening around them.
+GoAround SG is a Singapore local discovery assistant for residents, workers, students, visitors, and nearby businesses. The product direction is a daily "what is useful around me today?" experience: food, grocery deals, events, weather-aware ideas, transport context, local updates, and business promotions, backed by open data and source links.
 
-The original home-buyer scenario remains as one secondary use case: people who are considering living in a block can use the same neighbourhood intelligence to evaluate the area. The core product, however, is for **residents who stay there and want useful local information every day**.
+The current branch is in **debugging / UI polishing mode**. The deployed app is intentionally a mostly static Streamlit layout so layout, navigation, spacing, browser geolocation, and Databricks App rendering issues can be fixed before reconnecting the full data/ranking engine.
 
-## Product promise
+## Current Entry Point
 
-> Save your block once. Get a daily AI-powered view of useful things around you — transport, food, groceries, promotions, events, news, amenities, and future changes.
+Databricks Apps runs the file configured in `app.yaml`:
 
-## Why this fits the hackathon
+```bash
+streamlit run app_template_layout_test.py
+```
 
-The hackathon asks teams to go beyond dashboards and create intelligent apps that combine data, AI, analytics, and automation into experiences people can use every day. GoAround SG fits this because residents can use it repeatedly to answer:
+`app_template_layout_test.py` is the current layout target. It renders:
 
-- What is useful around my block today?
-- Any supermarket, hawker, mall, or food promotions nearby?
-- What community events are happening around my estate?
-- Which nearby bus stops and MRT options are useful?
-- Any credible local news, incidents, road closures, or town council updates?
-- What public facilities are nearby?
-- What future developments may affect where I live?
-- If I am considering moving here, what should I know about this block and neighbourhood?
+- a custom left navigation shell
+- `GoAround Today`
+- `Business Promotion`
+- `What is GoAround?`
+- browser geolocation when permission is granted
+- nearest known-area labeling for detected coordinates
+- live weather and temperature from data.gov.sg with a fallback
+- static Today’s Picks cards and a static business promotion form preview
 
-## Current working status
+The static cards and business form are placeholders. The source-backed ranking engine already exists in `src/goaround`, but it is not wired into `app_template_layout_test.py` yet.
 
-This is now a working open-data app foundation:
+## Product Promise
 
-- Live address / postal-code geocoding through OneMap public search.
-- Live HDB resale data from data.gov.sg for buyer / area-value mode.
-- Live data.gov.sg GeoJSON loaders for hawker centres, supermarkets and community clubs.
-- Live data.gov.sg datastore loaders for schools and pre-schools, with OneMap geocoding where coordinates are not supplied directly.
-- Interactive map of nearby live amenities.
-- Resident / buyer persona scoring foundation.
-- Comparable HDB transaction table and price trend chart for optional home-buyer mode.
-- Credible-source-only evidence workflow for local news / sensitive property history.
-- Databricks Apps, notebooks, deployment scripts and Model Serving hook.
+> Open GoAround SG and quickly discover useful, source-backed things around your current area: food, deals, events, weather-aware options, local context, and business promotions.
 
-## Target users
+The original home-buyer / tenant evaluation idea is now secondary. The main product is a daily local discovery feed that can support repeat usage.
 
-### Primary user: resident
+## Current Repository Shape
 
-A resident uses GoAround SG as a daily neighbourhood companion:
+```text
+app_template_layout_test.py   # current Databricks App entrypoint and layout debugging target
+app.yaml                      # Databricks App command
+src/goaround/                 # reusable Today’s Picks engine and AI helper modules
+databricks/                   # Lakehouse setup script for open-data Delta tables
+notebooks/                    # earlier ingestion / feature / Genie examples
+config/data_sources.yml       # source catalogue
+docs/TODAYS_PICKS_ENGINE.md   # current architecture note
+```
 
-- daily local briefing around their block
-- food, groceries, hawker, mall, and community promotions
-- nearby bus arrival and public transport convenience
-- events around the estate
-- useful facilities and services nearby
-- credible local news and safety updates
-- future development or estate-upgrading context
+There are several older `app_*.py` and `app_template_*.py` files in the repository. Treat them as prototypes/reference unless `app.yaml` points to them.
 
-### Secondary user: potential home buyer / tenant
+## Implemented Engine Pieces
 
-A buyer or tenant uses GoAround SG to evaluate whether a block or neighbourhood fits their lifestyle:
+The reusable engine is in `src/goaround`:
 
-- convenience score
-- nearby amenities
-- school / pre-school proximity
-- HDB resale trends and comparable transactions
-- local news and future development evidence
+- `models.py`: `UserContext`, `PickCard`, `RankedPick`
+- `ranking.py`: distance, interest, time-of-day, weather, freshness, source reliability, and business-promotion ranking
+- `seed_data.py`: official/source-backed seed cards and area search cards
+- `business.py`: source-backed business promotion card creation
+- `agent.py`: Ask GoAround helper using Databricks Model Serving when configured, with a safe local fallback
+- `lakehouse.py`: optional Databricks SQL loader for `gold_candidate_cards`
 
-## Implemented features
+Important rule:
 
-- Streamlit app deployable as a Databricks App via `app.yaml`.
-- OneMap geocoding for address / postal-code search.
-- Live data.gov.sg loaders for HDB resale, hawker centres, schools, pre-schools, community clubs and supermarkets.
-- Geocoding cache for schools and pre-schools when source records do not expose latitude/longitude.
-- Distance calculation and nearest-amenity ranking.
-- Live neighbourhood map.
-- HDB comparable trend chart and transaction table for buyer mode.
-- Persona-weighted scoring foundation:
-  - Balanced resident
-  - Family with young child
-  - Car-free commuter
-  - Investor / buyer mode
-  - Elderly parents nearby
-- Local news / sensitive-history panel that only shows credible source-backed results when a search key is configured.
-- Manual credible-source search links when no search key is configured.
-- Future-development evidence links for official URA/LTA/HDB sources.
-- Databricks Model Serving hook for AI neighbourhood briefing with deterministic fallback.
-- Lakebase/Postgres-ready environment configuration for saved blocks, preferences, watchlists and alerts.
-- Databricks notebooks for Bronze/Silver/Gold Delta ingestion and Genie-ready SQL views.
-- Local and Databricks deployment scripts.
+> No source URL = no claim.
 
-## Databricks usage
+The app should not invent promotions, incidents, prices, events, timings, or official claims without a source URL.
 
-| Databricks capability | How GoAround SG uses it |
+## Databricks Story
+
+| Databricks capability | Intended GoAround SG usage |
 |---|---|
-| Databricks Apps | Deploys the resident-facing Streamlit intelligent app |
-| Lakehouse / Delta | Stores open data, cleaned location tables, and Gold neighbourhood features |
-| Genie | Enables natural-language questions over neighbourhood and price datasets |
-| Model Serving | Generates AI neighbourhood briefings and recommendations |
-| Lakebase | Planned memory layer for saved blocks, resident preferences, watchlists and alert settings |
-| Jobs / workflows | Planned automation for daily data refresh, event ingestion and alert generation |
+| Databricks Apps | Host the Streamlit intelligent app |
+| Lakehouse / Delta | Store Bronze, Silver, and Gold local discovery data |
+| Databricks SQL | Serve Gold candidate cards to the app |
+| Model Serving | Power Ask GoAround responses from source-backed context |
+| Genie | Natural-language analytics over local demand, cards, and interactions |
+| Lakebase | Persist saved areas, interests, reminders, business submissions, and user memory |
+| Jobs / Workflows | Refresh open data, source registries, and candidate cards |
 
-## Quick start locally
+The direct public-API path is still useful for demos, but the stronger hackathon architecture is:
+
+```text
+Open data + live APIs + source registries
+  -> Databricks Jobs / Workflows
+  -> Bronze raw Delta tables
+  -> Silver cleaned/geocoded local entities
+  -> Gold candidate cards / Today’s Picks
+  -> Databricks App + Ask GoAround
+```
+
+## Quick Start Locally
+
+Use Python 3.10 or newer. On this machine, Python 3.9.7 is not suitable because current Streamlit versions exclude it.
 
 ```bash
-python -m venv .venv
+/usr/local/bin/python3.12 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-streamlit run app.py
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+streamlit run app_template_layout_test.py
 ```
 
-Windows PowerShell:
-
-```powershell
-py -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-Copy-Item .env.example .env
-streamlit run app.py
-```
-
-The first run may be slower because school/pre-school records are geocoded and cached for 24 hours.
-
-## Databricks App deployment
+If you want to run an older prototype, run it explicitly, for example:
 
 ```bash
-export DATABRICKS_APP_NAME=goaround-sg
-export GIT_REPO_URL=https://github.com/sgirabin/2026-databricks-hackathon
-./scripts/deploy_databricks_git.sh
-```
-
-Or deploy from a workspace source path:
-
-```bash
-export DATABRICKS_APP_NAME=goaround-sg
-export DATABRICKS_WORKSPACE_PATH=/Workspace/Users/<your-email>/goaround-sg
-./scripts/deploy_databricks_workspace.sh
+streamlit run app_picks.py
 ```
 
 ## Configuration
 
-Copy `.env.example` to `.env` and update later:
+The current layout target can run without environment variables. Stronger engine-backed demos may use:
 
 ```dotenv
 DATA_GOV_API_KEY=
-ONEMAP_EMAIL=
-ONEMAP_PASSWORD=
-ONEMAP_ACCESS_TOKEN=
+LTA_ACCOUNT_KEY=
 BING_SEARCH_KEY=
 DATABRICKS_HOST=
 DATABRICKS_TOKEN=
 DATABRICKS_MODEL_ENDPOINT=databricks-meta-llama-3-3-70b-instruct
 DATABRICKS_SERVER_HOSTNAME=
 DATABRICKS_HTTP_PATH=
-DATABRICKS_SQL_ACCESS_TOKEN=
 USE_DATABRICKS_SQL=false
+GOAROUND_CATALOG=main
+GOAROUND_SCHEMA=goaround_sg
 LAKEBASE_DATABASE_URL=
 ```
 
-## Data sources
+## Data Sources
 
-The data catalogue is in `config/data_sources.yml`. Main sources include HDB resale transactions, HDB resale price index, NEA hawker centres, MOE schools, ECDA centres, PA community clubs, SFA supermarkets, OneMap, URA planning pages and LTA project pages.
+The source catalogue is in `config/data_sources.yml`. Relevant sources include:
 
-Future promotion/event sources can include mall websites, supermarket promotion pages, PA/community event pages, town council updates, and curated user-submitted sources.
+- data.gov.sg weather APIs
+- data.gov.sg hawker centre, supermarket, and community club datasets
+- OneMap geocoding / reverse geocoding
+- LTA DataMall bus stops and bus arrivals when configured
+- official mall, supermarket, community, URA, HDB, LTA, and NLB source links
 
-## Sensitive evidence policy
+Some older files still reference HDB resale, schools, pre-schools, buyer mode, and wider neighbourhood intelligence features. Those are historical/reference features, not the current active layout target.
 
-GoAround SG does not infer or invent fire, suicide, crime, death, or stigma-related local history. The rule is:
+## Debugging Focus
 
-> If there is no credible source URL, there is no claim.
+Current work should usually start from:
 
-If `BING_SEARCH_KEY` is not configured, the app only shows manual credible-source search links. If configured, it retrieves search results but still displays source title, URL, date and snippet instead of making unsupported claims.
+```text
+app_template_layout_test.py
+```
 
-## Demo flow for hackathon
+Likely next implementation step after layout debugging:
 
-1. Search a sample address such as `308C Punggol Walk`.
-2. Select a resident persona such as `Family with young child` or `Car-free commuter`.
-3. Review the neighbourhood briefing and scorecard.
-4. Open `Live amenities map` and show the live open-data records loaded.
-5. Explain daily-use modules: promotions, bus arrival, local events and news can be layered on the same block-based profile.
-6. Open `Price trends` as secondary buyer/tenant mode.
-7. Open `Evidence & future plans` and explain the credible-source-only policy.
-8. Open `Databricks architecture` and explain how the app connects to Databricks Apps, Delta tables, Genie, Model Serving and Lakebase.
+```text
+wire app_template_layout_test.py to src/goaround ranking, source cards, business card creation, and Ask GoAround
+```
+
+## Verification
+
+Basic checks:
+
+```bash
+python -m py_compile app_template_layout_test.py src/goaround/*.py
+python -m pytest
+```
+
+There are currently no test files, so `pytest` reports that it collected 0 items.
 
 ## Disclaimer
 
-This is a decision-support prototype for hackathon use. It is not financial, legal, valuation, transport, or safety advice. Users should verify important information with official agencies and service providers.
+GoAround SG is a hackathon prototype. It is not financial, legal, safety, transport, valuation, or official government advice. Users should verify important information with the original source.

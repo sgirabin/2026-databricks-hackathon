@@ -1,14 +1,28 @@
 # GoAround SG - Today’s Picks Engine
 
-Branch:
+This document describes the intended source-backed recommendation engine behind GoAround SG.
+
+## Current Status
+
+The current Databricks App entrypoint is:
 
 ```text
-feature/todays-picks-engine
+app_template_layout_test.py
 ```
 
-## Product position
+That file is a static layout/debugging target. It does not yet call this engine.
 
-GoAround SG is an AI-powered local lobang feed for useful things around where people live, work, study or visit.
+The reusable engine already exists in:
+
+```text
+src/goaround/
+```
+
+Older app files such as `app_picks.py`, `app_final.py`, `app_clean.py`, and the `app_template_*.py` variants show previous attempts to wire this engine into Streamlit. Treat them as implementation references unless `app.yaml` points to them.
+
+## Product Position
+
+GoAround SG is a local discovery assistant for useful things around where people live, work, study, or visit.
 
 The main experience is:
 
@@ -16,42 +30,20 @@ The main experience is:
 Today’s Picks Near You
 ```
 
-It turns open data, live APIs, source-backed promotion/event registries, user context and AI into ranked cards.
+It turns open data, live APIs, source registries, user context, and AI into ranked cards.
 
-## Why this is stronger
-
-The product is no longer only a neighbourhood dashboard or home-buyer app. It is a local discovery feed that can drive recurring usage across different users:
-
-- residents checking food, grocery, events and local updates
-- workers/students checking lunch, coffee and after-work options
-- tourists/visitors asking for short local plans
-- businesses submitting hyperlocal promotions
-- potential movers using buyer/tenant mode later
-
-## Clean code structure
+## Core Modules
 
 ```text
-app_picks.py                    # Streamlit app, thin UI layer
-src/goaround/models.py          # UserContext, PickCard, RankedPick
-src/goaround/ranking.py         # ranking algorithm and explainability
-src/goaround/seed_data.py       # source-backed seed cards and local search cards
-src/goaround/business.py        # business promotion card creation
-src/goaround/agent.py           # Ask GoAround / Databricks Model Serving helper
+src/goaround/models.py       # UserContext, PickCard, RankedPick
+src/goaround/ranking.py      # ranking algorithm and explainability
+src/goaround/seed_data.py    # source-backed seed cards and local search cards
+src/goaround/business.py     # business promotion card creation
+src/goaround/agent.py        # Ask GoAround / Databricks Model Serving helper
+src/goaround/lakehouse.py    # optional Databricks SQL Gold-card loader
 ```
 
-## Main tabs
-
-```text
-Today’s Picks
-Deals
-Things To Do
-Ask GoAround
-My Area
-Business Demo
-Data & Databricks
-```
-
-## Card types
+## Card Types
 
 ```text
 deal
@@ -62,7 +54,7 @@ local_update
 plan
 ```
 
-Each card includes:
+Each card should include:
 
 ```text
 title
@@ -70,9 +62,9 @@ description
 category
 source_name
 source_url
-distance_m
+distance_m when available
 why_shown
-actions: Save / Share / Remind / Open source
+actions such as Save / Share / Remind / Open source
 ```
 
 Important rule:
@@ -81,7 +73,7 @@ Important rule:
 No source URL = no claim.
 ```
 
-## Ranking logic
+## Ranking Logic
 
 Cards are ranked using:
 
@@ -96,76 +88,50 @@ Cards are ranked using:
 
 The ranking engine also generates a `why_shown` explanation for each card.
 
-## Open data usage
+## Source-Backed Candidate Cards
 
-The app uses open data and public APIs as a neighbourhood knowledge layer:
+Candidate cards can come from:
 
-- data.gov.sg hawker centre / food anchors
-- data.gov.sg supermarket anchors
-- data.gov.sg community club anchors
-- data.gov.sg weather API
-- OneMap geocoding
-- LTA DataMall bus stops / arrivals when configured
-- source-backed event and promotion registries
+- data.gov.sg open-data places such as hawker centres, supermarkets, and community clubs
+- data.gov.sg weather context
+- OneMap geocoding / reverse geocoding
+- LTA DataMall bus stops and arrivals when configured
+- official supermarket, mall, community, NLB, ActiveSG, URA, and LTA source registries
+- business-submitted promotion cards with source URLs
+- Databricks SQL `gold_candidate_cards` when configured
 
-## Databricks usage
+## Ask GoAround
 
-This is the intended Databricks architecture:
+`src/goaround/agent.py` supports two modes:
+
+- Databricks Model Serving when `DATABRICKS_HOST` and `DATABRICKS_TOKEN` are configured
+- local deterministic fallback when Databricks credentials are absent
+
+Both modes are expected to answer from supplied source-backed cards only.
+
+## Databricks Architecture
 
 ```text
 Open data + live APIs + source registries
   -> Databricks Jobs / Workflows
   -> Bronze raw Delta tables
   -> Silver cleaned/geocoded local entities
-  -> Gold today_picks, user_area_profile, card_interactions
+  -> Gold candidate cards / Today’s Picks
   -> Databricks App: GoAround SG
   -> Model Serving: Ask GoAround
   -> Genie: local demand analytics
-  -> Lakebase: saved areas, reminders, business promotions
+  -> Lakebase: saved areas, reminders, business promotions, interests
 ```
 
-## Hackathon demo flow
+## Next Integration Step
 
-1. Open GoAround SG.
-2. Select mode: `Resident` or `Visitor`.
-3. Search `308C Punggol Walk`, `83 Punggol Central`, `Chinatown MRT`, or `Orchard Road`.
-4. Select interests: cheap food, grocery, event, tourist, rainy day.
-5. Show Today’s Picks.
-6. Show why cards are ranked.
-7. Save/share/remind a card.
-8. Open Business Demo and submit a local promotion.
-9. Return to Today’s Picks and show the card can appear if relevant.
-10. Ask GoAround: `I am visiting this area for 2 hours. What should I do?`
-11. Open Data & Databricks and explain the platform story.
+Once `app_template_layout_test.py` is visually stable, wire it to:
 
-## Environment variables
+- `source_registry_cards()`
+- `area_anchor_cards()`
+- `rank_cards()`
+- `create_business_promo_card()`
+- `answer_with_databricks()`
+- optionally `load_gold_candidate_cards()`
 
-```dotenv
-DATA_GOV_API_KEY=
-LTA_ACCOUNT_KEY=
-BING_SEARCH_KEY=
-DATABRICKS_HOST=
-DATABRICKS_TOKEN=
-DATABRICKS_MODEL_ENDPOINT=databricks-meta-llama-3-3-70b-instruct
-LAKEBASE_DATABASE_URL=
-```
-
-The app can run without these keys, but the strongest demo uses:
-
-- LTA key for bus cards
-- Databricks endpoint for Ask GoAround
-- Lakebase later for persistent memory/business submissions
-
-## Business angle
-
-Businesses can submit source-backed local promotions with:
-
-- business name
-- title
-- category
-- source URL
-- location
-- valid date
-- target tags
-
-In production, the same flow should persist to Lakebase and be moderated by an AI validation workflow before appearing in Today’s Picks.
+That will turn the static layout into the live source-backed Today’s Picks experience.
