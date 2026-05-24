@@ -755,15 +755,15 @@ h2 {
     border: 1px solid #D8DFEA;
     border-radius: 18px;
     background: linear-gradient(180deg, #fff, #FBFCFE);
-    padding: 13px 14px;
+    padding: 12px 12px;
     margin: 10px 0;
     box-shadow: 0 5px 16px rgba(23,43,77,.045);
-    width: calc(100% - 4px);
+    width: calc(100% - 2px);
     box-sizing: border-box;
 }
 .info-row {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     align-items: flex-start;
     margin: 8px 0;
 }
@@ -773,13 +773,13 @@ h2 {
     flex: 0 0 auto;
 }
 .info-main {
-    font-size: 13px;
+    font-size: 12.6px;
     font-weight: 850;
     color: #172B4D !important;
     line-height: 1.35;
 }
 .info-sub {
-    font-size: 11.5px;
+    font-size: 11.2px;
     color: var(--muted) !important;
     line-height: 1.35;
 }
@@ -1058,7 +1058,7 @@ div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .p
 }
 
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .sidebar-card-marker) {
-    padding: 24px 18px 18px 18px !important;
+    padding: 24px 16px 18px 16px !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
 }
@@ -1360,7 +1360,7 @@ def render_sidebar():
 
 
 if page == "today":
-    sidebar_col, chat_col, picks_col = st.columns([0.18, 0.56, 0.26], gap="medium")
+    sidebar_col, chat_col, picks_col = st.columns([0.21, 0.53, 0.26], gap="medium")
     with sidebar_col:
         render_sidebar()
 
@@ -1500,7 +1500,7 @@ if page == "today":
 
 elif page == "business":
     st.markdown('<div class="business-page-marker"></div>', unsafe_allow_html=True)
-    sidebar_col, form_col, preview_col = st.columns([0.18, 0.56, 0.26], gap="medium")
+    sidebar_col, form_col, preview_col = st.columns([0.21, 0.53, 0.26], gap="medium")
     with sidebar_col:
         render_sidebar()
     with form_col:
@@ -1578,7 +1578,7 @@ elif page == "business":
 ''', unsafe_allow_html=True)
 
 else:  # about page
-    sidebar_col, content_col = st.columns([0.18, 0.82], gap="medium")
+    sidebar_col, content_col = st.columns([0.21, 0.79], gap="medium")
     with sidebar_col:
         render_sidebar()
     with content_col:
