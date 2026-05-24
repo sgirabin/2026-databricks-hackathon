@@ -9,56 +9,57 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-page = st.query_params.get("page", "today")
-if page not in {"today", "business", "about"}:
-    page = "today"
+if "page" not in st.session_state:
+    st.session_state.page = "today"
+page = st.session_state.page
 
 st.markdown("""
 <style>
 :root{
   color-scheme:light!important;
-  --bg:#F4F7FB;
-  --text:#172B4D;
-  --muted:#667085;
-  --line:#E3EAF5;
-  --blue:#0D6EFD;
-  --green:#10B981;
+  --bg:#F4F7FB;--text:#172B4D;--muted:#667085;--line:#E3EAF5;--blue:#0D6EFD;--green:#10B981;
   --app-h:calc(100dvh - 1.05rem);
   --chat-body-h:clamp(280px, calc(100dvh - 395px), 560px);
   --picks-body-h:clamp(390px, calc(100dvh - 152px), 760px);
 }
-@supports not (height:100dvh){
-  :root{--app-h:calc(100vh - 1.05rem);--chat-body-h:clamp(280px, calc(100vh - 395px), 560px);--picks-body-h:clamp(390px, calc(100vh - 152px), 760px);}
-}
+@supports not (height:100dvh){:root{--app-h:calc(100vh - 1.05rem);--chat-body-h:clamp(280px, calc(100vh - 395px), 560px);--picks-body-h:clamp(390px, calc(100vh - 152px), 760px)}}
 html,body,.stApp,[data-testid="stAppViewContainer"],[data-testid="block-container"]{background:var(--bg)!important;color:var(--text)!important;color-scheme:light!important;overflow:hidden!important}
 [data-testid="stHeader"],section[data-testid="stSidebar"]{display:none!important}
 .main .block-container{max-width:none!important;padding:.55rem .75rem .35rem .75rem!important;height:100dvh!important;overflow:hidden!important}
-div[data-testid="stHorizontalBlock"]{gap:1rem!important;align-items:stretch!important}
-div[data-testid="stVerticalBlock"]{gap:0!important}
+div[data-testid="stHorizontalBlock"]{gap:1rem!important;align-items:stretch!important}div[data-testid="stVerticalBlock"]{gap:0!important}
 .app-card{height:var(--app-h);background:white;border:1px solid var(--line);border-radius:24px;box-shadow:0 16px 38px rgba(23,43,77,.08);overflow:hidden;box-sizing:border-box}
 .sidebar-card{padding:26px 24px 18px 24px}.chat-card{padding:28px 28px 18px 28px}.picks-card{padding:28px 24px 18px 24px}.full-card{padding:30px 32px 20px 32px}
 .stMarkdown,.stCaption,label,p,span,div,h1,h2,h3,h4,h5,h6,li{color:var(--text)!important}.muted,.stCaption,.stCaption *{color:var(--muted)!important}
 h1{font-size:clamp(1.65rem,2.2vw,2.05rem)!important;letter-spacing:.01em;margin:0 0 .15rem 0!important}h2{font-size:clamp(1.25rem,1.55vw,1.55rem)!important;margin:0 0 .15rem 0!important}
 .brand{display:flex;gap:13px;align-items:center;margin-bottom:clamp(14px,2dvh,20px)}.pin{width:42px;height:42px;border-radius:50%;background:linear-gradient(145deg,#0D6EFD,#20B2AA);box-shadow:0 10px 22px rgba(13,110,253,.20);flex:0 0 auto}.brand-title{font-size:21px;font-weight:900;color:#0D2B5C}.green{color:var(--green)!important}.subtitle{font-size:12.5px;line-height:1.45;color:var(--muted)!important;margin-top:4px}
-.nav{border-top:1px solid var(--line);padding-top:14px;margin-top:8px}.nav a{display:block;text-decoration:none!important;border-radius:13px;padding:10px 12px;font-size:13.5px;font-weight:800;margin-bottom:5px;color:var(--text)!important}.nav a.active{background:linear-gradient(90deg,#EAF2FF,#F6FAFF);color:#175CD3!important;box-shadow:inset 3px 0 0 #0D6EFD}
+.nav{border-top:1px solid var(--line);padding-top:14px;margin-top:8px;margin-bottom:10px}.nav div[data-testid="stButton"]{margin-bottom:5px}.nav button{width:100%!important;justify-content:flex-start!important;text-align:left!important;border-radius:13px!important;padding:10px 12px!important;font-size:13.5px!important;font-weight:800!important;min-height:40px!important;box-shadow:none!important}.nav button[kind="primary"]{background:linear-gradient(90deg,#EAF2FF,#F6FAFF)!important;color:#175CD3!important;border:0!important;box-shadow:inset 3px 0 0 #0D6EFD!important}.nav button[kind="secondary"]{background:transparent!important;color:var(--text)!important;border:0!important}
 .side-title{font-size:20px;font-weight:900;margin:clamp(13px,2dvh,18px) 0 5px 0}.field{min-height:44px;border:1px solid #D8DFEA;border-radius:13px;background:white;display:flex;align-items:center;padding:0 13px;font-size:12.5px;color:#4B5565!important;margin-bottom:9px;box-shadow:0 2px 8px rgba(23,43,77,.025);box-sizing:border-box}.location-field{min-height:56px;align-items:flex-start;padding-top:9px;line-height:1.35}.tag{border-radius:999px;padding:6px 10px;background:#EEF4FF;color:#175CD3!important;font-size:11.5px;font-weight:800;display:inline-block;margin:3px}.tag-wrap{margin:7px 0 12px 0}
 .status{display:inline-block;border:1px solid var(--line);border-radius:12px;padding:9px 14px;font-size:12.5px;margin:0 8px 12px 0;background:white;box-shadow:0 2px 8px rgba(23,43,77,.025)}.chatbox{height:var(--chat-body-h);border-radius:18px;background:linear-gradient(180deg,#FFFFFF 0%,#FBFCFE 100%);border:1px dashed #D8E2F0;padding:22px;overflow:hidden;box-sizing:border-box}.bubble{border-radius:18px;background:#F1F5F9;padding:13px 16px;display:inline-block;margin:12px;max-width:68%;font-size:14px;line-height:1.45;box-shadow:0 2px 8px rgba(23,43,77,.025)}.user{text-align:right}.quick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}.quick{border:1px solid #D8DFEA;border-radius:13px;min-height:44px;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;background:white;box-shadow:0 2px 8px rgba(23,43,77,.025)}.inputbar{min-height:58px;border:1px solid #D8DFEA;border-radius:18px;background:white;display:grid;grid-template-columns:46px 1fr 58px;align-items:center;margin-top:14px;box-shadow:0 6px 18px rgba(23,43,77,.045)}.send{height:44px;width:44px;border-radius:13px;background:var(--blue);color:white!important;display:flex;align-items:center;justify-content:center;font-weight:900}
 .picklist{height:var(--picks-body-h);overflow:hidden}.pick{min-height:clamp(112px,17dvh,135px);border:1px solid var(--line);border-radius:18px;padding:15px;background:white;margin-bottom:13px;box-shadow:0 5px 16px rgba(23,43,77,.045)}.pick b{font-size:15px}.footer{text-align:center;color:var(--muted)!important;font-size:11.5px;margin-top:9px}.visit{display:inline-block;margin-top:10px;border:1px solid var(--line);border-radius:11px;padding:8px 11px;font-size:11.5px;background:white;color:#0D2B5C!important;font-weight:750}.save{background:linear-gradient(90deg,#0D6EFD,#2563EB)!important;color:white!important;justify-content:center!important;font-weight:900!important;border:0!important;box-shadow:0 8px 18px rgba(13,110,253,.22)!important}.main-shell-title{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.view-all{font-size:13px;color:#175CD3!important;font-weight:800;margin-top:6px}.sidebar-note{font-size:11.8px;color:var(--muted)!important;margin-top:10px;line-height:1.35}
 .kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}.kpi{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fff;box-shadow:0 5px 16px rgba(23,43,77,.045)}.kpi b{display:block;font-size:1.35rem;margin-top:4px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.form-field{border:1px solid #D8DFEA;border-radius:13px;padding:12px;background:#fff;color:#4B5565!important;font-size:13px}.wide{grid-column:1/-1}.preview-card{border:1px solid var(--line);border-radius:22px;padding:18px;background:#fff;box-shadow:0 8px 22px rgba(23,43,77,.055);margin-top:14px}.about-section{margin-top:22px}.about-section h2{margin-bottom:8px!important}.about-section ul{margin-top:8px;line-height:1.8}
-@media(max-height:760px){:root{--app-h:calc(100dvh - .9rem);--chat-body-h:clamp(260px, calc(100dvh - 405px), 420px);--picks-body-h:clamp(370px, calc(100dvh - 165px), 620px)}.pick{min-height:108px}.inputbar{min-height:52px}.quick{min-height:39px}.brand{margin-bottom:12px}.field{min-height:38px;margin-bottom:7px}.location-field{min-height:48px}.nav a{padding:8px 10px}.tag{padding:5px 8px}.sidebar-note{display:none}.sidebar-card,.chat-card,.picks-card,.full-card{padding-top:22px}}
+@media(max-height:760px){:root{--app-h:calc(100dvh - .9rem);--chat-body-h:clamp(260px, calc(100dvh - 405px), 420px);--picks-body-h:clamp(370px, calc(100dvh - 165px), 620px)}.pick{min-height:108px}.inputbar{min-height:52px}.quick{min-height:39px}.brand{margin-bottom:12px}.field{min-height:38px;margin-bottom:7px}.location-field{min-height:48px}.nav button{padding:8px 10px!important}.tag{padding:5px 8px}.sidebar-note{display:none}.sidebar-card,.chat-card,.picks-card,.full-card{padding-top:22px}}
 </style>
 """, unsafe_allow_html=True)
-
-def active(name: str) -> str:
-    return "active" if page == name else ""
 
 left, right = st.columns([0.18, 0.82], gap="small")
 
 with left:
-    st.markdown(f'''
+    st.markdown('''
 <div class="app-card sidebar-card">
 <div class="brand"><div class="pin"></div><div><div class="brand-title">GoAround <span class="green">SG</span></div><div class="subtitle">AI local discovery assistant<br>for useful lobang near you.</div></div></div>
-<div class="nav"><a class="{active('today')}" href="?page=today" target="_self">● GoAround Today</a><a class="{active('business')}" href="?page=business" target="_self">○ Business Promotion</a><a class="{active('about')}" href="?page=about" target="_self">○ What is GoAround?</a></div>
+<div class="nav">
+''', unsafe_allow_html=True)
+    if st.button("● GoAround Today", type="primary" if page == "today" else "secondary", use_container_width=True):
+        st.session_state.page = "today"
+        st.rerun()
+    if st.button("○ Business Promotion", type="primary" if page == "business" else "secondary", use_container_width=True):
+        st.session_state.page = "business"
+        st.rerun()
+    if st.button("○ What is GoAround?", type="primary" if page == "about" else "secondary", use_container_width=True):
+        st.session_state.page = "about"
+        st.rerun()
+    st.markdown('''
+</div>
 <div class="side-title">My area</div><div class="subtitle">Tell us where you are to get better picks.</div><br>
 <div class="field">Auto / Current location</div><div class="field">◎ Detect current location</div><div class="field location-field">Seng Kang, Singapore<br>(1.3871, 103.8915)</div>
 <div class="subtitle">Discovery radius: 1.5 km</div><div class="field">────────●────────</div>
