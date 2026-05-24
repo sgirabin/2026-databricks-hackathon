@@ -1,16 +1,19 @@
 from __future__ import annotations
 
 import math
+import os
 from html import escape
+from typing import Any
 from urllib.parse import urlencode
 
 import requests
 import streamlit as st
 
 try:
-    from streamlit_js_eval import get_geolocation
+    from streamlit_js_eval import get_geolocation, streamlit_js_eval
 except Exception:  # pragma: no cover - keeps local/dev startup safe if package is missing
     get_geolocation = None
+    streamlit_js_eval = None
 
 st.set_page_config(
     page_title="LAYOUT TARGET - GoAround SG",
@@ -22,6 +25,10 @@ st.set_page_config(
 DEFAULT_LOCATION = "Singapore"
 DEFAULT_COORDS = "1.3521, 103.8198"
 DEFAULT_RADIUS_M = 0
+GEOLOCATION_KEY = "goaround_auto_geolocation"
+IP_LOCATION_KEY = "goaround_ip_location"
+DEFAULT_SQL_HOST = "dbc-68521f65-774f.cloud.databricks.com"
+DEFAULT_SQL_HTTP_PATH = "/sql/1.0/warehouses/e3ab5c87926da4b9"
 
 KNOWN_AREAS = [
     ("Sengkang, Singapore", 1.3871, 103.8915),
@@ -56,6 +63,78 @@ def parse_coords(value: str) -> tuple[float, float] | None:
         return float(lat_s.strip()), float(lon_s.strip())
     except Exception:
         return None
+
+
+def extract_geolocation_coords(value: object) -> tuple[float, float] | None:
+    if not isinstance(value, dict):
+        return None
+    coords = value.get("coords")
+    if not isinstance(coords, dict):
+        wrapped = value.get("value")
+        if isinstance(wrapped, dict):
+            coords = wrapped.get("coords")
+    if not isinstance(coords, dict):
+        return None
+    lat_value = coords.get("latitude")
+    lon_value = coords.get("longitude")
+    if lat_value is None or lon_value is None:
+        return None
+    try:
+        return float(lat_value), float(lon_value)
+    except (TypeError, ValueError):
+        return None
+
+
+def extract_geolocation_error(value: object) -> str | None:
+    if not isinstance(value, dict):
+        return None
+    error = value.get("error")
+    if not isinstance(error, dict):
+        wrapped = value.get("value")
+        if isinstance(wrapped, dict):
+            error = wrapped.get("error")
+    if not isinstance(error, dict):
+        return None
+    return str(error.get("message") or "Browser location is unavailable.")
+
+
+def extract_ip_location_coords(value: object) -> tuple[float, float] | None:
+    if not isinstance(value, dict):
+        return None
+    data = value.get("value")
+    if not isinstance(data, dict):
+        data = value
+    lat_value = data.get("latitude", data.get("lat"))
+    lon_value = data.get("longitude", data.get("lon"))
+    if lat_value is None or lon_value is None:
+        return None
+    try:
+        return float(lat_value), float(lon_value)
+    except (TypeError, ValueError):
+        return None
+
+
+def apply_detected_location(
+    *,
+    detected_lat: float,
+    detected_lon: float,
+    detected_source: str,
+    current_page: str,
+) -> None:
+    coords_value = f"{detected_lat:.4f}, {detected_lon:.4f}"
+    location_value = nearest_area(detected_lat, detected_lon)
+    st.session_state["location"] = location_value
+    st.session_state["coords"] = coords_value
+    st.session_state["location_source"] = detected_source
+    st.query_params.update(
+        {
+            "page": current_page,
+            "location": location_value,
+            "coords": coords_value,
+            "source": detected_source,
+        }
+    )
+    st.rerun()
 
 
 def weather_icon(forecast: str) -> str:
@@ -139,46 +218,232 @@ def fetch_weather(lat: float, lon: float) -> dict[str, str]:
         return fallback
 
 
+def source_icon(card_type: str, category: str) -> str:
+    text = f"{card_type} {category}".lower()
+    if "food" in text or "hawker" in text:
+        return "🍴"
+    if "grocery" in text or "deal" in text:
+        return "🛒"
+    if "transport" in text:
+        return "🚌"
+    if "park" in text:
+        return "🌳"
+    if "family" in text:
+        return "👨‍👩‍👧"
+    if "health" in text:
+        return "🏥"
+    if "tourist" in text:
+        return "🧭"
+    if "recycling" in text:
+        return "♻️"
+    if "fitness" in text:
+        return "🏃"
+    if "community" in text or "event" in text:
+        return "📅"
+    return "📍"
+
+
+def distance_label(distance_m: float | None) -> str:
+    if distance_m is None:
+        return "Singapore source"
+    if distance_m < 1000:
+        return f"{distance_m:.0f}m away"
+    return f"{distance_m / 1000:.1f}km away"
+
+
+def normalized_url(url: str) -> str:
+    if not url:
+        return "https://data.gov.sg/"
+    if url.startswith("http://") or url.startswith("https://"):
+        return url
+    return "https://" + url
+
+
+def databricks_sql_settings() -> tuple[str | None, str | None, str | None, str, str]:
+    raw_host = os.getenv("DATABRICKS_SERVER_HOSTNAME") or os.getenv("DATABRICKS_HOST") or DEFAULT_SQL_HOST
+    host = raw_host.replace("https://", "").replace("http://", "").strip("/")
+    http_path = os.getenv("DATABRICKS_HTTP_PATH") or DEFAULT_SQL_HTTP_PATH
+    token = os.getenv("DATABRICKS_TOKEN")
+    catalog = os.getenv("GOAROUND_CATALOG", "workspace")
+    schema = os.getenv("GOAROUND_SCHEMA", "goaround_sg")
+    return host, http_path, token, catalog, schema
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def load_nearby_databricks_picks(user_lat: float, user_lon: float, limit: int = 160) -> tuple[list[dict[str, Any]], str]:
+    host, http_path, token, catalog, schema = databricks_sql_settings()
+    if not token:
+        return [], "Databricks token is not configured"
+    try:
+        from databricks import sql
+    except Exception as exc:
+        return [], f"Databricks SQL connector unavailable: {exc}"
+
+    table = f"{catalog}.{schema}.gold_candidate_cards"
+    lat_sql = float(user_lat)
+    lon_sql = float(user_lon)
+    distance_sql = (
+        f"SQRT(POWER((lat - {lat_sql}) * 111320, 2) + "
+        f"POWER((lon - {lon_sql}) * 111320 * COS(RADIANS({lat_sql})), 2))"
+    )
+    query = f"""
+        SELECT
+          card_type,
+          category,
+          title,
+          description,
+          source_name,
+          source_url,
+          lat,
+          lon,
+          freshness_score,
+          source_reliability,
+          {distance_sql} AS distance_m
+        FROM {table}
+        WHERE source_url IS NOT NULL
+          AND lat IS NOT NULL
+          AND lon IS NOT NULL
+        ORDER BY distance_m ASC
+        LIMIT {int(limit)}
+    """
+    try:
+        with sql.connect(server_hostname=host, http_path=http_path, access_token=token) as conn:
+            cursor = conn.cursor()
+            cursor.execute(query)
+            columns = [column[0] for column in cursor.description]
+            rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+            cursor.close()
+        return rows, f"{table} via Databricks SQL"
+    except Exception as exc:
+        return [], f"Databricks SQL unavailable: {exc}"
+
+
+def rank_pick_rows(rows: list[dict[str, Any]], context_interests: list[str], forecast: str) -> list[dict[str, Any]]:
+    wanted = {item.lower() for item in context_interests}
+    rainy = any(word in forecast.lower() for word in ["rain", "shower", "thunder"])
+    scored: list[dict[str, Any]] = []
+    for row in rows:
+        category = str(row.get("category") or "").lower()
+        card_type = str(row.get("card_type") or "").lower()
+        title = str(row.get("title") or "")
+        description = str(row.get("description") or "")
+        haystack = f"{category} {card_type} {title} {description}".lower()
+        distance_m = float(row.get("distance_m") or 0)
+        score = max(0.0, 1.0 - min(distance_m, 5000) / 5000)
+        if any(term in haystack for term in wanted):
+            score += 0.45
+        if category in {"food", "grocery", "community", "park", "tourist"} or card_type in {"food", "deal", "event", "plan"}:
+            score += 0.2
+        if rainy and any(term in haystack for term in ["mrt", "transport", "community", "health", "family"]):
+            score += 0.15
+        if card_type == "transport":
+            score -= 0.12
+        row = {**row, "score": score}
+        scored.append(row)
+
+    scored.sort(key=lambda item: item["score"], reverse=True)
+    selected: list[dict[str, Any]] = []
+    used_categories: set[str] = set()
+    for row in scored:
+        category = str(row.get("category") or "local")
+        if category in used_categories and len(selected) < 3:
+            continue
+        selected.append(row)
+        used_categories.add(category)
+        if len(selected) == 3:
+            break
+    if len(selected) < 3:
+        for row in scored:
+            if row not in selected:
+                selected.append(row)
+            if len(selected) == 3:
+                break
+    return selected
+
+
+def render_pick_html(row: dict[str, Any], fallback_scope: str) -> str:
+    card_type = str(row.get("card_type") or "local_update")
+    category = str(row.get("category") or "local")
+    title = escape(str(row.get("title") or "Local pick"))
+    description = escape(str(row.get("description") or "Source-backed local open-data card."))
+    source_name = escape(str(row.get("source_name") or "Databricks Gold table"))
+    source_url = escape(normalized_url(str(row.get("source_url") or "")))
+    try:
+        distance_m = float(row.get("distance_m"))
+    except (TypeError, ValueError):
+        distance_m = None
+    meta = escape(f"{source_name} · {distance_label(distance_m)}")
+    icon = source_icon(card_type, category)
+    why = escape(f"Shown from Databricks Gold cards for {fallback_scope}.")
+    return (
+        f'<div class="pick"><b>{icon} {title}</b><br>'
+        f'<span class="muted">{meta}</span><br>{description}<br>'
+        f'<span class="muted">{why}</span><br>'
+        f'<a class="visit" href="{source_url}" target="_blank" rel="noopener noreferrer">Visit Website</a></div>'
+    )
+
+
 params = st.query_params
 page = params.get("page", "today")
 if page not in {"today", "business", "about"}:
     page = "today"
 
-location_source = params.get("source", "default")
-coords = params.get("coords", DEFAULT_COORDS)
+location_source = params.get("source", st.session_state.get("location_source", "default"))
+coords = params.get("coords", st.session_state.get("coords", DEFAULT_COORDS))
 parsed = parse_coords(coords) or parse_coords(DEFAULT_COORDS)
 lat, lon = parsed or (1.3521, 103.8198)
-location = params.get("location", DEFAULT_LOCATION)
+location = params.get("location", st.session_state.get("location", DEFAULT_LOCATION))
 radius_m = DEFAULT_RADIUS_M if location_source != "browser" else 1500
 interests = ["cheap food", "grocery", "event", "deal"]
 interests_value = ",".join(interests)
 
 if get_geolocation and location_source != "browser":
-    geo = get_geolocation()
-    if geo and isinstance(geo, dict) and geo.get("coords"):
-        geo_coords = geo.get("coords") or {}
-        geo_lat = geo_coords.get("latitude")
-        geo_lon = geo_coords.get("longitude")
-        if geo_lat is not None and geo_lon is not None:
-            lat = float(geo_lat)
-            lon = float(geo_lon)
-            coords = f"{lat:.4f}, {lon:.4f}"
-            location = nearest_area(lat, lon)
-            st.query_params.update(
-                {
-                    "page": page,
-                    "location": location,
-                    "coords": coords,
-                    "source": "browser",
-                }
+    geo = get_geolocation(component_key=GEOLOCATION_KEY)
+    st.session_state["geolocation_raw_debug"] = repr(geo)
+    detected_coords = extract_geolocation_coords(geo)
+    if detected_coords:
+        apply_detected_location(
+            detected_lat=detected_coords[0],
+            detected_lon=detected_coords[1],
+            detected_source="browser",
+            current_page=page,
+        )
+    geolocation_error = extract_geolocation_error(geo)
+    if geolocation_error:
+        st.session_state["geolocation_error"] = geolocation_error
+        if streamlit_js_eval:
+            ip_geo = streamlit_js_eval(
+                js_expressions="fetch('https://ipapi.co/json/').then(r => r.json())",
+                key=IP_LOCATION_KEY,
             )
-            st.rerun()
+            st.session_state["ip_location_raw_debug"] = repr(ip_geo)
+            ip_coords = extract_ip_location_coords(ip_geo)
+            if ip_coords:
+                apply_detected_location(
+                    detected_lat=ip_coords[0],
+                    detected_lon=ip_coords[1],
+                    detected_source="browser",
+                    current_page=page,
+                )
+elif get_geolocation is None:
+    st.session_state["geolocation_raw_debug"] = "streamlit_js_eval.get_geolocation is unavailable"
+
+st.session_state["geolocation_state_debug"] = {
+    "page": page,
+    "location": location,
+    "coords": coords,
+    "location_source": location_source,
+    "is_browser_location": location_source == "browser",
+    "error": st.session_state.get("geolocation_error"),
+}
 
 is_browser_location = location_source == "browser"
 radius_label = f"{radius_m / 1000:g} km" if is_browser_location else "Singapore-wide"
 discovery_subtitle = "Discovery radius" if is_browser_location else "Discovery scope"
 weather = fetch_weather(lat, lon)
 weather_summary = f"{weather['temperature']} · {weather['forecast']}"
+databricks_rows, databricks_source = load_nearby_databricks_picks(lat, lon)
+ranked_picks = rank_pick_rows(databricks_rows, interests, weather["forecast"])
 
 safe_location = escape(location)
 safe_coords = escape(coords)
@@ -189,6 +454,26 @@ safe_weather_source = escape(weather["source"])
 safe_location_source = "Browser location" if is_browser_location else "Default area"
 safe_pick_scope = f"within {safe_radius_label}" if is_browser_location else "across Singapore"
 safe_near_phrase = f"near {safe_location}" if is_browser_location else "across Singapore"
+safe_databricks_source = escape(databricks_source)
+if ranked_picks:
+    picks_html = "".join(render_pick_html(row, safe_pick_scope) for row in ranked_picks)
+    picks_footer = f"{len(databricks_rows)} candidates from Databricks⌄"
+else:
+    picks_html = (
+        f'<div class="pick"><b>🤖 {safe_first_interest.title()} {safe_near_phrase}</b><br>'
+        f'<span class="muted">{safe_databricks_source}</span><br>'
+        'Databricks-backed picks are unavailable, so this placeholder is shown until SQL access is configured.<br>'
+        '<span class="visit">Visit Website</span></div>'
+        f'<div class="pick"><b>{weather["icon"]} Weather-aware plan</b><br>'
+        f'<span class="muted">{safe_weather_summary}</span><br>'
+        'Use this context to choose indoor, outdoor or transport-friendly options.<br>'
+        '<span class="visit">Visit Website</span></div>'
+        '<div class="pick"><b>🏷️ Singapore deal updates</b><br>'
+        f'<span class="muted">Interests · {escape(", ".join(interests[:3]))}</span><br>'
+        'Featured grocery offers and deal sources across Singapore.<br><span class="visit">Visit Website</span></div>'
+    )
+    picks_footer = "Databricks SQL not ready⌄"
+safe_picks_footer = escape(picks_footer)
 
 
 def make_url(target_page: str | None = None, **updates: str) -> str:
@@ -264,7 +549,7 @@ with right:
         with picks_col:
             st.markdown(f'''
 <div class="app-card picks-card"><div class="main-shell-title"><div><h2>Today’s Picks</h2><div class="muted">Curated for {safe_location} based on weather, area and interests.</div></div><div class="view-all">View all</div></div>
-<div class="picklist"><div class="pick"><b>🤖 {safe_first_interest.title()} {safe_near_phrase}</b><br><span class="muted">Local source · {safe_pick_scope}</span><br>Placeholder pick will later come from source-backed data.<br><span class="visit">Visit Website</span></div><div class="pick"><b>{weather['icon']} Weather-aware plan</b><br><span class="muted">{safe_weather_summary}</span><br>Use this context to choose indoor, outdoor or transport-friendly options.<br><span class="visit">Visit Website</span></div><div class="pick"><b>🏷️ Singapore deal updates</b><br><span class="muted">Interests · {escape(', '.join(interests[:3]))}</span><br>Featured grocery offers and deal sources across Singapore.<br><span class="visit">Visit Website</span></div></div><div class="footer" style="color:#175CD3!important;font-weight:800">More picks⌄</div></div>
+<div class="picklist">{picks_html}</div><div class="footer" style="color:#175CD3!important;font-weight:800">{safe_picks_footer}</div></div>
 ''', unsafe_allow_html=True)
     elif page == "business":
         form_col, preview_col = st.columns([0.68, 0.32], gap="large")
