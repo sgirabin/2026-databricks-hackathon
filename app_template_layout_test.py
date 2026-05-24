@@ -19,6 +19,10 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+DEFAULT_LOCATION = "Singapore"
+DEFAULT_COORDS = "1.3521, 103.8198"
+DEFAULT_RADIUS_M = 0
+
 KNOWN_AREAS = [
     ("Sengkang, Singapore", 1.3871, 103.8915),
     ("Punggol, Singapore", 1.4052, 103.9023),
@@ -140,12 +144,12 @@ page = params.get("page", "today")
 if page not in {"today", "business", "about"}:
     page = "today"
 
-location_source = params.get("source", "fallback")
-coords = params.get("coords", "1.3871, 103.8915")
-parsed = parse_coords(coords) or (1.3871, 103.8915)
-lat, lon = parsed
-location = params.get("location", nearest_area(lat, lon))
-radius_m = 1500
+location_source = params.get("source", "default")
+coords = params.get("coords", DEFAULT_COORDS)
+parsed = parse_coords(coords) or parse_coords(DEFAULT_COORDS)
+lat, lon = parsed or (1.3521, 103.8198)
+location = params.get("location", DEFAULT_LOCATION)
+radius_m = DEFAULT_RADIUS_M if location_source != "browser" else 1500
 interests = ["cheap food", "grocery", "event", "deal"]
 interests_value = ",".join(interests)
 
@@ -170,7 +174,9 @@ if get_geolocation and location_source != "browser":
             )
             st.rerun()
 
-radius_label = f"{radius_m / 1000:g} km"
+is_browser_location = location_source == "browser"
+radius_label = f"{radius_m / 1000:g} km" if is_browser_location else "Singapore-wide"
+discovery_subtitle = "Discovery radius" if is_browser_location else "Discovery scope"
 weather = fetch_weather(lat, lon)
 weather_summary = f"{weather['temperature']} · {weather['forecast']}"
 
@@ -180,7 +186,9 @@ safe_radius_label = escape(radius_label)
 safe_first_interest = escape(interests[0])
 safe_weather_summary = escape(weather_summary)
 safe_weather_source = escape(weather["source"])
-safe_location_source = "Browser location" if location_source == "browser" else "Fallback location"
+safe_location_source = "Browser location" if is_browser_location else "Default area"
+safe_pick_scope = f"within {safe_radius_label}" if is_browser_location else "across Singapore"
+safe_near_phrase = f"near {safe_location}" if is_browser_location else "across Singapore"
 
 
 def make_url(target_page: str | None = None, **updates: str) -> str:
@@ -232,8 +240,8 @@ with left:
 <div class="info-card">
   <div class="info-row"><div class="info-icon">📍</div><div><div class="info-main">{safe_location}</div><div class="info-sub">{safe_location_source}</div></div></div>
   <div class="info-row"><div class="info-icon">{weather['icon']}</div><div><div class="info-main">{safe_weather_summary}</div><div class="info-sub">{safe_weather_source}</div></div></div>
-  <div class="info-row"><div class="info-icon">◎</div><div><div class="info-main">Within {safe_radius_label}</div><div class="info-sub">Discovery radius</div></div></div>
-  <div class="info-row"><div class="info-icon">🧭</div><div><div class="info-main">{safe_coords}</div><div class="info-sub">Coordinates</div></div></div>
+  <div class="info-row"><div class="info-icon">◎</div><div><div class="info-main">{safe_radius_label}</div><div class="info-sub">{discovery_subtitle}</div></div></div>
+  <div class="info-row"><div class="info-icon">🧭</div><div><div class="info-main">{safe_coords}</div><div class="info-sub">Approx. centre point</div></div></div>
 </div>
 <div class="area-label">Useful interests</div><div class="tag-wrap">{render_tags(interests)}</div>
 <div class="small-note">No manual save is needed. Ask the chat about another place, for example: “What can I do near Chinatown?”</div>
@@ -247,8 +255,8 @@ with right:
         with chat_col:
             st.markdown(f'''
 <div class="app-card chat-card"><h1>Ask GoAround</h1><div class="muted">Your conversation-style local assistant.</div>
-<div style="margin-top:12px"><span class="status">{weather['icon']} {safe_weather_summary}</span><span class="status">📍 {safe_location}</span><span class="status">◎ Within {safe_radius_label}</span></div>
-<div class="chatbox"><div>🤖 <span class="bubble">Hi, I’m Ask GoAround. Ask me what to eat, what to do with kids, rainy-day options, nearby deals, or a short visitor plan.</span></div><div class="user"><span class="bubble">Any cheap food spots near me?</span> 👤</div><div>🤖 <span class="bubble">Here are some budget-friendly options near {safe_location} within {safe_radius_label}. Weather now: {safe_weather_summary}.</span></div></div>
+<div style="margin-top:12px"><span class="status">{weather['icon']} {safe_weather_summary}</span><span class="status">📍 {safe_location}</span><span class="status">◎ {safe_radius_label}</span></div>
+<div class="chatbox"><div>🤖 <span class="bubble">Hi, I’m Ask GoAround. Ask me what to eat, what to do with kids, rainy-day options, nearby deals, or a short visitor plan.</span></div><div class="user"><span class="bubble">Any cheap food spots near me?</span> 👤</div><div>🤖 <span class="bubble">Here are some budget-friendly options {safe_near_phrase}. Weather now: {safe_weather_summary}.</span></div></div>
 <div class="quick-grid"><div class="quick">🍴 Eat cheap</div><div class="quick">📅 Weekend events</div><div class="quick">🌧️ Rainy-day ideas</div><div class="quick">🛒 Grocery deals</div></div>
 <div class="inputbar"><div style="text-align:center">📎</div><div class="muted">Ask GoAround about this area or another place...</div><div class="send">➤</div></div>
 <div class="footer">GoAround SG. Source-backed local discovery only. Verify deals, events and official updates at source before acting.</div></div>
@@ -256,23 +264,23 @@ with right:
         with picks_col:
             st.markdown(f'''
 <div class="app-card picks-card"><div class="main-shell-title"><div><h2>Today’s Picks</h2><div class="muted">Curated for {safe_location} based on weather, area and interests.</div></div><div class="view-all">View all</div></div>
-<div class="picklist"><div class="pick"><b>🤖 {safe_first_interest.title()} near {safe_location}</b><br><span class="muted">Local source · within {safe_radius_label}</span><br>Placeholder pick will later come from source-backed data.<br><span class="visit">Visit Website</span></div><div class="pick"><b>{weather['icon']} Weather-aware plan</b><br><span class="muted">{safe_weather_summary}</span><br>Use this context to choose indoor, outdoor or transport-friendly options.<br><span class="visit">Visit Website</span></div><div class="pick"><b>🏷️ Grocery and deal updates</b><br><span class="muted">Interests · {escape(', '.join(interests[:3]))}</span><br>Weekly grocery offers and deal sources near your area.<br><span class="visit">Visit Website</span></div></div><div class="footer" style="color:#175CD3!important;font-weight:800">More picks⌄</div></div>
+<div class="picklist"><div class="pick"><b>🤖 {safe_first_interest.title()} {safe_near_phrase}</b><br><span class="muted">Local source · {safe_pick_scope}</span><br>Placeholder pick will later come from source-backed data.<br><span class="visit">Visit Website</span></div><div class="pick"><b>{weather['icon']} Weather-aware plan</b><br><span class="muted">{safe_weather_summary}</span><br>Use this context to choose indoor, outdoor or transport-friendly options.<br><span class="visit">Visit Website</span></div><div class="pick"><b>🏷️ Singapore deal updates</b><br><span class="muted">Interests · {escape(', '.join(interests[:3]))}</span><br>Featured grocery offers and deal sources across Singapore.<br><span class="visit">Visit Website</span></div></div><div class="footer" style="color:#175CD3!important;font-weight:800">More picks⌄</div></div>
 ''', unsafe_allow_html=True)
     elif page == "business":
         form_col, preview_col = st.columns([0.68, 0.32], gap="large")
         with form_col:
             st.markdown(f'''
-<div class="app-card chat-card"><h1>Business Promotion</h1><div class="muted">Create a local promotion that can appear in Today’s Picks near {safe_location}.</div>
+<div class="app-card chat-card"><h1>Business Promotion</h1><div class="muted">Create a local promotion that can appear in Today’s Picks for {safe_location}.</div>
 <div class="kpi-grid"><div class="kpi"><span class="muted">Active</span><b>3</b></div><div class="kpi"><span class="muted">Clicks</span><b>128</b></div><div class="kpi"><span class="muted">Saves</span><b>47</b></div><div class="kpi"><span class="muted">Views</span><b>612</b></div></div>
 <h2>Create Promotion</h2><div class="form-grid"><div class="form-field">Business name</div><div class="form-field">Promotion title</div><div class="form-field">Category</div><div class="form-field">Location / Area: {safe_location}</div><div class="form-field">Valid from</div><div class="form-field">Valid to</div><div class="form-field wide">Audience / Interests: {escape(', '.join(interests))}</div><div class="form-field wide" style="min-height:90px;align-items:flex-start">Short description</div><div class="form-field wide">CTA link</div></div>
 <div class="field save" style="max-width:220px;margin-top:16px">Publish Promotion</div><div class="footer">Business layout placeholder only. Save logic comes later.</div></div>
 ''', unsafe_allow_html=True)
         with preview_col:
             st.markdown(f'''
-<div class="app-card picks-card"><h2>Preview</h2><div class="muted">How your promotion appears to nearby users.</div><div class="preview-card"><div class="tag">FOOD & DINING</div><h2 style="margin-top:16px!important">50% Off Chicken Rice</h2><div class="muted">Fresh chicken, fragrant rice and homemade chilli near {safe_location}.</div><br><span class="status">📍 {safe_location}</span><br><span class="visit">View details ↗</span></div></div>
+<div class="app-card picks-card"><h2>Preview</h2><div class="muted">How your promotion appears to users.</div><div class="preview-card"><div class="tag">FOOD & DINING</div><h2 style="margin-top:16px!important">50% Off Chicken Rice</h2><div class="muted">Fresh chicken, fragrant rice and homemade chilli in Singapore.</div><br><span class="status">📍 {safe_location}</span><br><span class="visit">View details ↗</span></div></div>
 ''', unsafe_allow_html=True)
     else:
         st.markdown(f'''
-<div class="app-card full-card"><h1>What is GoAround SG?</h1><div class="muted">A source-backed local discovery assistant for Singapore. Current selected area: {safe_location} within {safe_radius_label}.</div>
+<div class="app-card full-card"><h1>What is GoAround SG?</h1><div class="muted">A source-backed local discovery assistant for Singapore. Current area scope: {safe_location} · {safe_radius_label}.</div>
 <div class="about-section"><h2>For residents and visitors</h2><p>Ask what to eat, what to do with kids, rainy-day options, nearby deals, or useful updates around your selected area. You can also ask about another location directly in chat.</p></div><div class="about-section"><h2>For businesses</h2><p>Businesses can create local promotion cards that are shown to nearby users based on location, category, interests, and timing.</p></div><div class="about-section"><h2>Why it is different</h2><p>GoAround SG combines open data, source registries, browser location, weather, ranking, and AI conversation into one daily local assistant.</p></div><div class="about-section"><h2>Databricks usage in this prototype</h2><ul><li>Databricks Apps hosts the application.</li><li>Lakehouse / Delta can store Bronze, Silver, and Gold local discovery data.</li><li>Databricks SQL warehouse can serve candidate cards when configured.</li><li>Model Serving / GenAI can power Ask GoAround when a serving endpoint is configured.</li></ul></div><div class="footer">GoAround SG — Team R4131N. Source-backed local discovery. Verify final details at source.</div></div>
 ''', unsafe_allow_html=True)
