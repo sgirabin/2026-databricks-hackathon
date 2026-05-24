@@ -597,15 +597,15 @@ st.markdown("""
     --blue: #0D6EFD;
     --green: #10B981;
     --app-h: calc(100dvh - 1.05rem);
-    --chat-body-h: clamp(250px, calc(var(--app-h) - 340px), 760px);
-    --chat-body-expanded-h: clamp(430px, calc(var(--app-h) - 230px), 980px);
+    --chat-body-h: clamp(360px, calc(var(--app-h) - 250px), 900px);
+    --chat-body-expanded-h: clamp(430px, calc(var(--app-h) - 215px), 980px);
     --picks-body-h: clamp(360px, calc(var(--app-h) - 145px), 1100px);
 }
 @supports not (height:100dvh) {
     :root {
         --app-h: calc(100vh - 1.05rem);
-        --chat-body-h: clamp(250px, calc(var(--app-h) - 340px), 760px);
-        --chat-body-expanded-h: clamp(430px, calc(var(--app-h) - 230px), 980px);
+        --chat-body-h: clamp(360px, calc(var(--app-h) - 250px), 900px);
+        --chat-body-expanded-h: clamp(430px, calc(var(--app-h) - 215px), 980px);
         --picks-body-h: clamp(360px, calc(var(--app-h) - 145px), 1100px);
     }
 }
@@ -623,13 +623,13 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="block-cont
 }
 div.block-container, div[data-testid="stMainBlockContainer"], .main .block-container {
     max-width: none !important;
-    padding: .65rem 1.15rem .45rem 1.15rem !important;
+    padding: .65rem 1.45rem .45rem 1.15rem !important;
     height: 100dvh !important;
     overflow: hidden !important;
     box-sizing: border-box !important;
 }
 div[data-testid="stHorizontalBlock"] {
-    gap: .9rem !important;
+    gap: .75rem !important;
     align-items: stretch !important;
     width: 100% !important;
     max-width: 100% !important;
@@ -657,6 +657,8 @@ body:has(.business-page-marker),
 }
 .app-card {
     height: var(--app-h);
+    width: calc(100% - 8px);
+    margin-right: 8px;
     background: white;
     border: 1px solid var(--line);
     border-radius: 24px;
@@ -756,7 +758,7 @@ h2 {
     padding: 13px 14px;
     margin: 10px 0;
     box-shadow: 0 5px 16px rgba(23,43,77,.045);
-    width: 100%;
+    width: calc(100% - 4px);
     box-sizing: border-box;
 }
 .info-row {
@@ -926,7 +928,7 @@ h2 {
     background: white;
     margin-bottom: 13px;
     box-shadow: 0 5px 16px rgba(23,43,77,.045);
-    width: 100%;
+    width: calc(100% - 6px);
     box-sizing: border-box;
 }
 .pick b { font-size: 15px; }
@@ -968,7 +970,7 @@ h2 {
 .kpi-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 12px;
+    gap: 10px;
     margin: 18px 0;
 }
 .kpi {
@@ -979,6 +981,7 @@ h2 {
     box-shadow: 0 5px 16px rgba(23,43,77,.045);
     overflow: hidden;
     position: relative;
+    min-width: 0;
 }
 .kpi b { display: block; font-size: 1.35rem; margin-top: 4px; }
 .kpi:nth-child(1){background:linear-gradient(145deg,#ECFDF3,#FFFFFF);border-color:#B7E4CA}.kpi:nth-child(1) b{color:#047857!important}
@@ -1007,7 +1010,7 @@ h2 {
     background: #fff;
     box-shadow: 0 8px 22px rgba(23,43,77,.055);
     margin-top: 14px;
-    width: 100%;
+    width: calc(100% - 6px);
     box-sizing: border-box;
 }
 .about-section { margin-top: 22px; }
@@ -1046,8 +1049,9 @@ div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .p
     border-radius: 24px !important;
     box-shadow: 0 16px 38px rgba(23,43,77,.08) !important;
     height: var(--app-h) !important;
-    width: 100% !important;
-    max-width: 100% !important;
+    width: calc(100% - 8px) !important;
+    max-width: calc(100% - 8px) !important;
+    margin-right: 8px !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
     position: relative !important;
@@ -1073,7 +1077,7 @@ div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .p
 }
 
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) {
-    padding: 26px 28px 16px 28px !important;
+    padding: 26px 24px 16px 28px !important;
     height: auto !important;
     min-height: var(--app-h) !important;
     max-height: none !important;
@@ -1083,7 +1087,7 @@ div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .b
 }
 
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .preview-card-marker) {
-    padding: 26px 18px 16px 18px !important;
+    padding: 26px 14px 16px 18px !important;
     overflow-x: hidden !important;
 }
 
@@ -1123,6 +1127,14 @@ div[data-testid="stTextInput"] input, div[data-testid="stTextArea"] textarea {
     font-size: 13.5px !important;
     padding: 0 16px !important;
     box-shadow: inset 0 1px 2px rgba(0,0,0,0.05) !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+div[data-testid="stSelectbox"] [data-baseweb="select"],
+div[data-testid="stMultiSelect"] [data-baseweb="select"],
+div[data-testid="stDateInput"] input {
+    width: 100% !important;
+    box-sizing: border-box !important;
 }
 div[data-testid="stTextInput"] input:focus, div[data-testid="stTextArea"] textarea:focus {
     border-color: var(--blue) !important;
@@ -1219,6 +1231,7 @@ div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .b
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button *,
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) div[data-testid="stForm"] div[data-testid="stButton"] button * {
     color: white !important;
+    opacity: 1 !important;
 }
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover,
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) div[data-testid="stForm"] div[data-testid="stButton"] button:hover {
