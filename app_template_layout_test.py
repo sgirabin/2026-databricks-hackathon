@@ -1590,7 +1590,7 @@ div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .b
     border: 0 !important;
     border-radius: 999px !important;
     box-shadow: 0 14px 26px rgba(13, 110, 253, 0.24) !important;
-    min-height: 48px !important;
+    min-height: 16px !important;
     width: auto !important;
     min-width: 210px !important;
     padding: 0 28px !important;
