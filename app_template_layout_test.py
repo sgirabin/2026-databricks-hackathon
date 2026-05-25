@@ -765,6 +765,34 @@ def render_tags(items: list[str]) -> str:
     return "".join(f'<span class="tag">{escape(item)} ×</span>' for item in items[:5])
 
 
+def render_chat_content(content: str) -> str:
+    """Render a small safe Markdown subset inside custom HTML chat bubbles."""
+    safe = escape(content)
+    safe = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", safe)
+    lines = safe.splitlines()
+    html_parts: list[str] = []
+    bullet_items: list[str] = []
+
+    def flush_bullets() -> None:
+        if bullet_items:
+            html_parts.append("<ul>" + "".join(f"<li>{item}</li>" for item in bullet_items) + "</ul>")
+            bullet_items.clear()
+
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            flush_bullets()
+            continue
+        if stripped.startswith("- "):
+            bullet_items.append(stripped[2:].strip())
+        else:
+            flush_bullets()
+            html_parts.append(f"<p>{stripped}</p>")
+
+    flush_bullets()
+    return "".join(html_parts)
+
+
 # Try to load and base64-encode the logo
 import base64
 
@@ -1050,6 +1078,24 @@ h2 {
     font-size: 14px;
     line-height: 1.45;
     box-shadow: 0 2px 8px rgba(23,43,77,.025);
+}
+.bubble p {
+    margin: 0 0 9px 0 !important;
+}
+.bubble p:last-child {
+    margin-bottom: 0 !important;
+}
+.bubble ul {
+    margin: 8px 0 9px 18px !important;
+    padding: 0 !important;
+}
+.bubble li {
+    margin: 5px 0 !important;
+    line-height: 1.42;
+}
+.bubble strong {
+    font-weight: 900;
+    color: #0D2B5C !important;
 }
 .user {
     text-align: right;
@@ -1665,10 +1711,11 @@ if page == "today":
 '''
                 for msg in conversation_messages[-8:]:
                     role = msg["role"]
-                    content = escape(msg["content"]).replace("\n", "<br>")
                     if role == "user":
+                        content = escape(msg["content"]).replace("\n", "<br>")
                         chat_history_html += f'<div style="text-align:right; margin: 10px 0;"><span class="bubble" style="background:#EAF2FF; text-align:left;">{content}</span> 👤</div>'
                     else:
+                        content = render_chat_content(msg["content"])
                         chat_history_html += f'<div style="margin: 10px 0;">🤖 <span class="bubble">{content}</span></div>'
                 if include_thinking:
                     chat_history_html += f'''
