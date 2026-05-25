@@ -805,6 +805,15 @@ def render_chat_content(content: str) -> str:
     return "".join(html_parts)
 
 
+def reset_business_form_defaults() -> None:
+    st.session_state["business_name_input"] = ""
+    st.session_state["promotion_title_input"] = ""
+    st.session_state["promotion_area_input"] = location
+    st.session_state["promotion_interests_input"] = []
+    st.session_state["promotion_description_input"] = ""
+    st.session_state["promotion_url_input"] = ""
+
+
 # Try to load and base64-encode the logo
 import base64
 
@@ -1294,6 +1303,12 @@ h2 {
 .tech-pill{display:inline-block;margin:5px 6px 0 0;padding:8px 11px;border-radius:999px;background:#EEF4FF;color:#175CD3!important;font-weight:850;font-size:.82rem}
 .value-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:18px 0}
 .value-item{border-radius:16px;padding:13px;background:#0D2B5C;color:#fff!important}.value-item b,.value-item span{color:#fff!important}.value-item span{font-size:.8rem;opacity:.82}
+.publish-status-card{border-radius:18px;padding:14px 16px;margin:12px 0 16px 0;border:1px solid #B7E4CA;background:linear-gradient(135deg,#ECFDF3,#FFFFFF);box-shadow:0 10px 22px rgba(16,185,129,.12);font-size:13px;line-height:1.45}
+.publish-status-card strong{display:block;font-size:14px;margin-bottom:3px;color:#047857!important}
+.publish-status-card.warning{border-color:#FED7AA;background:linear-gradient(135deg,#FFF7ED,#FFFFFF);box-shadow:0 10px 22px rgba(249,115,22,.12)}
+.publish-status-card.warning strong{color:#C2410C!important}
+.publish-status-card.error{border-color:#FECACA;background:linear-gradient(135deg,#FEF2F2,#FFFFFF);box-shadow:0 10px 22px rgba(239,68,68,.12)}
+.publish-status-card.error strong{color:#B91C1C!important}
 
 @media(max-height: 760px) {
     :root { --app-h: calc(100dvh - .9rem); }
@@ -1841,31 +1856,37 @@ elif page == "business":
             publish_status = st.session_state.get("business_publish_status")
             if publish_status:
                 status_message = publish_status.get("message", "Promotion publish status is unavailable.")
-                if publish_status.get("kind") == "success":
-                    st.success(status_message)
-                elif publish_status.get("kind") == "warning":
-                    st.warning(status_message)
-                else:
-                    st.error(status_message)
+                status_kind = publish_status.get("kind", "error")
+                status_title = {
+                    "success": "Promotion published",
+                    "warning": "Promotion saved locally only",
+                    "error": "Promotion not published",
+                }.get(status_kind, "Promotion status")
+                st.markdown(
+                    f'<div class="publish-status-card {escape(status_kind)}">'
+                    f'<strong>{escape(status_title)}</strong>{escape(status_message)}'
+                    '</div>',
+                    unsafe_allow_html=True,
+                )
             
             # Interactive Streamlit form
             with st.form("business_form"):
                 col1, col2 = st.columns(2)
-                b_name = col1.text_input("Business name", value="Ah Boyz Chicken Rice")
-                p_title = col2.text_input("Promotion title *", value="50% Off Signature Chicken Rice (Dinner Special)")
+                b_name = col1.text_input("Business name", value="", placeholder="Ah Boyz Chicken Rice", key="business_name_input")
+                p_title = col2.text_input("Promotion title *", value="", placeholder="50% off signature set", key="promotion_title_input")
                 
                 col3, col4 = st.columns(2)
                 p_category = col3.selectbox("Category *", ["Food & Dining", "Grocery", "Mall", "Family", "Fitness"])
-                p_area = col4.text_input("Location / Area *", value=location)
+                p_area = col4.text_input("Location / Area *", value=location, key="promotion_area_input")
                 
                 col5, col6 = st.columns(2)
                 p_from = col5.date_input("Valid from")
                 p_to = col6.date_input("Valid to")
                 
-                p_interests = st.multiselect("Audience / Interests", ["food", "grocery", "event", "deal", "fitness", "tourist"], default=["food", "deal"])
+                p_interests = st.multiselect("Audience / Interests", ["food", "grocery", "event", "deal", "fitness", "tourist"], default=[], key="promotion_interests_input")
                 
-                p_description = st.text_area("Short description *", value="Enjoy our signature Hainanese Chicken Rice at 50% off for dinner! Freshly steamed chicken, fragrant rice, and our homemade chilli.")
-                p_url = st.text_input("CTA link (source url) *", value="https://example.com/AhBoyzDinnerDeal")
+                p_description = st.text_area("Short description *", value="", placeholder="Describe the offer, terms, and why nearby users should care.", key="promotion_description_input")
+                p_url = st.text_input("CTA link (source url) *", value="", placeholder="https://example.com/promo", key="promotion_url_input")
                 
                 publish_btn = st.form_submit_button("Publish Promotion", use_container_width=False)
                 
@@ -1874,7 +1895,13 @@ elif page == "business":
 ''', unsafe_allow_html=True)
         
         if publish_btn:
-            if not p_url.startswith("http"):
+            if not all([b_name.strip(), p_title.strip(), p_description.strip(), p_url.strip()]):
+                st.session_state["business_publish_status"] = {
+                    "kind": "error",
+                    "message": "Please complete business name, promotion title, short description, and CTA link before publishing.",
+                }
+                st.rerun()
+            elif not p_url.startswith("http"):
                 st.session_state["business_publish_status"] = {
                     "kind": "error",
                     "message": "Please provide a valid source URL starting with http:// or https:// to verify this deal.",
@@ -1900,6 +1927,7 @@ elif page == "business":
                         "kind": "success",
                         "message": f"Promotion '{p_title}' was published to Databricks SQL successfully. Check GoAround Today to see it ranked near you.",
                     }
+                    reset_business_form_defaults()
                 else:
                     st.session_state["business_publish_status"] = {
                         "kind": "warning",
