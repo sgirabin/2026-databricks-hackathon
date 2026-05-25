@@ -117,13 +117,18 @@ def answer_with_databricks(question: str, context: UserContext, ranked: list[Ran
     }
     if q in greetings:
         return (
-            f"Hello! I'm **Ask GoAround**, your hyperlocal discovery assistant. 😊\n\n"
-            f"Since you're near **{context.address}**, I can help you find things like:\n"
-            f"- 🍲 **Local Food & Coffee**: Hidden gems or cheap eats nearby.\n"
-            f"- 🏷️ **Lobang & Deals**: Supermarket discounts and retail promotions.\n"
-            f"- 🎪 **Things To Do**: Parks, events, and family activities.\n"
-            f"- ☔ **Weather-Aware Ideas**: Great indoor plans if it's rainy outside.\n\n"
-            f"What are you in the mood for today?"
+            "I am here. Ask me for food, deals, family activities, rainy-day ideas, "
+            f"or a short plan around **{context.address}**."
+        )
+
+    identity_words = {"who are you", "what are you", "what can you do", "help", "about you"}
+    if q in identity_words or q.startswith("who are you"):
+        return (
+            "I'm **Ask GoAround**, the chat layer for GoAround SG.\n\n"
+            f"- I use your selected area, currently **{context.address}**, to explain nearby source-backed picks.\n"
+            "- I can help with food, deals, events, family activities, weather-aware ideas, and short visitor plans.\n"
+            "- I avoid inventing promotions, prices, or event details; I point you back to sources when details need verification.\n\n"
+            "For the strongest demo, connect me to Databricks Genie so I can query the lakehouse directly."
         )
 
     host = os.getenv("DATABRICKS_HOST")

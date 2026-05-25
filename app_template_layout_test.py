@@ -765,6 +765,18 @@ def render_tags(items: list[str]) -> str:
     return "".join(f'<span class="tag">{escape(item)} ×</span>' for item in items[:5])
 
 
+def welcome_chat_message(location_name: str) -> str:
+    return (
+        "Hello! I'm **Ask GoAround**, your hyperlocal discovery assistant. 😊\n\n"
+        f"Since you're near **{location_name}**, I can help you find things like:\n"
+        "- 🍲 **Local Food & Coffee**: Hidden gems or cheap eats nearby.\n"
+        "- 🏷️ **Lobang & Deals**: Supermarket discounts and retail promotions.\n"
+        "- 🎪 **Things To Do**: Parks, events, and family activities.\n"
+        "- ☔ **Weather-Aware Ideas**: Great indoor plans if it's rainy outside.\n\n"
+        "What are you in the mood for today?"
+    )
+
+
 def render_chat_content(content: str) -> str:
     """Render a small safe Markdown subset inside custom HTML chat bubbles."""
     safe = escape(content)
@@ -1688,27 +1700,26 @@ if page == "today":
 
             # Conversational state tracking
             if "ask_messages" not in st.session_state:
-                st.session_state["ask_messages"] = []
+                st.session_state["ask_messages"] = [
+                    {
+                        "role": "assistant",
+                        "content": welcome_chat_message(location),
+                        "kind": "welcome",
+                    }
+                ]
+                st.session_state["ask_welcome_location"] = location
+            elif st.session_state.get("ask_welcome_location") != location:
+                for msg in st.session_state["ask_messages"]:
+                    if msg.get("kind") == "welcome":
+                        msg["content"] = welcome_chat_message(location)
+                        break
+                st.session_state["ask_welcome_location"] = location
             st.session_state.pop("pending_query", None)
             
             def render_chat_history(include_thinking: bool = False) -> None:
                 chat_history_html = ""
                 conversation_messages = st.session_state["ask_messages"]
-                chatbox_class = "chatbox expanded" if conversation_messages else "chatbox"
-                if not conversation_messages:
-                    chat_history_html += f'''
-<div style="margin: 10px 0;">
-  🤖 <span class="bubble">
-    Hello! I'm <b>Ask GoAround</b>, your hyperlocal discovery assistant. 😊<br><br>
-    Since you're near <b>{safe_location}</b>, I can help you find things like:<br>
-    🍲 <b>Local Food & Coffee</b>: Hidden gems or cheap eats nearby.<br>
-    🏷️ <b>Lobang & Deals</b>: Supermarket discounts and retail promotions.<br>
-    🎪 <b>Things To Do</b>: Parks, events, and family activities.<br>
-    ☔ <b>Weather-Aware Ideas</b>: Great indoor plans if it's rainy outside.<br><br>
-    What are you in the mood for today?
-  </span>
-</div>
-'''
+                chatbox_class = "chatbox expanded" if len(conversation_messages) > 1 else "chatbox"
                 for msg in conversation_messages[-8:]:
                     role = msg["role"]
                     if role == "user":
