@@ -1899,7 +1899,6 @@ elif page == "business":
             
             # Interactive Streamlit form
             with st.form("business_form"):
-                st.form_submit_button("Use current location for demo", on_click=sync_business_area_to_current_location)
                 col1, col2 = st.columns(2)
                 b_name = col1.text_input("Business name", value="", placeholder="Ah Boyz Chicken Rice", key="business_name_input")
                 p_title = col2.text_input("Promotion title *", value="", placeholder="50% off signature set", key="promotion_title_input")
