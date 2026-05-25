@@ -1053,8 +1053,8 @@ div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .p
     border-radius: 24px !important;
     box-shadow: 0 16px 38px rgba(23,43,77,.08) !important;
     height: var(--app-h) !important;
-    width: calc(100% - 30px) !important;
-    max-width: calc(100% - 30px) !important;
+    width: calc(100% - 0px) !important;
+    max-width: calc(100% - 0px) !important;
     margin-right: 8px !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
