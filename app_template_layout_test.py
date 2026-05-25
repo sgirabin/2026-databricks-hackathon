@@ -599,14 +599,14 @@ st.markdown("""
     --app-h: calc(100dvh - 1.05rem);
     --chat-body-h: clamp(360px, calc(var(--app-h) - 250px), 900px);
     --chat-body-expanded-h: clamp(430px, calc(var(--app-h) - 215px), 980px);
-    --picks-body-h: clamp(360px, calc(var(--app-h) - 145px), 1100px);
+    --picks-body-h: clamp(300px, calc(var(--app-h) - 270px), 980px);
 }
 @supports not (height:100dvh) {
     :root {
         --app-h: calc(100vh - 1.05rem);
         --chat-body-h: clamp(360px, calc(var(--app-h) - 250px), 900px);
         --chat-body-expanded-h: clamp(430px, calc(var(--app-h) - 215px), 980px);
-        --picks-body-h: clamp(360px, calc(var(--app-h) - 145px), 1100px);
+        --picks-body-h: clamp(300px, calc(var(--app-h) - 270px), 980px);
     }
 }
 html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="block-container"] {
@@ -921,6 +921,9 @@ h2 {
     height: var(--picks-body-h);
     width: calc(100% - 10px) !important;
     overflow-y: auto;
+    padding-bottom: 34px;
+    scroll-padding-bottom: 34px;
+    box-sizing: border-box;
 }
 .pick {
     display: flow-root !important;
@@ -933,6 +936,9 @@ h2 {
     box-shadow: 0 5px 16px rgba(23,43,77,.045);
     width: calc(100% - 6px);
     box-sizing: border-box;
+}
+.picklist .pick:last-child {
+    margin-bottom: 28px;
 }
 .pick b { font-size: 15px; }
 .footer {
