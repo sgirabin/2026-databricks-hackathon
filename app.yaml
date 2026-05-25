@@ -6,3 +6,21 @@ command:
   - 0.0.0.0
   - --server.port
   - $DATABRICKS_APP_PORT
+
+env:
+  - name: DATABRICKS_HOST
+    value: https://dbc-68521f65-774f.cloud.databricks.com
+  - name: DATABRICKS_SERVER_HOSTNAME
+    value: dbc-68521f65-774f.cloud.databricks.com
+  - name: DATABRICKS_HTTP_PATH
+    value: /sql/1.0/warehouses/e3ab5c87926da4b9
+  - name: GOAROUND_CATALOG
+    value: workspace
+  - name: GOAROUND_SCHEMA
+    value: goaround_sg
+  - name: USE_DATABRICKS_SQL
+    value: "true"
+  - name: GENIE_SPACE_ID
+    value: 01f157d5d4c210a0b04e26744bb50cca
+  - name: DATABRICKS_MODEL_ENDPOINT
+    value: databricks-meta-llama-3-3-70b-instruct
