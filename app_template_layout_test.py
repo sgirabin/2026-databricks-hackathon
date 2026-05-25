@@ -814,6 +814,25 @@ def reset_business_form_defaults() -> None:
     st.session_state["promotion_url_input"] = ""
 
 
+def store_business_preview(
+    *,
+    business_name: str,
+    title: str,
+    category: str,
+    area: str,
+    description: str,
+    url: str,
+) -> None:
+    st.session_state["business_preview"] = {
+        "business_name": business_name.strip(),
+        "title": title.strip(),
+        "category": category,
+        "area": area.strip(),
+        "description": description.strip(),
+        "url": url.strip(),
+    }
+
+
 # Try to load and base64-encode the logo
 import base64
 
@@ -1888,13 +1907,30 @@ elif page == "business":
                 p_description = st.text_area("Short description *", value="", placeholder="Describe the offer, terms, and why nearby users should care.", key="promotion_description_input")
                 p_url = st.text_input("CTA link (source url) *", value="", placeholder="https://example.com/promo", key="promotion_url_input")
                 
-                publish_btn = st.form_submit_button("Publish Promotion", use_container_width=False)
+                preview_btn, publish_btn = st.columns([1, 1.2])
+                preview_clicked = preview_btn.form_submit_button("Preview", use_container_width=False)
+                publish_clicked = publish_btn.form_submit_button("Publish Promotion", use_container_width=False)
                 
             st.markdown(f'''
 <div class="footer" style="margin-top:10px;">Submitted promotions appear immediately in Today's Picks on the homepage.</div>
 ''', unsafe_allow_html=True)
         
-        if publish_btn:
+        if preview_clicked:
+            store_business_preview(
+                business_name=b_name,
+                title=p_title,
+                category=p_category,
+                area=p_area,
+                description=p_description,
+                url=p_url,
+            )
+            st.session_state["business_publish_status"] = {
+                "kind": "success",
+                "message": "Preview updated. Review the promotion card on the right before publishing.",
+            }
+            st.rerun()
+
+        if publish_clicked:
             if not all([b_name.strip(), p_title.strip(), p_description.strip(), p_url.strip()]):
                 st.session_state["business_publish_status"] = {
                     "kind": "error",
@@ -1920,6 +1956,14 @@ elif page == "business":
                     valid_until=p_to.isoformat(),
                     tags=p_interests,
                 )
+                store_business_preview(
+                    business_name=b_name,
+                    title=p_title,
+                    category=p_category,
+                    area=p_area,
+                    description=p_description,
+                    url=p_url,
+                )
                 with st.spinner("Publishing promotion..."):
                     saved = save_business_promotion(new_promo, databricks_sql_settings())
                 if saved:
@@ -1938,17 +1982,25 @@ elif page == "business":
     with preview_col:
         with st.container():
             st.markdown('<div class="preview-card-marker"></div>', unsafe_allow_html=True)
+            preview_data = st.session_state.get("business_preview", {})
+            preview_category = preview_data.get("category") or "Food & Dining"
+            preview_title = preview_data.get("title") or "Your promotion title"
+            preview_description = preview_data.get("description") or "Add a short source-backed description, then click Preview to see how the promotion will appear."
+            preview_area = preview_data.get("area") or location
+            preview_business = preview_data.get("business_name") or "Your business"
+            preview_url = preview_data.get("url") or "#"
+            preview_cta = "View details ↗" if preview_url != "#" else "Add source URL"
             st.markdown(f'''
-<h2>Preview</h2><div class="muted">How your promotion appears to users in real-time.</div>
+<h2>Preview</h2><div class="muted">Click Preview in the form to refresh this card before publishing.</div>
 <div class="preview-card" style="margin-top:20px;">
-<div class="tag" style="background:#FFE6E2; color:#D32F2F !important;">{escape(p_category.upper())}</div>
-<h2 style="margin-top:16px!important; font-size: 1.25rem;">{escape(p_title)}</h2>
-<div class="muted" style="font-size:0.9rem; margin-top:8px;">{escape(p_description)}</div>
+<div class="tag" style="background:#FFE6E2; color:#D32F2F !important;">{escape(preview_category.upper())}</div>
+<h2 style="margin-top:16px!important; font-size: 1.25rem;">{escape(preview_title)}</h2>
+<div class="muted" style="font-size:0.9rem; margin-top:8px;">{escape(preview_description)}</div>
 <br>
-<div style="font-size:0.85rem; color:var(--muted);"><span class="info-icon">📍</span> {escape(p_area)}</div>
-<div style="font-size:0.85rem; color:var(--muted); margin-top:4px;"><span class="info-icon">🏢</span> {escape(b_name)}</div>
+<div style="font-size:0.85rem; color:var(--muted);"><span class="info-icon">📍</span> {escape(preview_area)}</div>
+<div style="font-size:0.85rem; color:var(--muted); margin-top:4px;"><span class="info-icon">🏢</span> {escape(preview_business)}</div>
 <br>
-<a class="visit" href="{escape(p_url)}" target="_blank">View details ↗</a>
+<a class="visit" href="{escape(preview_url)}" target="_blank">{escape(preview_cta)}</a>
 </div>
 ''', unsafe_allow_html=True)
 
