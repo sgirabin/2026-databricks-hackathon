@@ -13,6 +13,9 @@ from datetime import datetime
 
 import requests
 import streamlit as st
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
 try:
     from streamlit_js_eval import get_geolocation, streamlit_js_eval
