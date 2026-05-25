@@ -870,12 +870,12 @@ h2 {
     box-shadow: 0 2px 8px rgba(23,43,77,.025);
 }
 .inputbar {
-    min-height: 58px;
+    min-height: 36px;
     border: 1px solid #D8DFEA;
     border-radius: 18px;
     background: white;
     display: grid;
-    grid-template-columns: 46px 1fr 58px;
+    grid-template-columns: 46px 1fr 36px;
     align-items: center;
     margin-top: 14px;
     box-shadow: 0 6px 18px rgba(23,43,77,.045);
@@ -899,7 +899,7 @@ h2 {
     padding: 18px;
     overflow-y: auto;
     box-sizing: border-box;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
 }
 .chatbox.expanded {
     height: var(--chat-body-expanded-h);
@@ -1241,8 +1241,8 @@ div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .c
     font-size: 16px !important;
     font-weight: 900 !important;
     box-shadow: 0 8px 18px rgba(13,110,253,.22) !important;
-    min-height: 40px !important;
-    height: 40px !important;
+    min-height: 36px !important;
+    height: 36px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -1255,9 +1255,9 @@ div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .c
 
 /* Style premium input inside chat form and keep the send button aligned. */
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .chat-card-marker) div[data-testid="stForm"] div[data-testid="stTextInput"] input {
-    min-height: 40px !important;
-    height: 40px !important;
-    line-height: 40px !important;
+    min-height: 36px !important;
+    height: 36px !important;
+    line-height: 36px !important;
     border-radius: 16px !important;
     font-size: 14px !important;
     padding: 0 18px !important;
