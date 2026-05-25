@@ -1218,7 +1218,7 @@ div[data-testid="stMultiSelect"] [data-baseweb="tag"] svg {
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .chat-card-marker) div[data-testid="stButton"] button {
     border: 1px solid #D8DFEA !important;
     border-radius: 13px !important;
-    min-height: 44px !important;
+    min-height: 36px !important;
     font-size: 12.5px !important;
     font-weight: 800 !important;
     background: white !important;
@@ -1241,8 +1241,8 @@ div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .c
     font-size: 16px !important;
     font-weight: 900 !important;
     box-shadow: 0 8px 18px rgba(13,110,253,.22) !important;
-    min-height: 58px !important;
-    height: 58px !important;
+    min-height: 40px !important;
+    height: 40px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -1255,9 +1255,9 @@ div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .c
 
 /* Style premium input inside chat form and keep the send button aligned. */
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .chat-card-marker) div[data-testid="stForm"] div[data-testid="stTextInput"] input {
-    min-height: 58px !important;
-    height: 58px !important;
-    line-height: 58px !important;
+    min-height: 40px !important;
+    height: 40px !important;
+    line-height: 40px !important;
     border-radius: 16px !important;
     font-size: 14px !important;
     padding: 0 18px !important;
