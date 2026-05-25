@@ -496,7 +496,7 @@ def build_picks_feed(active_filters: list[str], max_distance_km: float) -> tuple
     max_distance_m = max_distance_km * 1000
     scoped_picks = [
         pick for pick in ranked_picks
-        if pick.distance_m is None or pick.distance_m <= max_distance_m
+        if pick.distance_m is not None and pick.distance_m <= max_distance_m
     ]
     if selected_filters:
         matched_picks = []
