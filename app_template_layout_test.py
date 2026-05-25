@@ -919,6 +919,7 @@ h2 {
 }
 .picklist {
     height: var(--picks-body-h);
+    width: calc(100% - 10px) !important;
     overflow-y: auto;
 }
 .pick {
@@ -974,6 +975,7 @@ h2 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 10px;
     margin: 18px 0;
+    wdith: 95%;
 }
 .kpi {
     border: 1px solid var(--line);
@@ -1051,8 +1053,8 @@ div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .p
     border-radius: 24px !important;
     box-shadow: 0 16px 38px rgba(23,43,77,.08) !important;
     height: var(--app-h) !important;
-    width: calc(100% - 8px) !important;
-    max-width: calc(100% - 8px) !important;
+    width: calc(100% - 30px) !important;
+    max-width: calc(100% - 30px) !important;
     margin-right: 8px !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
