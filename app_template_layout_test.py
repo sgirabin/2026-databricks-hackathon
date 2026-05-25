@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import math
 import os
+import json
+import re
 from html import escape
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlencode
 from datetime import datetime
@@ -41,6 +44,17 @@ GEOLOCATION_KEY = "goaround_auto_geolocation"
 IP_LOCATION_KEY = "goaround_ip_location"
 DEFAULT_SQL_HOST = "dbc-68521f65-774f.cloud.databricks.com"
 DEFAULT_SQL_HTTP_PATH = "/sql/1.0/warehouses/e3ab5c87926da4b9"
+
+LOCAL_POI_DATASETS = (
+    ("community_clubs", "data/CommunityClubs.geojson", "event", "community", "OnePA community clubs", "https://www.onepa.gov.sg/"),
+    ("healthier_eateries", "data/HealthierEateries.geojson", "food", "food", "HPB healthier eateries", "https://www.hpb.gov.sg/"),
+    ("parks", "data/Parks.geojson", "event", "park", "NParks parks", "https://www.nparks.gov.sg/"),
+    ("parks_sg", "data/ParksSG.geojson", "event", "park", "NParks parks", "https://www.nparks.gov.sg/"),
+    ("tourist_attractions", "data/TouristAttractions.geojson", "plan", "tourist", "Singapore Tourism Board", "https://www.visitsingapore.com/"),
+    ("gyms", "data/GymsSGGEOJSON.geojson", "event", "fitness", "SportSG gyms", "https://www.myactivesg.com/"),
+    ("sports_facilities", "data/SportSGSportFacilitiesGEOJSON.geojson", "event", "fitness", "SportSG sport facilities", "https://www.myactivesg.com/"),
+    ("mrt_station_exits", "data/LTAMRTStationExitGEOJSON.geojson", "transport", "transport", "LTA MRT station exits", "https://www.lta.gov.sg/"),
+)
 
 KNOWN_AREAS = [
     ("Sengkang, Singapore", 1.3871, 103.8915),
@@ -271,6 +285,109 @@ def normalized_url(url: str) -> str:
     return "https://" + url
 
 
+def extract_html_fields(value: str | None) -> dict[str, str]:
+    if not value:
+        return {}
+    fields: dict[str, str] = {}
+    for key, raw in re.findall(r"<th[^>]*>\s*([^<]+?)\s*</th>\s*<td[^>]*>\s*(.*?)\s*</td>", value, flags=re.I | re.S):
+        clean_value = re.sub(r"<[^>]+>", "", raw).strip()
+        fields[key.strip().upper()] = clean_value
+    return fields
+
+
+@st.cache_data(ttl=600, show_spinner=False)
+def load_local_poi_cards(user_lat: float, user_lon: float, limit: int = 120) -> list[PickCard]:
+    """Fallback to bundled open-data POIs when Databricks SQL is unavailable."""
+    ranked_rows: list[tuple[float, PickCard]] = []
+    base_dir = Path(__file__).resolve().parent
+
+    for dataset_name, rel_path, card_type, category, source_name, source_url in LOCAL_POI_DATASETS:
+        path = base_dir / rel_path
+        if not path.exists():
+            continue
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+
+        for idx, feature in enumerate(data.get("features", [])):
+            geom = feature.get("geometry") or {}
+            coords = geom.get("coordinates") or []
+            if geom.get("type") != "Point" or len(coords) < 2:
+                continue
+            try:
+                lon_value = float(coords[0])
+                lat_value = float(coords[1])
+            except (TypeError, ValueError):
+                continue
+
+            distance_m = distance_km(user_lat, user_lon, lat_value, lon_value) * 1000
+            if distance_m > 5000:
+                continue
+
+            props = feature.get("properties") or {}
+            fields = extract_html_fields(str(props.get("Description") or ""))
+            title = (
+                props.get("NAME")
+                or props.get("Name")
+                or props.get("STATION_NA")
+                or props.get("PAGETITLE")
+                or props.get("HCI_NAME")
+                or fields.get("NAME")
+                or fields.get("CENTRE_NAME")
+                or fields.get("HCI_NAME")
+                or fields.get("DESCRIPTION")
+                or category.replace("_", " ").title()
+            )
+            title_text = str(title).strip()
+            if title_text.lower().startswith("kml_") or not title_text:
+                title_text = f"{category.replace('_', ' ').title()} nearby"
+
+            address = (
+                props.get("ADDRESS")
+                or " ".join(
+                    str(part or "")
+                    for part in [
+                        props.get("ADDRESSBLOCKHOUSENUMBER") or fields.get("ADDRESSBLOCKHOUSENUMBER"),
+                        props.get("ADDRESSSTREETNAME") or fields.get("ADDRESSSTREETNAME"),
+                        props.get("ADDRESSBUILDINGNAME") or fields.get("ADDRESSBUILDINGNAME"),
+                    ]
+                ).strip()
+                or props.get("STREET_NAME")
+                or fields.get("STREET_NAME")
+                or ""
+            )
+            description = (
+                props.get("OVERVIEW")
+                or props.get("DESCRIPTION")
+                or fields.get("DESCRIPTION")
+                or f"{category.replace('_', ' ').title()} location from Singapore open data."
+            )
+            address_text = str(address).strip()
+            if address_text:
+                description = f"{description} Address: {address_text}."
+
+            card = PickCard(
+                id=f"local-{dataset_name}-{idx}",
+                card_type=card_type,
+                category=category,
+                title=title_text,
+                description=str(description)[:420],
+                source_name=source_name,
+                source_url=source_url,
+                lat=lat_value,
+                lon=lon_value,
+                location_name=address_text or title_text,
+                tags=(category, card_type, "open data", "nearby", dataset_name.replace("_", " ")),
+                source_reliability=0.78,
+                freshness_score=0.62,
+            )
+            ranked_rows.append((distance_m, card))
+
+    ranked_rows.sort(key=lambda row: row[0])
+    return [card for _, card in ranked_rows[:limit]]
+
+
 def databricks_sql_settings() -> tuple[str | None, str | None, str | None, str, str]:
     raw_host = os.getenv("DATABRICKS_SERVER_HOSTNAME") or os.getenv("DATABRICKS_HOST") or DEFAULT_SQL_HOST
     host = raw_host.replace("https://", "").replace("http://", "").strip("/")
@@ -433,7 +550,8 @@ weather_summary = f"{weather['temperature']} · {weather['forecast']}"
 
 # Core dynamic recommendations querying and compilation
 db_cards, databricks_source = load_nearby_databricks_picks(lat, lon)
-physical_cards = list(db_cards) if db_cards else list(source_registry_cards())
+local_poi_cards = [] if db_cards else load_local_poi_cards(lat, lon)
+physical_cards = list(db_cards) if db_cards else (list(local_poi_cards) if local_poi_cards else list(source_registry_cards()))
 
 # Append merchant-submitted promotions from Databricks SQL or local JSON fallback
 business_cards = load_business_promotions(lat, lon, databricks_sql_settings())
@@ -445,7 +563,7 @@ context = UserContext(
     address=location,
     lat=lat,
     lon=lon,
-    radius_m=radius_m,
+    radius_m=max(radius_m, 3000),
     interests=tuple(interests),
     time_of_day=infer_time_of_day(),
     weather=weather["forecast"],
