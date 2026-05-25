@@ -1576,6 +1576,16 @@ elif page == "business":
 <div class="kpi-grid"><div class="kpi"><span class="muted">Active</span><b>3</b></div><div class="kpi"><span class="muted">Clicks</span><b>128</b></div><div class="kpi"><span class="muted">Saves</span><b>47</b></div><div class="kpi"><span class="muted">Views</span><b>612</b></div></div>
 <h2>Create Promotion</h2>
 ''', unsafe_allow_html=True)
+
+            publish_status = st.session_state.get("business_publish_status")
+            if publish_status:
+                status_message = publish_status.get("message", "Promotion publish status is unavailable.")
+                if publish_status.get("kind") == "success":
+                    st.success(status_message)
+                elif publish_status.get("kind") == "warning":
+                    st.warning(status_message)
+                else:
+                    st.error(status_message)
             
             # Interactive Streamlit form
             with st.form("business_form"):
@@ -1604,7 +1614,11 @@ elif page == "business":
         
         if publish_btn:
             if not p_url.startswith("http"):
-                st.error("Please provide a valid source URL starting with http:// or https:// to verify this deal.")
+                st.session_state["business_publish_status"] = {
+                    "kind": "error",
+                    "message": "Please provide a valid source URL starting with http:// or https:// to verify this deal.",
+                }
+                st.rerun()
             else:
                 new_promo = create_business_promo_card(
                     business_name=b_name,
@@ -1618,11 +1632,18 @@ elif page == "business":
                     valid_until=p_to.isoformat(),
                     tags=p_interests,
                 )
-                saved = save_business_promotion(new_promo, databricks_sql_settings())
+                with st.spinner("Publishing promotion..."):
+                    saved = save_business_promotion(new_promo, databricks_sql_settings())
                 if saved:
-                    st.success("🎉 Promotion published to Databricks SQL successfully! Check the 'GoAround Today' tab to see it ranked near you.")
+                    st.session_state["business_publish_status"] = {
+                        "kind": "success",
+                        "message": f"Promotion '{p_title}' was published to Databricks SQL successfully. Check GoAround Today to see it ranked near you.",
+                    }
                 else:
-                    st.warning("⚠️ Promotion is only saved in the app's local fallback. It may disappear after redeployment until Databricks SQL persistence is configured.")
+                    st.session_state["business_publish_status"] = {
+                        "kind": "warning",
+                        "message": f"Promotion '{p_title}' was saved only in the app's local fallback. It may disappear after redeployment until Databricks SQL persistence is configured.",
+                    }
                 st.rerun()
                 
     with preview_col:
