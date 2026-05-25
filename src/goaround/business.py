@@ -5,6 +5,8 @@ import os
 from datetime import datetime
 from uuid import uuid4
 
+import requests
+
 from .models import PickCard
 
 BUSINESS_PROMOTIONS_COLUMNS = """
@@ -24,6 +26,44 @@ BUSINESS_PROMOTIONS_COLUMNS = """
     freshness_score DOUBLE,
     submitted_at STRING
 """
+
+
+def sql_connect_kwargs(host: str, http_path: str, token: str | None) -> dict:
+    base = {"server_hostname": host, "http_path": http_path}
+    if token:
+        return {**base, "access_token": token}
+
+    client_id = os.getenv("DATABRICKS_CLIENT_ID")
+    client_secret = os.getenv("DATABRICKS_CLIENT_SECRET")
+    workspace_host = os.getenv("DATABRICKS_HOST") or host
+    if not (client_id and client_secret and workspace_host):
+        raise RuntimeError("Databricks token or app OAuth credentials are not configured")
+
+    if not workspace_host.startswith(("http://", "https://")):
+        workspace_host = f"https://{workspace_host}"
+    token_url = f"{workspace_host.rstrip('/')}/oidc/oauth2/v2.0/token"
+    cached_token: dict[str, str] = {}
+
+    def credentials_provider():
+        def header_factory():
+            if "Authorization" not in cached_token:
+                response = requests.post(
+                    token_url,
+                    data={
+                        "grant_type": "client_credentials",
+                        "client_id": client_id,
+                        "client_secret": client_secret,
+                        "scope": "all-apis",
+                    },
+                    timeout=20,
+                )
+                response.raise_for_status()
+                cached_token["Authorization"] = f"Bearer {response.json()['access_token']}"
+            return {"Authorization": cached_token["Authorization"]}
+
+        return header_factory
+
+    return {**base, "credentials_provider": credentials_provider}
 
 
 def create_business_promo_card(
@@ -147,7 +187,7 @@ def load_business_promotions(
     host, http_path, token, catalog, schema = settings
     local_cards = load_local_promotions()
 
-    if not token or not host:
+    if not host:
         return local_cards
 
     table = f"{catalog}.{schema}.business_promotions"
@@ -167,7 +207,7 @@ def load_business_promotions(
 
     try:
         from databricks import sql
-        with sql.connect(server_hostname=host, http_path=http_path, access_token=token) as conn:
+        with sql.connect(**sql_connect_kwargs(host, http_path, token)) as conn:
             with conn.cursor() as cursor:
                 cursor.execute(query)
                 columns = [column[0] for column in cursor.description]
@@ -216,7 +256,7 @@ def save_business_promotion(
     # Always save locally first as a fallback
     save_local_promotion(card)
 
-    if not token or not host:
+    if not host:
         return False
 
     table = f"{catalog}.{schema}.business_promotions"
@@ -267,7 +307,7 @@ def save_business_promotion(
 
     try:
         from databricks import sql
-        with sql.connect(server_hostname=host, http_path=http_path, access_token=token) as conn:
+        with sql.connect(**sql_connect_kwargs(host, http_path, token)) as conn:
             with conn.cursor() as cursor:
                 cursor.execute(create_query)
                 cursor.execute(query)

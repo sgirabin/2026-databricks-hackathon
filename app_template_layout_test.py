@@ -38,6 +38,7 @@ from src.goaround.business import (
     create_business_promo_card,
     load_business_promotions,
     save_business_promotion,
+    sql_connect_kwargs,
 )
 from src.goaround.agent import answer_with_databricks
 
@@ -469,8 +470,8 @@ def databricks_sql_settings() -> tuple[str | None, str | None, str | None, str, 
 @st.cache_data(ttl=300, show_spinner=False)
 def load_nearby_databricks_picks(user_lat: float, user_lon: float, limit: int = 160) -> tuple[list[PickCard], str]:
     host, http_path, token, catalog, schema = databricks_sql_settings()
-    if not token:
-        return [], "Databricks token is not configured"
+    if not host:
+        return [], "Databricks SQL host is not configured"
     try:
         from databricks import sql
     except Exception as exc:
@@ -504,7 +505,7 @@ def load_nearby_databricks_picks(user_lat: float, user_lon: float, limit: int = 
         LIMIT {int(limit)}
     """
     try:
-        with sql.connect(server_hostname=host, http_path=http_path, access_token=token) as conn:
+        with sql.connect(**sql_connect_kwargs(host, http_path, token)) as conn:
             cursor = conn.cursor()
             cursor.execute(query)
             columns = [column[0] for column in cursor.description]
