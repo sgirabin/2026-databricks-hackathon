@@ -814,7 +814,7 @@ h2 {
     line-height: 1.4;
 }
 .field {
-    min-height: 44px;
+    min-height: 36px;
     border: 1px solid #D8DFEA;
     border-radius: 13px;
     background: white;
@@ -1178,7 +1178,7 @@ div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .b
 div[data-testid="stTextInput"] input, div[data-testid="stTextArea"] textarea {
     border: 1px solid #D8DFEA !important;
     border-radius: 13px !important;
-    min-height: 44px !important;
+    min-height: 36px !important;
     background-color: white !important;
     color: var(--text) !important;
     font-size: 13.5px !important;
@@ -1192,6 +1192,8 @@ div[data-testid="stMultiSelect"] [data-baseweb="select"],
 div[data-testid="stDateInput"] input {
     width: 100% !important;
     box-sizing: border-box !important;
+    border: 1px solid #D8DFEA !important;
+    border-radius: 13px !important;    
 }
 div[data-testid="stTextInput"] input:focus, div[data-testid="stTextArea"] textarea:focus {
     border-color: var(--blue) !important;
