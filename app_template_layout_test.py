@@ -1059,12 +1059,41 @@ div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .p
     box-sizing: border-box !important;
     overflow: hidden !important;
     position: relative !important;
+    --card-inner-gutter: 22px;
+}
+
+/* Streamlit applies fixed inline widths to nested element containers. Keep those
+   generated wrappers inside the visible card border to avoid clipped right edges. */
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .sidebar-card-marker) > div[data-testid="element-container"],
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .chat-card-marker) > div[data-testid="element-container"],
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .picks-card-marker) > div[data-testid="element-container"],
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) > div[data-testid="element-container"],
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .preview-card-marker) > div[data-testid="element-container"] {
+    width: calc(100% - var(--card-inner-gutter)) !important;
+    max-width: calc(100% - var(--card-inner-gutter)) !important;
+    box-sizing: border-box !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .sidebar-card-marker) > div[data-testid="element-container"] > div,
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .chat-card-marker) > div[data-testid="element-container"] > div,
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .picks-card-marker) > div[data-testid="element-container"] > div,
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) > div[data-testid="element-container"] > div,
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .preview-card-marker) > div[data-testid="element-container"] > div,
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .sidebar-card-marker) > div[data-testid="element-container"] .stMarkdown,
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .chat-card-marker) > div[data-testid="element-container"] .stMarkdown,
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .picks-card-marker) > div[data-testid="element-container"] .stMarkdown,
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) > div[data-testid="element-container"] .stMarkdown,
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .preview-card-marker) > div[data-testid="element-container"] .stMarkdown {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
 }
 
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .sidebar-card-marker) {
     padding: 24px 16px 18px 16px !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
+    --card-inner-gutter: 28px;
 }
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .sidebar-card-marker)::-webkit-scrollbar {
     width: 0px !important;
@@ -1073,11 +1102,13 @@ div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .s
 
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .chat-card-marker) {
     padding: 24px 26px 14px 26px !important;
+    --card-inner-gutter: 14px;
 }
 
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .picks-card-marker) {
     padding: 24px 18px 14px 18px !important;
     overflow-x: hidden !important;
+    --card-inner-gutter: 18px;
 }
 
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) {
@@ -1088,11 +1119,13 @@ div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .b
     overflow-y: visible !important;
     overflow-x: hidden !important;
     padding-bottom: 54px !important;
+    --card-inner-gutter: 22px;
 }
 
 div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .preview-card-marker) {
     padding: 26px 14px 16px 18px !important;
     overflow-x: hidden !important;
+    --card-inner-gutter: 22px;
 }
 
 div[data-testid="stMainBlockContainer"]:has(.business-page-marker) div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .preview-card-marker) {
@@ -1118,6 +1151,26 @@ div[data-testid="stForm"] {
     background: transparent !important;
     padding: 0 !important;
     margin: 0 !important;
+    box-sizing: border-box !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) div[data-testid="stForm"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) div[data-testid="stForm"] div[data-testid="stVerticalBlock"] {
+    gap: 10px !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) div[data-testid="stForm"] div[data-testid="stHorizontalBlock"] {
+    gap: 14px !important;
+    align-items: flex-start !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(> div[data-testid="element-container"] .business-form-marker) div[data-testid="stForm"] div[data-testid="element-container"] {
+    margin-bottom: 8px !important;
     box-sizing: border-box !important;
 }
 
