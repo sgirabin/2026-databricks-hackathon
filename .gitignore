@@ -1,0 +1,8 @@
+.DS_Store
+.antigravitycli/
+.venv/
+__pycache__/
+data/.DS_Store
+data/api-specs/.DS_Store
+scratch/__pycache__/
+src/goaround/__pycache__/
