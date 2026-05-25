@@ -681,10 +681,13 @@ def build_picks_feed(active_filters: list[str], max_distance_km: float) -> tuple
     selected_filters = [value for value in active_filters if value in filter_aliases and value != "all"]
     active_terms = tuple(term for value in selected_filters for term in filter_aliases[value])
     max_distance_m = max_distance_km * 1000
-    scoped_picks = [
+    distance_scoped = [
         pick for pick in ranked_picks
         if pick.distance_m is not None and pick.distance_m <= max_distance_m
     ]
+    business_scoped = [pick for pick in distance_scoped if pick.card.business_submitted]
+    regular_scoped = [pick for pick in distance_scoped if not pick.card.business_submitted]
+    scoped_picks = business_scoped + regular_scoped
     if selected_filters:
         matched_picks = []
         for pick in scoped_picks:
@@ -812,6 +815,10 @@ def reset_business_form_defaults() -> None:
     st.session_state["promotion_interests_input"] = []
     st.session_state["promotion_description_input"] = ""
     st.session_state["promotion_url_input"] = ""
+
+
+def sync_business_area_to_current_location() -> None:
+    st.session_state["promotion_area_input"] = location
 
 
 def store_business_preview(
@@ -1870,6 +1877,7 @@ elif page == "business":
 <h1>Business Promotion</h1><div class="muted">Create a local promotion that can appear in Today’s Picks for {safe_location}.</div>
 <div class="kpi-grid"><div class="kpi"><span class="muted">Active</span><b>3</b></div><div class="kpi"><span class="muted">Clicks</span><b>128</b></div><div class="kpi"><span class="muted">Saves</span><b>47</b></div><div class="kpi"><span class="muted">Views</span><b>612</b></div></div>
 <h2>Create Promotion</h2>
+<div class="small-note" style="margin:8px 0 12px 0;">Demo tip: promotions are saved at the current selected coordinates <b>{safe_coords}</b>. On Today’s Picks, keep the distance slider above 0.1km and choose the Deal filter to surface it immediately.</div>
 ''', unsafe_allow_html=True)
 
             publish_status = st.session_state.get("business_publish_status")
@@ -1890,6 +1898,7 @@ elif page == "business":
             
             # Interactive Streamlit form
             with st.form("business_form"):
+                st.form_submit_button("Use current location for demo", on_click=sync_business_area_to_current_location)
                 col1, col2 = st.columns(2)
                 b_name = col1.text_input("Business name", value="", placeholder="Ah Boyz Chicken Rice", key="business_name_input")
                 p_title = col2.text_input("Promotion title *", value="", placeholder="50% off signature set", key="promotion_title_input")
