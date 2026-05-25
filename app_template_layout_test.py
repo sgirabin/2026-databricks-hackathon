@@ -1622,7 +1622,7 @@ elif page == "business":
                 if saved:
                     st.success("🎉 Promotion published to Databricks SQL successfully! Check the 'GoAround Today' tab to see it ranked near you.")
                 else:
-                    st.warning("⚠️ Saved promotion locally as backup. Check the 'GoAround Today' tab to see it ranked near you.")
+                    st.warning("⚠️ Promotion is only saved in the app's local fallback. It may disappear after redeployment until Databricks SQL persistence is configured.")
                 st.rerun()
                 
     with preview_col:

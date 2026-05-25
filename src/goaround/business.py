@@ -7,6 +7,24 @@ from uuid import uuid4
 
 from .models import PickCard
 
+BUSINESS_PROMOTIONS_COLUMNS = """
+    id STRING,
+    card_type STRING,
+    category STRING,
+    title STRING,
+    description STRING,
+    source_name STRING,
+    source_url STRING,
+    lat DOUBLE,
+    lon DOUBLE,
+    location_name STRING,
+    valid_until STRING,
+    tags STRING,
+    source_reliability DOUBLE,
+    freshness_score DOUBLE,
+    submitted_at STRING
+"""
+
 
 def create_business_promo_card(
     *,
@@ -210,8 +228,25 @@ def save_business_promotion(
             return ""
         return s.replace("'", "''")
 
+    create_query = f"CREATE TABLE IF NOT EXISTS {table} ({BUSINESS_PROMOTIONS_COLUMNS}) USING delta"
     query = f"""
-        INSERT INTO {table} VALUES (
+        INSERT INTO {table} (
+            id,
+            card_type,
+            category,
+            title,
+            description,
+            source_name,
+            source_url,
+            lat,
+            lon,
+            location_name,
+            valid_until,
+            tags,
+            source_reliability,
+            freshness_score,
+            submitted_at
+        ) VALUES (
             '{clean(card.id)}',
             '{clean(card.card_type)}',
             '{clean(card.category)}',
@@ -234,7 +269,11 @@ def save_business_promotion(
         from databricks import sql
         with sql.connect(server_hostname=host, http_path=http_path, access_token=token) as conn:
             with conn.cursor() as cursor:
+                cursor.execute(create_query)
                 cursor.execute(query)
+            commit = getattr(conn, "commit", None)
+            if commit:
+                commit()
         print(f"Successfully ingested promotion '{card.title}' into Databricks SQL table {table}.")
         return True
     except Exception as exc:
