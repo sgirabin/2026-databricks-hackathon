@@ -4,6 +4,7 @@ import math
 import os
 import json
 import re
+import csv
 from html import escape
 from pathlib import Path
 from typing import Any
@@ -55,6 +56,8 @@ LOCAL_POI_DATASETS = (
     ("sports_facilities", "data/SportSGSportFacilitiesGEOJSON.geojson", "event", "fitness", "SportSG sport facilities", "https://www.myactivesg.com/"),
     ("mrt_station_exits", "data/LTAMRTStationExitGEOJSON.geojson", "transport", "transport", "LTA MRT station exits", "https://www.lta.gov.sg/"),
 )
+
+LOCAL_HAWKER_CSV = "data/DatesofHawkerCentresClosure.csv"
 
 KNOWN_AREAS = [
     ("Sengkang, Singapore", 1.3871, 103.8915),
@@ -295,10 +298,23 @@ def extract_html_fields(value: str | None) -> dict[str, str]:
     return fields
 
 
+def local_poi_tags(dataset_name: str, card_type: str, category: str) -> tuple[str, ...]:
+    tags = {dataset_name.replace("_", " "), category, card_type, "open data", "nearby"}
+    if category in {"food", "grocery"} or card_type == "food":
+        tags.update({"food", "eat", "dining", "hawker", "market"})
+    if category in {"community", "park", "fitness"} or card_type == "event":
+        tags.update({"event", "events", "things to do", "weekend", "family"})
+    if category == "transport":
+        tags.update({"transport", "mrt", "lrt", "station"})
+    if category == "tourist":
+        tags.update({"tourist", "visitor", "things to do"})
+    return tuple(sorted(tags))
+
+
 @st.cache_data(ttl=600, show_spinner=False)
 def load_local_poi_cards(user_lat: float, user_lon: float, limit: int = 120) -> list[PickCard]:
     """Fallback to bundled open-data POIs when Databricks SQL is unavailable."""
-    ranked_rows: list[tuple[float, PickCard]] = []
+    best_by_key: dict[str, tuple[float, PickCard]] = {}
     base_dir = Path(__file__).resolve().parent
 
     for dataset_name, rel_path, card_type, category, source_name, source_url in LOCAL_POI_DATASETS:
@@ -328,15 +344,15 @@ def load_local_poi_cards(user_lat: float, user_lon: float, limit: int = 120) -> 
             props = feature.get("properties") or {}
             fields = extract_html_fields(str(props.get("Description") or ""))
             title = (
-                props.get("NAME")
-                or props.get("Name")
-                or props.get("STATION_NA")
+                props.get("STATION_NA")
                 or props.get("PAGETITLE")
                 or props.get("HCI_NAME")
                 or fields.get("NAME")
                 or fields.get("CENTRE_NAME")
                 or fields.get("HCI_NAME")
                 or fields.get("DESCRIPTION")
+                or props.get("NAME")
+                or props.get("Name")
                 or category.replace("_", " ").title()
             )
             title_text = str(title).strip()
@@ -378,12 +394,59 @@ def load_local_poi_cards(user_lat: float, user_lon: float, limit: int = 120) -> 
                 lat=lat_value,
                 lon=lon_value,
                 location_name=address_text or title_text,
-                tags=(category, card_type, "open data", "nearby", dataset_name.replace("_", " ")),
+                tags=local_poi_tags(dataset_name, card_type, category),
                 source_reliability=0.78,
                 freshness_score=0.62,
             )
-            ranked_rows.append((distance_m, card))
+            dedupe_key = f"{category}:{title_text.lower()}"
+            if dedupe_key not in best_by_key or distance_m < best_by_key[dedupe_key][0]:
+                best_by_key[dedupe_key] = (distance_m, card)
 
+    hawker_path = base_dir / LOCAL_HAWKER_CSV
+    if hawker_path.exists():
+        try:
+            with hawker_path.open("r", encoding="utf-8") as handle:
+                for idx, row in enumerate(csv.DictReader(handle)):
+                    try:
+                        lat_value = float(row.get("latitude_hc") or "")
+                        lon_value = float(row.get("longitude_hc") or "")
+                    except (TypeError, ValueError):
+                        continue
+                    distance_m = distance_km(user_lat, user_lon, lat_value, lon_value) * 1000
+                    if distance_m > 5000:
+                        continue
+                    title_text = str(row.get("name") or "Hawker centre").strip()
+                    description = (
+                        row.get("description_myenv")
+                        or f"Hawker and market centre with {row.get('no_of_food_stalls') or 'multiple'} food stalls."
+                    )
+                    q2_start = row.get("q2_cleaningstartdate")
+                    q2_end = row.get("q2_cleaningenddate")
+                    if q2_start and q2_start != "NA":
+                        description = f"{description} 2026 Q2 cleaning: {q2_start} to {q2_end}."
+                    address_text = str(row.get("address_myenv") or "").strip()
+                    card = PickCard(
+                        id=f"local-hawker-{idx}",
+                        card_type="food",
+                        category="food",
+                        title=title_text,
+                        description=str(description)[:420],
+                        source_name="NEA hawker centre closure schedule",
+                        source_url="https://www.nea.gov.sg/",
+                        lat=lat_value,
+                        lon=lon_value,
+                        location_name=address_text or title_text,
+                        tags=local_poi_tags("hawker_centres", "food", "food"),
+                        source_reliability=0.86,
+                        freshness_score=0.72,
+                    )
+                    dedupe_key = f"food:{title_text.lower()}"
+                    if dedupe_key not in best_by_key or distance_m < best_by_key[dedupe_key][0]:
+                        best_by_key[dedupe_key] = (distance_m, card)
+        except Exception:
+            pass
+
+    ranked_rows = list(best_by_key.values())
     ranked_rows.sort(key=lambda row: row[0])
     return [card for _, card in ranked_rows[:limit]]
 
@@ -552,6 +615,8 @@ weather_summary = f"{weather['temperature']} · {weather['forecast']}"
 db_cards, databricks_source = load_nearby_databricks_picks(lat, lon)
 local_poi_cards = [] if db_cards else load_local_poi_cards(lat, lon)
 physical_cards = list(db_cards) if db_cards else (list(local_poi_cards) if local_poi_cards else list(source_registry_cards()))
+if db_cards or local_poi_cards:
+    physical_cards.extend(source_registry_cards())
 
 # Append merchant-submitted promotions from Databricks SQL or local JSON fallback
 business_cards = load_business_promotions(lat, lon, databricks_sql_settings())
@@ -569,8 +634,9 @@ context = UserContext(
     weather=weather["forecast"],
 )
 
-# Apply formal dynamic ranking engine on physical cards
-ranked_physical_picks = rank_cards(physical_cards, context, limit=12)
+# Apply formal dynamic ranking engine on a broad pool so filters can still find
+# food, event, and deal matches beyond the nearest transport records.
+ranked_physical_picks = rank_cards(physical_cards, context, limit=80)
 
 # Extract and wrap Google Search anchor cards as low-ranked picks at the bottom of the feed
 search_cards = area_anchor_cards(location, lat, lon)
@@ -630,6 +696,22 @@ def build_picks_feed(active_filters: list[str], max_distance_km: float) -> tuple
             if any(term in haystack for term in active_terms):
                 matched_picks.append(pick)
         scoped_picks = matched_picks
+        if not scoped_picks and any(value in {"grocery", "deal"} for value in selected_filters):
+            fallback_matches = []
+            for pick in ranked_picks:
+                if pick.distance_m is not None:
+                    continue
+                card = pick.card
+                haystack = " ".join([
+                    card.card_type,
+                    card.category,
+                    card.title,
+                    card.description,
+                    " ".join(card.tags)
+                ]).lower()
+                if any(term in haystack for term in active_terms):
+                    fallback_matches.append(pick)
+            scoped_picks = fallback_matches
 
     if scoped_picks:
         footer = f"{len(scoped_picks)} of {len(all_cards)} picks within {max_distance_km:g} km⌄"
